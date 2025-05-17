@@ -1,0 +1,10 @@
+Clone repo: 
+	git clone https://github.com/razzzz87/qt.git
+add changed file in to repo:
+	git add <filename>
+add all change file in repo:
+	git add .
+To Create branch on the levelop to "remotes/origin/main"
+	git checkout -b <branch name>
+	git push -u origin <branch name>
+	verify it: git branch -a it should show remotes/origin/develop
