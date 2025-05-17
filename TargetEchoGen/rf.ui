@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RF</class>
+ <widget class="QWidget" name="RF">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>965</width>
+    <height>681</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QGroupBox" name="groupBox_ddr_status_4">
+   <property name="geometry">
+    <rect>
+     <x>1126</x>
+     <y>330</y>
+     <width>487</width>
+     <height>228</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Triggre Setup</string>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_15">
+    <property name="spacing">
+     <number>4</number>
+    </property>
+    <property name="topMargin">
+     <number>4</number>
+    </property>
+    <property name="bottomMargin">
+     <number>4</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="frame_14">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <property name="topMargin">
+        <number>4</number>
+       </property>
+       <property name="bottomMargin">
+        <number>4</number>
+       </property>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_15">
+         <item row="4" column="3">
+          <widget class="QPushButton" name="pushButton_31">
+           <property name="text">
+            <string>Trigger setup</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_trigger_source_3">
+           <property name="text">
+            <string>Trigger source</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_loop_back_enable_3">
+           <property name="text">
+            <string>SW Loop Back</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QCheckBox" name="checkBox_9">
+           <property name="text">
+            <string>Enable</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QLineEdit" name="lineEdit_trigger_pulse_width_3"/>
+         </item>
+         <item row="6" column="0">
+          <widget class="QPushButton" name="pushButton_34">
+           <property name="text">
+            <string>Start</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QComboBox" name="comboBox_trigger_source_3">
+           <item>
+            <property name="text">
+             <string>External</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Internal</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="6" column="3">
+          <widget class="QPushButton" name="pushButton_35">
+           <property name="text">
+            <string>Stop</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>Trigger pulse gap (Sample)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_trigger_pulse_width_sample_3">
+           <property name="text">
+            <string>Trigger pulse width (Sample)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QLineEdit" name="lineEdit_8"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="pushButton_3">
+   <property name="geometry">
+    <rect>
+     <x>1126</x>
+     <y>190</y>
+     <width>178</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>DAC 2 Default</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_ddr_status_5">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>170</y>
+     <width>375</width>
+     <height>250</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Triggre Setup</string>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_17">
+    <property name="spacing">
+     <number>4</number>
+    </property>
+    <property name="topMargin">
+     <number>4</number>
+    </property>
+    <property name="bottomMargin">
+     <number>4</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="frame_15">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_12">
+       <property name="topMargin">
+        <number>4</number>
+       </property>
+       <property name="bottomMargin">
+        <number>4</number>
+       </property>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_17">
+         <item row="4" column="3">
+          <widget class="QPushButton" name="pushButton_32">
+           <property name="text">
+            <string>Trigger setup</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_trigger_source_4">
+           <property name="text">
+            <string>Trigger source</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_loop_back_enable_4">
+           <property name="text">
+            <string>SW Loop Back</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QCheckBox" name="checkBox_10">
+           <property name="text">
+            <string>Enable</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QLineEdit" name="lineEdit_trigger_pulse_width_4"/>
+         </item>
+         <item row="6" column="0">
+          <widget class="QPushButton" name="pushButton_37">
+           <property name="text">
+            <string>Start</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QComboBox" name="comboBox_trigger_source_4">
+           <item>
+            <property name="text">
+             <string>External</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Internal</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="6" column="3">
+          <widget class="QPushButton" name="pushButton_38">
+           <property name="text">
+            <string>Stop</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>Trigger pulse gap (Sample)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_trigger_pulse_width_sample_4">
+           <property name="text">
+            <string>Trigger pulse width (Sample)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QLineEdit" name="lineEdit_9"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_ddr_status_6">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>60</y>
+     <width>375</width>
+     <height>90</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Status</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_13">
+    <property name="leftMargin">
+     <number>11</number>
+    </property>
+    <property name="topMargin">
+     <number>11</number>
+    </property>
+    <property name="rightMargin">
+     <number>11</number>
+    </property>
+    <property name="bottomMargin">
+     <number>11</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="frame_2">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_14">
+       <property name="leftMargin">
+        <number>8</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>8</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_16">
+         <item row="0" column="1">
+          <widget class="QLabel" name="label_dac_fifo_entery_error_led_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="pixmap">
+            <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="pushButton_36">
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_dac_fifo_entery_error_2">
+           <property name="text">
+            <string>DAC3 FIFO entry error</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>670</x>
+     <y>5</y>
+     <width>150</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>DAC 3 Default</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_dac_setup_if_mode_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>430</width>
+     <height>520</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>DAC3</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_6">
+    <item>
+     <widget class="QFrame" name="frame_7">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>259</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_16">
+       <property name="spacing">
+        <number>16</number>
+       </property>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="8" column="3">
+            <widget class="QLabel" name="label_29">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_signal_delay_ch1_2">
+             <property name="text">
+              <string>Doppler Shift In Hz</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="comboBox_4">
+             <item>
+              <property name="text">
+               <string>2</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>4</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>8</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_iq_data_channel1_2">
+             <property name="text">
+              <string>IQ File Name</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_interpolation_2">
+             <property name="text">
+              <string>Interpolation</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEdit_7"/>
+           </item>
+           <item row="6" column="1">
+            <widget class="QSpinBox" name="spinBox_7"/>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_pulse_with_sample_ch1_2">
+             <property name="text">
+              <string>PW Samples</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QSpinBox" name="spinBox_10"/>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_iq_data_channel2_2">
+             <property name="text">
+              <string>Swap IQ</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_pulse_with_sample_ch_2">
+             <property name="text">
+              <string>Signal Delay </string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QLabel" name="label_17">
+             <property name="text">
+              <string>ns</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButton_12">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="TargetEchoGen.qrc">
+               <normaloff>:/images/file-browser-icon-23.jpg</normaloff>:/images/file-browser-icon-23.jpg</iconset>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QPushButton" name="pushButton_6">
+             <property name="text">
+              <string>Send</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QComboBox" name="comboBox_6">
+             <item>
+              <property name="text">
+               <string>Normal</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Swap</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="spinBox_8"/>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLabel" name="label_30">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="1">
+            <widget class="QLabel" name="label_31">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="3">
+            <widget class="QLabel" name="label_32">
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_6">
+      <property name="title">
+       <string>Amplitude</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_22">
+       <item>
+        <layout class="QGridLayout" name="gridLayout_18">
+         <item row="1" column="3">
+          <widget class="QPushButton" name="pushButton_13">
+           <property name="text">
+            <string>Send</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSpinBox" name="spinBox_2"/>
+         </item>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="pushButton_27">
+           <property name="text">
+            <string>Decr</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QRadioButton" name="radioButton_4">
+           <property name="text">
+            <string>Base Value</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QRadioButton" name="radioButton_5">
+           <property name="text">
+            <string>File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="lineEdit_11"/>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="pushButton_39">
+           <property name="text">
+            <string>Incr</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="lineEdit_12"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="radioButton_6">
+           <property name="text">
+            <string>Fixed Level</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="pushButton_44">
+           <property name="text">
+            <string>Set</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QPushButton" name="pushButton_45">
+           <property name="text">
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_46">
+      <property name="text">
+       <string>Apply</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>43</x>
+     <y>532</y>
+     <width>397</width>
+     <height>38</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_8">
+    <item>
+     <widget class="QPushButton" name="pushButton_40">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Start</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_41">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Stop</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton_42">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Restart</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="TargetEchoGen.qrc"/>
+ </resources>
+ <connections/>
+</ui>

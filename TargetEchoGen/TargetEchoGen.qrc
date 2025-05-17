@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/images"/>
+    <qresource prefix="/">
+        <file>images/led-green_icon.jpg</file>
+        <file>images/Avarthana_logo.png</file>
+        <file>images/file-browser-icon-23.jpg</file>
+        <file>images/DRDO_logo-removebg-preview.png</file>
+        <file>images/icon_settings-880x880.webp</file>
+        <file>images/brahmos.png</file>
+        <file>images/drdl.png</file>
+        <file>images/refresh.png</file>
+        <file>images/connecte_setting.png</file>
+        <file>images/Refresh.png</file>
+        <file>images/reset.png</file>
+        <file>images/led-circle-grey.png</file>
+        <file>images/led-icon-red.jpg</file>
+        <file>images/icons8-radio-button-48.png</file>
+        <file>images/icons8-chevron-up-26.png</file>
+        <file>images/icons8-chevron-down-26.png</file>
+        <file>images/icons8-dropdown-26.png</file>
+    </qresource>
+</RCC>
