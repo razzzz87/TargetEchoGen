@@ -8,3 +8,30 @@ To Create branch on the levelop to "remotes/origin/main"
 	git checkout -b <branch name>
 	git push -u origin <branch name>
 	verify it: git branch -a it should show remotes/origin/develop
+Upload opensource repos in our repos with its history and branches: full instructions should be like this:
+# 1. Clone a bare repo that includes all branches/tags/remotes/refs:
+	git clone --mirror https://github.com/yoctoproject/poky.git
+	git clone --mirror https://github.com/openembedded/meta-openembedded.git
+	git clone --mirror https://github.com/Xilinx/meta-xilinx.git
+	git clone --mirror https://github.com/Xilinx/meta-xilinx-tools.git
+ 
+# 2. Create an empty repo on Bitbucket (do not initialize it with README/etc).
+ 	Cread empty repo, by following the instruction link.
+	https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository
+	this repo URL will used to set our remote url next steps 3
+# 3. Push everything to the new Bitbucket repo:
+	# This mirrors all refs (refs/heads/*, refs/tags/*, refs/remotes/*).
+	cd <xxx.git>  : enter into opensource or any repos which you want to upload in defferent repos with its history.   
+	git remote set-url origin <set your repo url> 
+	for example: git remote set-url origin ssh://git@origin.www.code.dtf.lighting.com:7999/bs4/poky.git
+	git push --mirror
+	do the same for all repos. 
+Change commit message of previous commits, for current commit we can use "git commit --amend  -m "new msg", but if you want to change previous commits message use rebase command bellow is the steps: 
+	#1. Start the interactive rebase:
+		git rebase -i HEAD~n <Replace n with the number of commits you want to rebase.>
+	#2. Edit the commit list: Git will open your configured text editor with a list of commits. Each line will look like:pick <SHA> commit message
+	#3. For the commit message you want to change, replace pick with reword.Save and close the editor: After making your changes, save and close the editor.
+	#4. Git will open a new editor for each commit you marked with reword. Edit the commit message and save it.
+    #5. run "git rebase --continue" will complete the rebaseing.
+
+
