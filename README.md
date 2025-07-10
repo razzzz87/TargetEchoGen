@@ -1,2 +1,1 @@
-# qt
-Qt Based GUI Application 
+TargetEchoGen Qt Based GUI Application 
