@@ -2711,27 +2711,27 @@ protected:
   The template parameter <tt>DataType</tt> is the type of the stored data points. It must be
   trivially copyable and have the following public methods, preferably inline:
 
-  \li <tt>double sortKey() const</tt>\n Returns the member variable of this data point that is the
+  \li <tt>double sortKey() const</tt> Returns the member variable of this data point that is the
   sort key, defining the ordering in the container. Often this variable is simply called \a key.
 
-  \li <tt>static DataType fromSortKey(double sortKey)</tt>\n Returns a new instance of the data
+  \li <tt>static DataType fromSortKey(double sortKey)</tt> Returns a new instance of the data
   type initialized with its sort key set to \a sortKey.
 
-  \li <tt>static bool sortKeyIsMainKey()</tt>\n Returns true if the sort key is equal to the main
+  \li <tt>static bool sortKeyIsMainKey()</tt> Returns true if the sort key is equal to the main
   key (see method \c mainKey below). For most plottables this is the case. It is not the case for
   example for \ref QCPCurve, which uses \a t as sort key and \a key as main key. This is the reason
   why QCPCurve unlike QCPGraph can display parametric curves with loops.
 
-  \li <tt>double mainKey() const</tt>\n Returns the variable of this data point considered the main
+  \li <tt>double mainKey() const</tt> Returns the variable of this data point considered the main
   key. This is commonly the variable that is used as the coordinate of this data point on the key
   axis of the plottable. This method is used for example when determining the automatic axis
   rescaling of key axes (\ref QCPAxis::rescale).
 
-  \li <tt>double mainValue() const</tt>\n Returns the variable of this data point considered the
+  \li <tt>double mainValue() const</tt> Returns the variable of this data point considered the
   main value. This is commonly the variable that is used as the coordinate of this data point on
   the value axis of the plottable.
 
-  \li <tt>QCPRange valueRange() const</tt>\n Returns the range this data point spans in the value
+  \li <tt>QCPRange valueRange() const</tt> Returns the range this data point spans in the value
   axis coordinate. If the data is single-valued (e.g. QCPGraphData), this is simply a range with
   both lower and upper set to the main data point value. However if the data points can represent
   multiple values at once (e.g QCPFinancialData with its \a high, \a low, \a open and \a close
@@ -3271,7 +3271,7 @@ QCPRange QCPDataContainer<DataType>::keyRange(bool &foundRange, QCP::SignDomain 
   
   Inf and -Inf data values are ignored.
 
-  If \a inKeyRange has both lower and upper bound set to zero (is equal to <tt>QCPRange()</tt>),
+  If \a inKeyRange has both lower and upper bind set to zero (is equal to <tt>QCPRange()</tt>),
   all data points are considered, without any restriction on the keys.
 
   Use \a signDomain to control which sign of the value coordinates should be considered. This is

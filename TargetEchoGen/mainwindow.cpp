@@ -93,7 +93,7 @@ void MainWindow::on_pushButton_ddr_if_file_browse_clicked()
         LOG_TO_FILE("Filename:%s",fileName.toStdString().c_str());
         ui->lineEdit_ddr_if_file_path->setText(fileName);
     }
-    LOG_TO_FILE(":Exit\n");
+    LOG_TO_FILE(":Exit==>\n");
 }
 
 void MainWindow::on_pushButton_ddr_if_amplitude_file_browse_clicked()
@@ -109,7 +109,7 @@ void MainWindow::on_pushButton_ddr_if_amplitude_file_browse_clicked()
         LOG_TO_FILE("Filename:%s",fileName.toStdString().c_str());
         ui->lineEdit_ddr_if_file_path->setText(fileName);
     }
-    LOG_TO_FILE(":Exit\n");
+    LOG_TO_FILE(":Exit==>\n");
 }
 
 
@@ -126,7 +126,7 @@ void MainWindow::on_pushButton__ddr_if_amplitude_file_send_clicked()
         return;
     }
     LOG_TO_FILE("Continue to send file\n");
-    LOG_TO_FILE(":Exit\n");
+    LOG_TO_FILE(":Exit==>\n");
 }
 
 void MainWindow::on_pushButton_ddr_if_dac1_send_clicked()
@@ -143,7 +143,7 @@ void MainWindow::on_pushButton_ddr_if_dac1_send_clicked()
     }
     qDebug() << "Continue to send file\n";
     LOG_TO_FILE("Continue to send file\n");
-    LOG_TO_FILE(":Exit\n");
+    LOG_TO_FILE(":Exit==>\n");
 }
 
 
@@ -160,6 +160,6 @@ void MainWindow::on_pushButton_ddr_lx_file_browse_clicked()
         LOG_TO_FILE("Filename:%s",fileName.toStdString().c_str());
         ui->lineEdit_ddr_lx_file_path->setText(fileName);
     }
-    LOG_TO_FILE(":Exit\n");
+    LOG_TO_FILE(":Exit==>\n");
 }
 

@@ -9,8 +9,7 @@
 #include <QMutexLocker>
 
 #define LogFileName "logfile.log"
-
-#define LOG_TO_FILE(format, ...) Log::logToFile(__FILE__, __FUNCTION__, format, ##__VA_ARGS__)
+#define LOG_TO_FILE(format, ...) Log::logToFile(__FILE__, __FUNCTION__, (std::string(format) + "\n").c_str(), ##__VA_ARGS__)
 #define LOG_ONLY_DATA(format, ...) Log::logToFileOnlyData(format, ##__VA_ARGS__)
 
 class Log
@@ -23,6 +22,5 @@ public:
     static void printHexRecvBuffer(char* buffer, int len);
 private:
     static QMutex mutex;
-    //static const char *LogFileName;
 };
 #endif // LOG_H

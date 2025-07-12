@@ -15,9 +15,11 @@ typedef unsigned char uchar;
 #define CMD_GET_PROP        0x05
 
 
-#define SEND_MAGIC_BYTE_new     0xCC77
-#define RECV_MAGIC_BYTE_new     0xAA88
+#define SEND_MAGIC_BYTE_new  0xEE77
+#define RECV_MAGIC_BYTE_new  0xAA88
 
+#define SEND_MAGIC_BYTE 0xEE77
+#define RCEV_MAGIC_BYTE 0xAA55
 
 #include <string.h>
 #include <stdio.h>
@@ -74,6 +76,7 @@ public:
     ushort mPktBulkWriteUART(uint a_nRegisterAddress, uint a_nRegData, uint a_nPacketLen, char *a_byArrPacket);
 
     int mPktParse(char *byArrPacket);
+    uint mParseResponsePkt(const char byArrPktResp[16]);
     int mPktParseBulkRead(char *byArrPacket);
     ushort mGetPacketLength();
     uchar  mGetCommand();

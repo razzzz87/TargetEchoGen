@@ -1,5 +1,5 @@
 #include "Proto.h"
-
+#include "log.h"
 Proto::Proto()
 {
     m_nPacketLength     =   0;
@@ -375,7 +375,6 @@ ushort Proto::mPktReset(QByteArray &byArrPacket)
 {
 
 }*/
-#include <QDebug>
 int Proto::mPktParse(char *a_byArrData)
 {
     qDebug()<<"PArse packet";
@@ -398,7 +397,7 @@ int Proto::mPktParse(char *a_byArrData)
 
     if((m_nMagicBytes    ==  SEND_MAGIC_BYTE_new) |   (m_nMagicBytes   ==  RECV_MAGIC_BYTE_new))
     {
-        qDebug()<<"Parse packet2";
+        LOG_TO_FILE("Parse packet2");
 
         uchar chArrLength[2]    =   {'\0'};
         nParser++;
@@ -463,6 +462,52 @@ int Proto::mPktParse(char *a_byArrData)
         return -1;  // wrong magic byte
     }
     return 0; //successful
+}
+
+
+//#define SEND_MAGIC_BYTE 0xEE77
+#define RCEV_MAGIC_BYTE 0xAA55
+
+uint Proto::mParseResponsePkt(const char byArrPktResp[16]) {
+    size_t nParser = 0;
+
+    // Extract magic bytes (big endian)
+    uint16_t m_nMagicBytes = (static_cast<uint8_t>(byArrPktResp[nParser]) << 8) |
+                             static_cast<uint8_t>(byArrPktResp[nParser + 1]);
+    nParser += 2;
+
+    if (m_nMagicBytes != SEND_MAGIC_BYTE && m_nMagicBytes != RCEV_MAGIC_BYTE) {
+        LOG_TO_FILE("Wrong Magic byte");
+        return 0;
+    }
+
+    // Extract packet length
+    uint16_t m_nPacketLength = (static_cast<uint8_t>(byArrPktResp[nParser]) << 8) |
+                               static_cast<uint8_t>(byArrPktResp[nParser + 1]);
+    nParser += 2;
+
+    if (m_nPacketLength != 16) return 0;
+
+    // Skip NULL byte
+    nParser += 1;
+
+    // Read command byte (unused here)
+    uint8_t m_chCommand = static_cast<uint8_t>(byArrPktResp[nParser]);
+    nParser += 3; // Skip command and 2 reserved bytes
+
+    // Extract status (4 bytes, big endian)
+    uint32_t m_nStatus = (static_cast<uint8_t>(byArrPktResp[nParser]) << 24) |
+                         (static_cast<uint8_t>(byArrPktResp[nParser + 1]) << 16) |
+                         (static_cast<uint8_t>(byArrPktResp[nParser + 2]) << 8) |
+                         static_cast<uint8_t>(byArrPktResp[nParser + 3]);
+    nParser += 4;
+
+    // Extract register data (next 4 bytes)
+    uint32_t m_nRegisterData = (static_cast<uint8_t>(byArrPktResp[nParser]) << 24) |
+                               (static_cast<uint8_t>(byArrPktResp[nParser + 1]) << 16) |
+                               (static_cast<uint8_t>(byArrPktResp[nParser + 2]) << 8) |
+                               static_cast<uint8_t>(byArrPktResp[nParser + 3]);
+    return m_nRegisterData;
 }
 
 int Proto::mPktParseBulkRead(char *a_byArrData)

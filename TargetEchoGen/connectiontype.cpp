@@ -41,7 +41,7 @@ ConnectionType::~ConnectionType()
 
 void ConnectionType::on_pushButton_connect_pl_1g_clicked()
 {
-    LOG_TO_FILE(":Entry:\n");
+    LOG_TO_FILE(":Entry:");
     if(ui->pushButton_connect_pl_1g->text() == "Connect"){
 
         QString ip = ui->lineEdit_pl_1g_ip->text();
@@ -70,29 +70,33 @@ void ConnectionType::on_pushButton_connect_pl_1g_clicked()
             }
         }
     }
-    LOG_TO_FILE(":Exit:\n");
+    LOG_TO_FILE(":Exit==>");
 }
 
 
 void ConnectionType::on_pushButton_connect_ps1g_clicked()
 {
-    LOG_TO_FILE(":Entry:\n");
+    LOG_TO_FILE(":Entry:");
     if(ui->pushButton_connect_ps1g->text() == "Connect"){
 
-        QString ip = ui->lineEdit_ps_1g_ip->text();
-        qint16 port = ui->lineEdit_ps_1g_port->text().toInt();
-        LOG_TO_FILE("PS 1G IP Address:%s Port: %d\n",ip.toStdString().c_str(),port);
-        qDebug() << "IP:"<<ip << " port " << port;
-        UDPPS_01G_Con->bindSocket(ip,port);
+        QString remote_ip = ui->lineEdit_ps_1g_ip->text();
+        qint16 remote_port = ui->lineEdit_ps_1g_port->text().toInt();
+        LOG_TO_FILE("PS 1G IP Address:%s Port: %d",remote_ip.toStdString().c_str(),remote_port);
+        qDebug() << "IP:"<<remote_ip << " port " << remote_port;
+
+        UDPPS_01G_Con->bindSocket(remote_port);
+        UDPPS_01G_Con->remote_ip = remote_ip;
+        UDPPS_01G_Con->remote_port = remote_port;
+
         if(UDPPS_01G_Con->getConStatus() == NOT_CONNECTED){
-            qDebug() << "Failed IP:"<<ip << " port " << port;
-            LOG_TO_FILE("ERROR: Con Failed : PS 1G IP Address:%s Port: %d\n",ip.toStdString().c_str(),port);
+            qDebug() << "Failed IP:"<<remote_ip << " port " << remote_port;
+            LOG_TO_FILE("ERROR: Con Failed : PS 1G IP Address:%s Port: %d",remote_ip.toStdString().c_str(),remote_port);
             ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
             ui->pushButton_connect_ps1g->setText("Connect");
         }else{
             ui->pushButton_connect_ps1g->setText("Disconnect");
             ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
-            LOG_TO_FILE("UDP Connection succeeded\n");
+            LOG_TO_FILE("UDP Connection succeeded");
         }
     }else{
         if(ui->pushButton_connect_ps1g->text() == "Disconnect")
@@ -101,33 +105,33 @@ void ConnectionType::on_pushButton_connect_ps1g_clicked()
                 ui->pushButton_connect_ps1g->setText("Connect");
                 qDebug() << "Diconnection done: IP:";
                 ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-                LOG_TO_FILE("UDP Connection closed successfully\n");
+                LOG_TO_FILE("UDP Connection closed successfully");
             }else{
                 ui->pushButton_connect_ps1g->setText("Disconnect");
-                LOG_TO_FILE("ERROR: Disconnection failed\n");
+                LOG_TO_FILE("ERROR: Disconnection failed");
             }
         }
     }
-    LOG_TO_FILE(":Exit:\n");
+    LOG_TO_FILE(":Exit==>");
 }
 
 
 void ConnectionType::on_pushButton_connect_pl_10g_clicked()
 {
-    LOG_TO_FILE(":Entry\n");
+    LOG_TO_FILE(":Entry");
     if(ui->pushButton_connect_pl_10g->text() == "Connect"){
 
         QString ip = ui->lineEdit_pl_10g_ip->text();
-        LOG_TO_FILE("PS 1G IP Address:%s\n",ip.toStdString().c_str());
+        LOG_TO_FILE("PS 1G IP Address:%s",ip.toStdString().c_str());
         UDPPL_10G_Con->bindSocket(ip,000);
         if(UDPPL_10G_Con->getConStatus() == NOT_CONNECTED){
-            LOG_TO_FILE("ERROR: Con Failed : PS 1G IP Address:%s\n",ip.toStdString().c_str());
+            LOG_TO_FILE("ERROR: Con Failed : PS 1G IP Address:%s",ip.toStdString().c_str());
             ui->label_conn_pl_10g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
             ui->pushButton_connect_pl_10g->setText("Connect");
         }else{
             ui->pushButton_connect_pl_10g->setText("Disconnect");
             ui->label_conn_pl_10g_led->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
-            LOG_TO_FILE("UDP Connection succeeded\n");
+            LOG_TO_FILE("UDP Connection succeeded");
         }
     }else{
         if(ui->pushButton_connect_pl_10g->text() == "Disconnect")
@@ -136,14 +140,14 @@ void ConnectionType::on_pushButton_connect_pl_10g_clicked()
                 ui->pushButton_connect_pl_10g->setText("Connect");
                 qDebug() << "Diconnection done: IP:";
                 ui->label_conn_pl_10g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-                LOG_TO_FILE("UDP Connection closed successfully\n");
+                LOG_TO_FILE("UDP Connection closed successfully");
             }else{
                 ui->pushButton_connect_pl_10g->setText("Disconnect");
-                LOG_TO_FILE("ERROR: Disconnection failed\n");
+                LOG_TO_FILE("ERROR: Disconnection failed");
             }
         }
     }
-    LOG_TO_FILE(":Exit:\n");
+    LOG_TO_FILE(":Exit==>");
 }
 
 

@@ -53,7 +53,6 @@ Spectrum::Spectrum(QWidget *parent)
 {
     ui->setupUi(this);
 
-// Read data from CSV file
     QCustomPlot *customPlot = new QCustomPlot(this);
     QVector<double> wavelengths, intensities;
     QFile file("spectrum_data.csv");

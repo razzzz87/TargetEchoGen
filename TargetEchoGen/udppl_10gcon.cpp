@@ -4,18 +4,19 @@ void UDP_PL10G_Con::bindSocket(const QString &ipAddress, quint16 port) {
 
     bool success = udpSocket->bind(QHostAddress(ipAddress), port);
     if (success) {
-        LOG_TO_FILE("Socket successfully bound!");
+        LOG_TO_FILE("Socket successfully bind!");
         IsConnected = true;
     } else {
         LOG_TO_FILE("Failed to bind socket.");
         IsConnected = false;
         return;
     }
+    IsConnected = true;
     getUDPSockStatus(udpSocket); //status in log
     connect(udpSocket, &QUdpSocket::readyRead, this, &UDP_PL10G_Con::processPendingDatagrams);
 }
 bool UDP_PL10G_Con::Disconnect() {
-    LOG_TO_FILE(":Entry:\n");
+    LOG_TO_FILE(":Entry==>");
     udpSocket->close();
     if (udpSocket->state() == QAbstractSocket::UnconnectedState) {
         LOG_TO_FILE("Socket successfully closed.");
@@ -34,7 +35,7 @@ void UDP_PL10G_Con ::sendMessage(const char* message,int len, const QString &ipA
     } else {
         LOG_TO_FILE("Bytes written: %ld ",bytesWritten);
     }
-    LOG_TO_FILE(":Exit:\n");
+    LOG_TO_FILE(":Exit==>");
 }
 void UDP_PL10G_Con::sendMessage(const QString &message, const QString &ipAddress, quint16 port)
 {
@@ -51,13 +52,13 @@ void UDP_PL10G_Con::setSocketBufferSize(int size) {
 
     udpSocket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, size);
     if (udpSocket->error() != QAbstractSocket::UnknownSocketError) {
-        LOG_TO_FILE("Failed to set socket option:%s\n",udpSocket->errorString().toStdString().c_str());
+        LOG_TO_FILE("Failed to set socket option:%s",udpSocket->errorString().toStdString().c_str());
     } else {
         LOG_TO_FILE("Socket option set successfully.");
     }
     udpSocket->setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, size);
     if (udpSocket->error() != QAbstractSocket::UnknownSocketError) {
-        LOG_TO_FILE("Failed to set socket option:%s\n",udpSocket->errorString().toStdString().c_str());
+        LOG_TO_FILE("Failed to set socket option:%s",udpSocket->errorString().toStdString().c_str());
     } else {
         LOG_TO_FILE("Socket option set successfully.");    }
 }
@@ -74,23 +75,23 @@ void UDP_PL10G_Con::getUDPSockStatus(QUdpSocket *udpSocket)
 {
     LOG_TO_FILE(":Entry==>");
     QAbstractSocket::SocketState state = udpSocket->state();
-    IsConnected = false;
+    //IsConnected = false;
     switch (state) {
     case QAbstractSocket::UnconnectedState:
-        LOG_TO_FILE("Socket is not connected.");
+        LOG_TO_FILE("UnconnectedState");
         break;
     case QAbstractSocket::HostLookupState:
-        LOG_TO_FILE("Socket is performing a host name lookup.");
+        LOG_TO_FILE("HostLookupState");
         break;
     case QAbstractSocket::ConnectingState:
-        LOG_TO_FILE("Socket is attempting to connect.");
+        LOG_TO_FILE("ConnectingState");
         break;
     case QAbstractSocket::ConnectedState:
         LOG_TO_FILE("Socket is connected.");
         IsConnected=true;
         break;
     case QAbstractSocket::BoundState:
-        LOG_TO_FILE("Socket is bound to an address and port.");
+        LOG_TO_FILE("BoundState");
         break;
     case QAbstractSocket::ClosingState:
         IsConnected=false;
@@ -103,5 +104,6 @@ void UDP_PL10G_Con::getUDPSockStatus(QUdpSocket *udpSocket)
         LOG_TO_FILE("Unknown socket state.");
         break;
     }
+    LOG_TO_FILE(":Exit==>");
 }
 

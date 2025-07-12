@@ -892,7 +892,7 @@ void QCPPaintBufferGlFbo::donePainting()
   if (mGlFrameBuffer && mGlFrameBuffer->isBound())
     mGlFrameBuffer->release();
   else
-    qDebug() << Q_FUNC_INFO << "Either OpenGL frame buffer not valid or was not bound";
+    qDebug() << Q_FUNC_INFO << "Either OpenGL frame buffer not valid or was not bind";
 }
 
 /* inherits documentation from base class */
@@ -1901,7 +1901,7 @@ void QCPLayerable::wheelEvent(QWheelEvent *event)
   corresponding to a minimum magnitude of roughly 1e-308.
 
   \warning Do not use this constant to indicate "arbitrarily small" values in plotting logic (as
-  values that will appear in the plot)! It is intended only as a bound to compare against, e.g. to
+  values that will appear in the plot)! It is intended only as a bind to compare against, e.g. to
   prevent axis ranges from obtaining underflowing ranges.
 
   \see validRange, maxRange
@@ -1914,7 +1914,7 @@ const double QCPRange::minRange = 1e-280;
   corresponding to a maximum magnitude of roughly 1e308.
 
   \warning Do not use this constant to indicate "arbitrarily large" values in plotting logic (as
-  values that will appear in the plot)! It is intended only as a bound to compare against, e.g. to
+  values that will appear in the plot)! It is intended only as a bind to compare against, e.g. to
   prevent axis ranges from obtaining overflowing ranges.
 
   \see validRange, minRange
@@ -1949,7 +1949,7 @@ QCPRange::QCPRange(double lower, double upper) :
   Expands this range such that \a otherRange is contained in the new range. It is assumed that both
   this range and \a otherRange are normalized (see \ref normalize).
 
-  If this range contains NaN as lower or upper bound, it will be replaced by the respective bound
+  If this range contains NaN as lower or upper bind, it will be replaced by the respective bind
   of \a otherRange.
 
   If \a otherRange is already inside the current range, this function does nothing.
@@ -1969,7 +1969,7 @@ void QCPRange::expand(const QCPRange &otherRange)
   Expands this range such that \a includeCoord is contained in the new range. It is assumed that
   this range is normalized (see \ref normalize).
 
-  If this range contains NaN as lower or upper bound, the respective bound will be set to \a
+  If this range contains NaN as lower or upper bind, the respective bind will be set to \a
   includeCoord.
 
   If \a includeCoord is already inside the current range, this function does nothing.
@@ -1990,7 +1990,7 @@ void QCPRange::expand(double includeCoord)
   Returns an expanded range that contains this and \a otherRange. It is assumed that both this
   range and \a otherRange are normalized (see \ref normalize).
 
-  If this range contains NaN as lower or upper bound, the returned range's bound will be taken from
+  If this range contains NaN as lower or upper bind, the returned range's bind will be taken from
   \a otherRange.
 
   \see expand
@@ -2007,7 +2007,7 @@ QCPRange QCPRange::expanded(const QCPRange &otherRange) const
   Returns an expanded range that includes the specified \a includeCoord. It is assumed that this
   range is normalized (see \ref normalize).
 
-  If this range contains NaN as lower or upper bound, the returned range's bound will be set to \a
+  If this range contains NaN as lower or upper bind, the returned range's bind will be set to \a
   includeCoord.
 
   \see expand
@@ -2058,9 +2058,9 @@ QCPRange QCPRange::bounded(double lowerBound, double upperBound) const
   If the original range does span positive and negative sign domains or contains zero,
   the returned range will try to approximate the original range as good as possible.
   If the positive interval of the original range is wider than the negative interval, the
-  returned range will only contain the positive interval, with lower bound set to \a rangeFac or
+  returned range will only contain the positive interval, with lower bind set to \a rangeFac or
   \a rangeFac *\a upper, whichever is closer to zero. Same procedure is used if the negative interval
-  is wider than the positive interval, this time by changing the \a upper bound.
+  is wider than the positive interval, this time by changing the \a upper bind.
 */
 QCPRange QCPRange::sanitizedForLogScale() const
 {
@@ -2171,7 +2171,7 @@ bool QCPRange::validRange(const QCPRange &range)
   of a contiguous set of data points. The \a end index corresponds to the data point just after the
   last data point of the data range, like in standard iterators.
 
-  Data Ranges are not bound to a certain plottable, thus they can be freely exchanged, created and
+  Data Ranges are not bind to a certain plottable, thus they can be freely exchanged, created and
   modified. If a non-contiguous data set shall be described, the class \ref QCPDataSelection is
   used, which holds and manages multiple instances of \ref QCPDataRange. In most situations, \ref
   QCPDataSelection is thus used.
@@ -3000,9 +3000,9 @@ void QCPSelectionRect::draw(QCPPainter *painter)
   QCPMarginGroup allows you to tie a margin side of two or more layout elements together, such that
   they will all have the same size, based on the largest required margin in the group.
   
-  \n
+  
   \image html QCPMarginGroup.png "Demonstration of QCPMarginGroup"
-  \n
+  
   
   In certain situations it is desirable that margins at specific sides are synchronized across
   layout elements. For example, if one QCPAxisRect is below another one in a grid layout, it will
@@ -5665,7 +5665,7 @@ QByteArray QCPLabelPainterPrivate::generateLabelParameterHash() const
   
   Draws a single tick label with the provided \a painter, utilizing the internal label cache to
   significantly speed up drawing of labels that were drawn in previous calls. The tick label is
-  always bound to an axis, the distance to the axis is controllable via \a distanceToAxis in
+  always bind to an axis, the distance to the axis is controllable via \a distanceToAxis in
   pixels. The pixel position in the axis direction is passed in the \a position parameter. Hence
   for the bottom axis, \a position would indicate the horizontal pixel position (not coordinate),
   at which the label should be drawn.
@@ -6563,7 +6563,7 @@ QCPAxisTickerDateTime::QCPAxisTickerDateTime() :
     <tr><td>\c t</td><td>The timezone (for example "CEST")</td></tr>
   </table>
   
-  Newlines can be inserted with \c "\n", literal strings (even when containing above expressions)
+  Newlines can be inserted with \c "", literal strings (even when containing above expressions)
   by encapsulating them using single-quotes. A literal single quote can be generated by using two
   consecutive single quotes in the format.
   
@@ -7841,7 +7841,7 @@ QVector<double> QCPAxisTickerLog::createTickVector(double tickStep, const QCPRan
 /*! \class QCPGrid
   \brief Responsible for drawing the grid of a QCPAxis.
   
-  This class is tightly bound to QCPAxis. Every axis owns a grid instance and uses it to draw the
+  This class is tightly bind to QCPAxis. Every axis owns a grid instance and uses it to draw the
   grid lines, sub grid lines and zero-line. You can interact with the grid of an axis via \ref
   QCPAxis::grid. Normally, you don't need to create an instance of QCPGrid yourself.
   
@@ -8077,7 +8077,7 @@ void QCPGrid::drawSubGridLines(QCPPainter *painter) const
   Axes are always part of an axis rect, see QCPAxisRect.
   \image html AxisNamesOverview.png
   <center>Naming convention of axis parts</center>
-  \n
+  
     
   \image html AxisRectSpacingOverview.png
   <center>Overview of the spacings and paddings that define the geometry of an axis. The dashed gray line
@@ -8450,7 +8450,7 @@ void QCPAxis::setSelectedParts(const SelectableParts &selected)
 /*!
   \overload
   
-  Sets the lower and upper bound of the axis range.
+  Sets the lower and upper bind of the axis range.
   
   To invert the direction of an axis, use \ref setRangeReversed.
   
@@ -8498,7 +8498,7 @@ void QCPAxis::setRange(double position, double size, Qt::AlignmentFlag alignment
 }
 
 /*!
-  Sets the lower bound of the axis range. The upper bound is not changed.
+  Sets the lower bind of the axis range. The upper bind is not changed.
   \see setRange
 */
 void QCPAxis::setRangeLower(double lower)
@@ -8520,7 +8520,7 @@ void QCPAxis::setRangeLower(double lower)
 }
 
 /*!
-  Sets the upper bound of the axis range. The lower bound is not changed.
+  Sets the upper bind of the axis range. The lower bind is not changed.
   \see setRange
 */
 void QCPAxis::setRangeUpper(double upper)
@@ -8647,7 +8647,7 @@ void QCPAxis::setTickLabelColor(const QColor &color)
 
 /*!
   Sets the rotation of the tick labels. If \a degrees is zero, the labels are drawn normally. Else,
-  the tick labels are drawn rotated by \a degrees clockwise. The specified angle is bound to values
+  the tick labels are drawn rotated by \a degrees clockwise. The specified angle is bind to values
   from -90 to 90 degrees.
   
   If \a degrees is exactly -90, 0 or 90, the tick labels are centered on the tick coordinate. For
@@ -8690,7 +8690,7 @@ void QCPAxis::setTickLabelSide(LabelSide side)
   point. For the 'g' and 'G' formats, the precision represents the maximum number of significant
   digits, trailing zeroes are omitted.
 
-  <b>The second and third characters</b> are optional and specific to QCustomPlot:\n
+  <b>The second and third characters</b> are optional and specific to QCustomPlot:
   If the first char was 'e' or 'g', numbers are/might be displayed in the scientific format, e.g.
   "5.5e9", which is ugly in a plot. So when the second char of \a formatCode is set to 'b' (for
   "beautiful"), those exponential numbers are formatted in a more natural way, i.e. "5.5
@@ -10199,7 +10199,7 @@ QByteArray QCPAxisPainterPrivate::generateLabelParameterHash() const
   
   Draws a single tick label with the provided \a painter, utilizing the internal label cache to
   significantly speed up drawing of labels that were drawn in previous calls. The tick label is
-  always bound to an axis, the distance to the axis is controllable via \a distanceToAxis in
+  always bind to an axis, the distance to the axis is controllable via \a distanceToAxis in
   pixels. The pixel position in the axis direction is passed in the \a position parameter. Hence
   for the bottom axis, \a position would indicate the horizontal pixel position (not coordinate),
   at which the label should be drawn.
@@ -10693,7 +10693,7 @@ QCPScatterStyle::QCPScatterStyle(ScatterShape shape, const QColor &color, const 
   
   \warning In some cases it might be tempting to directly use a pen style like <tt>Qt::NoPen</tt> as \a pen
   and a color like <tt>Qt::blue</tt> as \a brush. Notice however, that the corresponding call\n
-  <tt>QCPScatterStyle(QCPScatterShape::ssCircle, Qt::NoPen, Qt::blue, 5)</tt>\n
+  <tt>QCPScatterStyle(QCPScatterShape::ssCircle, Qt::NoPen, Qt::blue, 5)</tt>
   doesn't necessarily lead C++ to use this constructor in some cases, but might mistake
   <tt>Qt::NoPen</tt> for a QColor and use the
   \ref QCPScatterStyle(ScatterShape shape, const QColor &color, const QColor &fill, double size)
@@ -11363,7 +11363,7 @@ bool QCPSelectionDecorator::registerWithPlottable(QCPAbstractPlottable *plottabl
   whether a range could be found or not. If this is false, you shouldn't use the returned range
   (e.g. no points in data).
   
-  If \a inKeyRange has both lower and upper bound set to zero (is equal to <tt>QCPRange()</tt>),
+  If \a inKeyRange has both lower and upper bind set to zero (is equal to <tt>QCPRange()</tt>),
   all data points are considered, without any restriction on the keys.
 
   Note that \a foundRange is not the same as \ref QCPRange::validRange, since the range returned by
@@ -12803,7 +12803,7 @@ void QCPItemPosition::setPixelPosition(const QPointF &pixelPosition)
   
   First you instantiate the item you want to use and add it to the plot:
   \snippet documentation/doc-code-snippets/mainwindow.cpp qcpitemline-creation-1
-  by default, the positions of the item are bound to the x- and y-Axis of the plot. So we can just
+  by default, the positions of the item are bind to the x- and y-Axis of the plot. So we can just
   set the plot coordinates where the line should start/end:
   \snippet documentation/doc-code-snippets/mainwindow.cpp qcpitemline-creation-2
   If we don't want the line to be positioned in plot coordinates but a different coordinate system,
@@ -19790,7 +19790,7 @@ QCPTextElement::QCPTextElement(QCustomPlot *parentPlot, const QString &text, con
 }
 
 /*!
-  Sets the text that will be displayed to \a text. Multiple lines can be created by insertion of "\n".
+  Sets the text that will be displayed to \a text. Multiple lines can be created by insertion of "".
   
   \see setFont, setTextColor, setTextFlags
 */
@@ -22266,7 +22266,7 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData
   if (keyAxis->orientation() == Qt::Horizontal)
   {
     // x is key
-    // crop lower bound:
+    // crop lower bind:
     if (staticData->first().x() < croppedData->first().x()) // other one must be cropped
       qSwap(staticData, croppedData);
     const int lowBound = findIndexBelowX(croppedData, staticData->first().x());
@@ -22282,7 +22282,7 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData
     (*croppedData)[0].setY(croppedData->at(0).y()+slope*(staticData->first().x()-croppedData->at(0).x()));
     (*croppedData)[0].setX(staticData->first().x());
     
-    // crop upper bound:
+    // crop upper bind:
     if (staticData->last().x() > croppedData->last().x()) // other one must be cropped
       qSwap(staticData, croppedData);
     int highBound = findIndexAboveX(croppedData, staticData->last().x());
@@ -22300,7 +22300,7 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData
   } else // mKeyAxis->orientation() == Qt::Vertical
   {
     // y is key
-    // crop lower bound:
+    // crop lower bind:
     if (staticData->first().y() < croppedData->first().y()) // other one must be cropped
       qSwap(staticData, croppedData);
     int lowBound = findIndexBelowY(croppedData, staticData->first().y());
@@ -22316,7 +22316,7 @@ const QPolygonF QCPGraph::getChannelFillPolygon(const QVector<QPointF> *thisData
     (*croppedData)[0].setX(croppedData->at(0).x()+slope*(staticData->first().y()-croppedData->at(0).y()));
     (*croppedData)[0].setY(staticData->first().y());
     
-    // crop upper bound:
+    // crop upper bind:
     if (staticData->last().y() > croppedData->last().y()) // other one must be cropped
       qSwap(staticData, croppedData);
     int highBound = findIndexAboveY(croppedData, staticData->last().y());
@@ -23691,7 +23691,7 @@ bool QCPCurve::mayTraverse(int prevRegion, int currentRegion) const
   The return value of this method indicates whether the segment actually traverses region 5 or not.
   
   If the segment traverses 5, the output parameters \a crossA and \a crossB indicate the entry and
-  exit points of region 5. They will become the optimized points for that segment.
+  Exit==> points of region 5. They will become the optimized points for that segment.
 */
 bool QCPCurve::getTraverse(double prevKey, double prevValue, double key, double value, double keyMin, double valueMax, double keyMax, double valueMin, QPointF &crossA, QPointF &crossB) const
 {
@@ -23788,7 +23788,7 @@ bool QCPCurve::getTraverse(double prevKey, double prevValue, double key, double 
   This method assumes that the \ref getTraverse test has returned true, so the segment definitely
   traverses the visible region 5 when going from \a prevRegion to \a currentRegion.
   
-  In certain situations it is not sufficient to merely generate the entry and exit points of the
+  In certain situations it is not sufficient to merely generate the entry and Exit==> points of the
   segment into/out of region 5, as \ref getTraverse provides. It may happen that a single segment, in
   addition to traversing region 5, skips another region outside of region 5, which makes it
   necessary to add an optimized corner point there (very similar to the job \ref
@@ -24755,7 +24755,7 @@ QCPRange QCPBars::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) co
   if (foundRange && mKeyAxis)
   {
     double lowerPixelWidth, upperPixelWidth, keyPixel;
-    // lower range bound:
+    // lower range bind:
     getPixelWidth(range.lower, lowerPixelWidth, upperPixelWidth);
     keyPixel = mKeyAxis.data()->coordToPixel(range.lower) + lowerPixelWidth;
     if (mBarsGroup)
@@ -24763,7 +24763,7 @@ QCPRange QCPBars::getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain) co
     const double lowerCorrected = mKeyAxis.data()->pixelToCoord(keyPixel);
     if (!qIsNaN(lowerCorrected) && qIsFinite(lowerCorrected) && range.lower > lowerCorrected)
       range.lower = lowerCorrected;
-    // upper range bound:
+    // upper range bind:
     getPixelWidth(range.upper, lowerPixelWidth, upperPixelWidth);
     keyPixel = mKeyAxis.data()->coordToPixel(range.upper) + upperPixelWidth;
     if (mBarsGroup)
@@ -29726,7 +29726,7 @@ void QCPItemText::setSelectedFont(const QFont &font)
 
 /*!
   Sets the text that will be displayed. Multi-line texts are supported by inserting a line break
-  character, e.g. '\n'.
+  character, e.g. ''.
   
   \see setFont, setColor, setTextAlignment
 */
@@ -31328,7 +31328,7 @@ void QCPPolarAxisRadial::setSelectedParts(const SelectableParts &selected)
 /*!
   \overload
   
-  Sets the lower and upper bound of the axis range.
+  Sets the lower and upper bind of the axis range.
   
   To invert the direction of an axis, use \ref setRangeReversed.
   
@@ -31376,7 +31376,7 @@ void QCPPolarAxisRadial::setRange(double position, double size, Qt::AlignmentFla
 }
 
 /*!
-  Sets the lower bound of the axis range. The upper bound is not changed.
+  Sets the lower bind of the axis range. The upper bind is not changed.
   \see setRange
 */
 void QCPPolarAxisRadial::setRangeLower(double lower)
@@ -31398,7 +31398,7 @@ void QCPPolarAxisRadial::setRangeLower(double lower)
 }
 
 /*!
-  Sets the upper bound of the axis range. The lower bound is not changed.
+  Sets the upper bind of the axis range. The lower bind is not changed.
   \see setRange
 */
 void QCPPolarAxisRadial::setRangeUpper(double upper)
@@ -31531,7 +31531,7 @@ void QCPPolarAxisRadial::setTickLabelColor(const QColor &color)
 
 /*!
   Sets the rotation of the tick labels. If \a degrees is zero, the labels are drawn normally. Else,
-  the tick labels are drawn rotated by \a degrees clockwise. The specified angle is bound to values
+  the tick labels are drawn rotated by \a degrees clockwise. The specified angle is bind to values
   from -90 to 90 degrees.
   
   If \a degrees is exactly -90, 0 or 90, the tick labels are centered on the tick coordinate. For
@@ -31561,7 +31561,7 @@ void QCPPolarAxisRadial::setTickLabelMode(LabelMode mode)
   the normal format code used by Qt. In short, this means: 'e'/'E' scientific format, 'f' fixed
   format, 'g'/'G' scientific or fixed, whichever is shorter.
   
-  The second and third characters are optional and specific to QCustomPlot:\n
+  The second and third characters are optional and specific to QCustomPlot:
   If the first char was 'e' or 'g', numbers are/might be displayed in the scientific format, e.g.
   "5.5e9", which is ugly in a plot. So when the second char of \a formatCode is set to 'b' (for
   "beautiful"), those exponential numbers are formatted in a more natural way, i.e. "5.5
@@ -33268,7 +33268,7 @@ void QCPPolarAxisAngular::setSelectedParts(const SelectableParts &selected)
 /*!
   \overload
   
-  Sets the lower and upper bound of the axis range.
+  Sets the lower and upper bind of the axis range.
   
   To invert the direction of an axis, use \ref setRangeReversed.
   
@@ -33310,7 +33310,7 @@ void QCPPolarAxisAngular::setRange(double position, double size, Qt::AlignmentFl
 }
 
 /*!
-  Sets the lower bound of the axis range. The upper bound is not changed.
+  Sets the lower bind of the axis range. The upper bind is not changed.
   \see setRange
 */
 void QCPPolarAxisAngular::setRangeLower(double lower)
@@ -33326,7 +33326,7 @@ void QCPPolarAxisAngular::setRangeLower(double lower)
 }
 
 /*!
-  Sets the upper bound of the axis range. The lower bound is not changed.
+  Sets the upper bind of the axis range. The lower bind is not changed.
   \see setRange
 */
 void QCPPolarAxisAngular::setRangeUpper(double upper)
@@ -33445,7 +33445,7 @@ void QCPPolarAxisAngular::setTickLabelColor(const QColor &color)
 
 /*!
   Sets the rotation of the tick labels. If \a degrees is zero, the labels are drawn normally. Else,
-  the tick labels are drawn rotated by \a degrees clockwise. The specified angle is bound to values
+  the tick labels are drawn rotated by \a degrees clockwise. The specified angle is bind to values
   from -90 to 90 degrees.
   
   If \a degrees is exactly -90, 0 or 90, the tick labels are centered on the tick coordinate. For
@@ -33475,7 +33475,7 @@ void QCPPolarAxisAngular::setTickLabelMode(LabelMode mode)
   the normal format code used by Qt. In short, this means: 'e'/'E' scientific format, 'f' fixed
   format, 'g'/'G' scientific or fixed, whichever is shorter.
   
-  The second and third characters are optional and specific to QCustomPlot:\n If the first char was
+  The second and third characters are optional and specific to QCustomPlot: If the first char was
   'e' or 'g', numbers are/might be displayed in the scientific format, e.g. "5.5e9", which might be
   visually unappealing in a plot. So when the second char of \a formatCode is set to 'b' (for
   "beautiful"), those exponential numbers are formatted in a more natural way, i.e. "5.5
