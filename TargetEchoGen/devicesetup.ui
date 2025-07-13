@@ -267,18 +267,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox">
+           <widget class="QLineEdit" name="lineEdit_reg_read_addr1">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::ButtonSymbols::PlusMinus</enum>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
             </property>
            </widget>
           </item>
@@ -296,20 +290,17 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_device_setup_reg_val_read1">
+           <widget class="QLineEdit" name="lineEdit_reg_read_val1">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_device_setup_reg_read">
+           <widget class="QPushButton" name="pushButton_device_setup_reg1_read">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -339,15 +330,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_14">
+           <widget class="QLineEdit" name="lineEdit_reg_read_addr2">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
             </property>
            </widget>
           </item>
@@ -365,20 +353,17 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_15">
+           <widget class="QLineEdit" name="lineEdit_reg_read_val2">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="pushButton_device_setup_reg2_read">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -408,15 +393,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_16">
+           <widget class="QLineEdit" name="lineEdit_reg_read_addr3">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
             </property>
            </widget>
           </item>
@@ -434,20 +416,17 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_17">
+           <widget class="QLineEdit" name="lineEdit_reg_read_val3">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="pushButton_device_setup_reg3_read">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -477,21 +456,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_18">
+           <widget class="QLineEdit" name="lineEdit_reg_read_addr4">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
             </property>
            </widget>
           </item>
@@ -509,20 +479,17 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_19">
+           <widget class="QLineEdit" name="lineEdit_reg_read_val4">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_21">
+           <widget class="QPushButton" name="pushButton_device_setup_reg4_read">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -567,17 +534,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_reg_wr_addr1"/>
           </item>
           <item>
            <widget class="QLabel" name="label_4">
@@ -593,20 +550,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_4">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_wr_reg_val1"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButton_device_setup_wr_reg1">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -636,17 +583,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_20">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_reg_wr_addr2"/>
           </item>
           <item>
            <widget class="QLabel" name="label_34">
@@ -662,20 +599,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_21">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_wr_reg_val2"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_22">
+           <widget class="QPushButton" name="pushButton_device_setup_wr_reg2">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -705,17 +632,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_24">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_reg_wr_addr3"/>
           </item>
           <item>
            <widget class="QLabel" name="label_38">
@@ -731,20 +648,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_25">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_wr_reg_val3"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_24">
+           <widget class="QPushButton" name="pushButton_device_setup_wr_reg3">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -774,17 +681,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_22">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_reg_wr_addr4"/>
           </item>
           <item>
            <widget class="QLabel" name="label_36">
@@ -800,20 +697,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_23">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>2147483647</number>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_wr_reg_val4"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_23">
+           <widget class="QPushButton" name="pushButton_device_setup_wr_reg4">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>

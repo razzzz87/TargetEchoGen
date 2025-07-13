@@ -69,6 +69,8 @@ int UDP_PS1G_Con::readResponsPacket(char* recvdata,int len, QHostAddress ipAddre
                 Log::printHexRecvBuffer(recvdata,len);
             }
         }
+    }else{
+        LOG_TO_FILE("Timeout waiting for datagram.");
     }
     LOG_TO_FILE(":Exit==>");
     return bytesRead;

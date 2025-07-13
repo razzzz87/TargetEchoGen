@@ -104,8 +104,10 @@ void ConnectionType::on_pushButton_connect_ps1g_clicked()
             if(UDPPS_01G_Con->Disconnect()){
                 ui->pushButton_connect_ps1g->setText("Connect");
                 qDebug() << "Diconnection done: IP:";
+                UDPPS_01G_Con->IsConnected = false;
                 ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
                 LOG_TO_FILE("UDP Connection closed successfully");
+
             }else{
                 ui->pushButton_connect_ps1g->setText("Disconnect");
                 LOG_TO_FILE("ERROR: Disconnection failed");

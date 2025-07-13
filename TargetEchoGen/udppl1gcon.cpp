@@ -21,6 +21,7 @@ bool UDP_PL1G_Con::Disconnect() {
     udpSocket->close();
     if (udpSocket->state() == QAbstractSocket::UnconnectedState) {
         LOG_TO_FILE("Socket successfully closed.");
+        IsConnected = false;
         return true;
     } else {
         LOG_TO_FILE("Socket is still connected error:%s",udpSocket->error());

@@ -23,6 +23,7 @@ public:
     qint16 remote_port;
     QString host_ip;
     qint16 host_port;
+    bool IsConnected;
 
     static UDP_PS1G_Con& getInstance() {
         static UDP_PS1G_Con instance;
@@ -41,17 +42,6 @@ void getUDPSockStatus(QUdpSocket *udpSocket);
 bool Disconnect();
 
 private slots:
-/*
-    void processPendingDatagrams() {
-        while (udpSocket->hasPendingDatagrams()) {
-            QByteArray buffer;
-            buffer.resize(udpSocket->pendingDatagramSize());
-            udpSocket->readDatagram(buffer.data(), buffer.size());
-            Log::printHexCStyle(buffer);
-        }
-    }
-*/
-
     void sendKeepAlive() {
         QByteArray data = "KEEP_ALIVE";
         udpSocket->writeDatagram(data, QHostAddress(remote_ip), remote_port);
@@ -65,15 +55,12 @@ private:
         connect(keepAliveTimer, &QTimer::timeout, this, &UDP_PS1G_Con::sendKeepAlive);
         IsConnected = false;
     }
-
     ~UDP_PS1G_Con() = default;
-
     UDP_PS1G_Con(const UDP_PS1G_Con&) = delete;
     UDP_PS1G_Con& operator=(const UDP_PS1G_Con&) = delete;
 
     QUdpSocket *udpSocket;
     QTimer *keepAliveTimer;
-    bool IsConnected;
 };
 
 #endif // UDPCON_H

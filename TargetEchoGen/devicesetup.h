@@ -6,6 +6,7 @@
 #include "udpcon.h"
 #include "udppl1gcon.h"
 #include "udppl_10gcon.h"
+#include <QLineEdit>
 
 namespace Ui {
 class DeviceSetup;
@@ -19,8 +20,18 @@ public:
     explicit DeviceSetup(QWidget *parent = nullptr);
     ~DeviceSetup();
     uint64_t ParseRegReadResponsePkt(char *rcvpkt, int pktLen);
+    void readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
+    void WriteRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
 private slots:
-    void on_pushButton_device_setup_reg_read_clicked();
+    void on_pushButton_device_setup_reg1_read_clicked();
+    void on_pushButton_device_setup_reg2_read_clicked();
+    void on_pushButton_device_setup_reg3_read_clicked();
+    void on_pushButton_device_setup_reg4_read_clicked();
+
+    void on_pushButton_device_setup_wr_reg1_clicked();
+    void on_pushButton_device_setup_wr_reg2_clicked();
+    void on_pushButton_device_setup_wr_reg3_clicked();
+    void on_pushButton_device_setup_wr_reg4_clicked();
 
 private:
     Ui::DeviceSetup *ui;

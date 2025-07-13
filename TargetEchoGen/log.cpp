@@ -25,6 +25,16 @@ void Log::logToFile(const char *sourceFile, const char *functionName, const char
 
     out << buffer;
 }
+void Log::showStatusMessage(QWidget* parent, const QString& logText, const QString& dialogText) {
+    LOG_TO_FILE("Status Alert: %s", logText.toUtf8().constData());
+    QMessageBox msgBox(parent);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText(dialogText);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+
+    LOG_TO_FILE("Closed status dialog: %s", dialogText.toUtf8().constData());
+}
 void Log::logToFileOnlyData(const char *format, ...) {
     QFile file(LogFileName);
     if (!file.open(QIODevice::Append | QIODevice::Text)) {
