@@ -38,8 +38,6 @@ DeviceSetup::DeviceSetup(QWidget *parent)
     ui->lineEdit_reg_wr_addr3->setValidator(hexValidator);
     ui->lineEdit_reg_wr_addr4->setValidator(hexValidator);
 
-
-
 }
 
 DeviceSetup::~DeviceSetup()
@@ -119,7 +117,6 @@ void DeviceSetup::readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEdit
     } else {
         LOG_TO_FILE("ERROR: Unable to send data to udp socket.");
     }
-
     delete byArrPkt;
     LOG_TO_FILE(":Exit==>");
 }

@@ -18,8 +18,9 @@ typedef unsigned char uchar;
 #define SEND_MAGIC_BYTE_new  0xEE77
 #define RECV_MAGIC_BYTE_new  0xAA88
 
-#define SEND_MAGIC_BYTE 0xEE77
-#define RCEV_MAGIC_BYTE 0xAA55
+#define SEND_MAGIC_BYTE 0xCCAABBEE
+
+#define RCEV_MAGIC_BYTE 0xCCBBDDFF
 
 #include <string.h>
 #include <stdio.h>

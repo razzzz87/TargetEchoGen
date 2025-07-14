@@ -58,48 +58,40 @@ ushort Proto::mPktBulkWrite(uint a_nRegisterAddress, char *a_byBuff, uint a_nBuf
 
 ushort Proto::mPktRegWrite(uint a_nRegisterAddress, uint a_nRegisterData, char** a_byArrPacket)
 {
-    *a_byArrPacket	=	new char[16];
+    const ushort PACKET_SIZE = 16;
+    *a_byArrPacket = new char[PACKET_SIZE];
 
-    m_nPacketLength =   0;
-    char *byArrPacket;
-    byArrPacket	=	*a_byArrPacket;
+    m_nPacketLength = 0;
+    char* byArrPacket = *a_byArrPacket;
+    memset(byArrPacket, '\0', PACKET_SIZE);
 
-    memset(byArrPacket,'\0',16);
+    // Magic Sync Byte (4 bytes)
+    uint nSync = SEND_MAGIC_BYTE;
+    uchar* pchSync = (uchar*)&nSync;
+    mMemCpy(byArrPacket, pchSync, 4);
+    m_nPacketLength += 4;
 
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
-    uchar *pchMagicByte;
-    pchMagicByte =  (uchar *) &nMagicByte;
-    mMemCpy(byArrPacket,pchMagicByte,2);
-    m_nPacketLength +=  2;
+    // Packet Length (2 bytes)
+    ushort nLen = PACKET_SIZE;
+    uchar* pchPktLen = (uchar*)&nLen;
+    mMemCpy(byArrPacket + m_nPacketLength, pchPktLen, 2);
+    m_nPacketLength += 2;
 
-    //length bytes (2 bytes)
+    // Command (2 bytes)
+    ushort cmd = CMD_REG_WRITE;
+    uchar* pchCmd = (uchar*)&cmd;
+    mMemCpy(byArrPacket + m_nPacketLength, pchCmd, 2);
+    m_nPacketLength += 2;
 
+    // Register Address (4 bytes)
+    uchar* pchRegisterAddress = (uchar*)&a_nRegisterAddress;
+    mMemCpy(byArrPacket + m_nPacketLength, pchRegisterAddress, 4);
+    m_nPacketLength += 4;
 
-    ushort nLen	=	16;
-    uchar *pchPktLen	=	(uchar *) &nLen;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchPktLen,2);
-    m_nPacketLength +=  2;
-
-    //cmnd bytes (4 bytes)
-    char chCommand[4];
-    chCommand[0]	=	'\0';
-    chCommand[1]	=	CMD_REG_WRITE; //0x1:RW, 0x2:RR, 0x3:Action
-    chCommand[2]	=	'\0';
-    chCommand[3]	=	'\0';
-
-    memcpy(byArrPacket	+	m_nPacketLength, chCommand,4);
-
-    m_nPacketLength +=  4;
-
-    uchar *pchRegisterAddress;
-    pchRegisterAddress  =   (uchar *)&a_nRegisterAddress;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchRegisterAddress,4);
-    m_nPacketLength +=  4;
-
-    uchar *pchRegisterData;
-    pchRegisterData  =   (uchar *)&a_nRegisterData;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchRegisterData,4);
-    m_nPacketLength +=  4;
+    // Register Data (4 bytes)
+    uchar* pchRegisterData = (uchar*)&a_nRegisterData;
+    mMemCpy(byArrPacket + m_nPacketLength, pchRegisterData, 4);
+    m_nPacketLength += 4;
 
     return m_nPacketLength;
 }
@@ -149,43 +141,39 @@ ushort Proto::mPktBulkRead(uint a_nRegisterAddress, uint a_nPacketLen, char **a_
 
 ushort Proto::mPktRegRead(uint a_nRegisterAddress, char **a_byArrPacket)
 {
-    *a_byArrPacket	=	new char[16];
+    const int PACKET_SIZE = 16;
+    *a_byArrPacket = new char[PACKET_SIZE];
 
-    m_nPacketLength =   0;
-    char *byArrPacket;
-    byArrPacket	=	*a_byArrPacket;
+    m_nPacketLength = 0;
+    char *byArrPacket = *a_byArrPacket;
+    memset(byArrPacket, '\0', PACKET_SIZE);
 
-    memset(byArrPacket,'\0',16);
+    // Sync/magic bytes (4 bytes): CCAABBEE
+    uint nSync = SEND_MAGIC_BYTE;
+    uchar *pchSync = (uchar *)&nSync;
+    mMemCpy(byArrPacket, pchSync, 4);
+    m_nPacketLength += 4;
 
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
-    uchar *pchMagicByte;
-    pchMagicByte =  (uchar *) &nMagicByte;
-    mMemCpy(byArrPacket,pchMagicByte,2);
-    m_nPacketLength +=  2;
+    // Length (2 bytes)
+    ushort nLen = PACKET_SIZE;
+    uchar *pchPktLen = (uchar *)&nLen;
+    mMemCpy(byArrPacket + m_nPacketLength, pchPktLen, 2);
+    m_nPacketLength += 2;
 
-    //length bytes (2 bytes)
-    ushort nLen	=	16;
-    uchar *pchPktLen	=	(uchar *) &nLen;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchPktLen,2);
-    m_nPacketLength +=  2;
+    // Command (2 bytes)
+    ushort cmd = CMD_REG_READ;
+    uchar *pchCmd = (uchar *)&cmd;
+    mMemCpy(byArrPacket + m_nPacketLength, pchCmd, 2);
+    m_nPacketLength += 2;
 
-    //cmnd bytes (4 bytes)
-    char chCommand[4];
-    chCommand[0]	=	'\0';
-    chCommand[1]	=	CMD_REG_READ; //0x1:RW, 0x2:RR, 0x3:Action
-    chCommand[2]	=	'\0';
-    chCommand[3]	=	'\0';
+    // Register Address (4 bytes)
+    uchar *pchRegAddr = (uchar *)&a_nRegisterAddress;
+    mMemCpy(byArrPacket + m_nPacketLength, pchRegAddr, 4);
+    m_nPacketLength += 4;
 
-    memcpy(byArrPacket	+	m_nPacketLength, chCommand,4);
-    m_nPacketLength +=  4;
-
-    uchar *pchRegisterAddress;
-    pchRegisterAddress  =   (uchar *)&a_nRegisterAddress;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchRegisterAddress,4);
-    m_nPacketLength +=  4;
-
-    memset(byArrPacket	+	m_nPacketLength,'\0',4);
-    m_nPacketLength +=  4;
+    // Padding (4 bytes)
+    memset(byArrPacket + m_nPacketLength, '\0', 4);
+    m_nPacketLength += 4;
 
     return m_nPacketLength;
 }
@@ -464,36 +452,32 @@ int Proto::mPktParse(char *a_byArrData)
     return 0; //successful
 }
 
-
-//#define SEND_MAGIC_BYTE 0xEE77
-#define RCEV_MAGIC_BYTE 0xAA55
-
 uint Proto::mParseResponsePkt(const char byArrPktResp[16]) {
     size_t nParser = 0;
 
-    // Extract magic bytes (big endian)
-    uint16_t m_nMagicBytes = (static_cast<uint8_t>(byArrPktResp[nParser]) << 8) |
-                             static_cast<uint8_t>(byArrPktResp[nParser + 1]);
-    nParser += 2;
+    // Extract magic bytes (4 bytes, big endian)
+    uint m_nMagicBytes = (static_cast<uint8_t>(byArrPktResp[nParser]) << 24) |
+                         (static_cast<uint8_t>(byArrPktResp[nParser + 1]) << 16) |
+                         (static_cast<uint8_t>(byArrPktResp[nParser + 2]) << 8) |
+                         static_cast<uint8_t>(byArrPktResp[nParser + 3]);
+    nParser += 4;
 
-    if (m_nMagicBytes != SEND_MAGIC_BYTE && m_nMagicBytes != RCEV_MAGIC_BYTE) {
+    if (m_nMagicBytes != RCEV_MAGIC_BYTE) {
         LOG_TO_FILE("Wrong Magic byte");
         return 0;
     }
 
-    // Extract packet length
+    // Extract packet length (2 bytes, big endian)
     uint16_t m_nPacketLength = (static_cast<uint8_t>(byArrPktResp[nParser]) << 8) |
                                static_cast<uint8_t>(byArrPktResp[nParser + 1]);
     nParser += 2;
 
     if (m_nPacketLength != 16) return 0;
 
-    // Skip NULL byte
-    nParser += 1;
-
-    // Read command byte (unused here)
-    uint8_t m_chCommand = static_cast<uint8_t>(byArrPktResp[nParser]);
-    nParser += 3; // Skip command and 2 reserved bytes
+    // Extract command (2 bytes, if applicable)
+    uint16_t m_nCommand = (static_cast<uint8_t>(byArrPktResp[nParser]) << 8) |
+                          static_cast<uint8_t>(byArrPktResp[nParser + 1]);
+    nParser += 2;
 
     // Extract status (4 bytes, big endian)
     uint32_t m_nStatus = (static_cast<uint8_t>(byArrPktResp[nParser]) << 24) |
@@ -502,11 +486,12 @@ uint Proto::mParseResponsePkt(const char byArrPktResp[16]) {
                          static_cast<uint8_t>(byArrPktResp[nParser + 3]);
     nParser += 4;
 
-    // Extract register data (next 4 bytes)
+    // Extract register data (last 4 bytes)
     uint32_t m_nRegisterData = (static_cast<uint8_t>(byArrPktResp[nParser]) << 24) |
                                (static_cast<uint8_t>(byArrPktResp[nParser + 1]) << 16) |
                                (static_cast<uint8_t>(byArrPktResp[nParser + 2]) << 8) |
                                static_cast<uint8_t>(byArrPktResp[nParser + 3]);
+
     return m_nRegisterData;
 }
 
