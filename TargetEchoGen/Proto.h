@@ -11,16 +11,13 @@ typedef unsigned char uchar;
 #define CMD_REG_WRITE       0x01
 #define CMD_REG_READ        0x02
 #define CMD_ACTION          0x03
-
 #define CMD_GET_PROP        0x05
 
-
-#define SEND_MAGIC_BYTE_new  0xEE77
-#define RECV_MAGIC_BYTE_new  0xAA88
-
 #define SEND_MAGIC_BYTE 0xCCAABBEE
-
 #define RCEV_MAGIC_BYTE 0xCCBBDDFF
+#define CMD_BULK_WRITE 0x0001
+#define CMD_BULK_READ 0x0002
+
 
 #include <string.h>
 #include <stdio.h>

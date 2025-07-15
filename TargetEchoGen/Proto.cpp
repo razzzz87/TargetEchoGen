@@ -12,46 +12,35 @@ Proto::Proto()
 
 ushort Proto::mPktBulkWrite(uint a_nRegisterAddress, char *a_byBuff, uint a_nBuffLen, char** a_byArrPacket)
 {
-    int nPacketInitialLen	=	12	+	a_nBuffLen;
-    *a_byArrPacket	=	new char[nPacketInitialLen];
+    ushort packetLen = 12 + a_nBuffLen;  // Sync (4) + Len (2) + Cmd (2) + Addr (4) + Payload
+    *a_byArrPacket = new char[packetLen];
+    char *byArrPacket = *a_byArrPacket;
+    memset(byArrPacket, '\0', packetLen);
 
-    m_nPacketLength =   0;
-    char *byArrPacket;
-    byArrPacket	=	*a_byArrPacket;
+    m_nPacketLength = 0;
 
-    memset(byArrPacket,'\0',nPacketInitialLen);
+    // Sync (4 bytes)
+    uint sync = SEND_MAGIC_BYTE;
+    mMemCpy(byArrPacket, (uchar*)&sync, 4);
+    m_nPacketLength += 4;
 
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
-    uchar *pchMagicByte;
-    pchMagicByte =  (uchar *) &nMagicByte;
-    mMemCpy(byArrPacket,pchMagicByte,2);
-    m_nPacketLength +=  2;
+    // Length (2 bytes)
+    ushort nLen = packetLen;
+    mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&nLen, 2);
+    m_nPacketLength += 2;
 
-    //length bytes (2 bytes)
-    ushort nLen	=	nPacketInitialLen;
-    uchar *pchPktLen	=	(uchar *) &nLen;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchPktLen,2);
-    m_nPacketLength +=  2;
+    // Command (2 bytes)
+    ushort cmd = CMD_BULK_WRITE;
+    mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&cmd, 2);
+    m_nPacketLength += 2;
 
-    //cmnd bytes (4 bytes)
-    char chCommand[4];
-    chCommand[0]	=	'\0';
-    chCommand[1]	=	CMD_REG_WRITE; //0x1:RW, 0x2:RR, 0x3:Action
-    chCommand[2]	=	'\0';
-    chCommand[3]	=	'\0';
+    // Register Address (4 bytes)
+    mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&a_nRegisterAddress, 4);
+    m_nPacketLength += 4;
 
-    memcpy(byArrPacket	+	m_nPacketLength, chCommand,4);
-
-    m_nPacketLength +=  4;
-
-    uchar *pchRegisterAddress;
-    pchRegisterAddress  =   (uchar *)&a_nRegisterAddress;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchRegisterAddress,4);
-    m_nPacketLength +=  4;
-
-    memcpy(byArrPacket	+	m_nPacketLength, a_byBuff, a_nBuffLen);
-
-    m_nPacketLength	+=	a_nBuffLen;
+    // Payload
+    memcpy(byArrPacket + m_nPacketLength, a_byBuff, a_nBuffLen);
+    m_nPacketLength += a_nBuffLen;
 
     return m_nPacketLength;
 }
@@ -96,45 +85,42 @@ ushort Proto::mPktRegWrite(uint a_nRegisterAddress, uint a_nRegisterData, char**
     return m_nPacketLength;
 }
 
+#define SYNC_BYTE 0xCCAABBEE
+#define CMD_BULK_READ 0x0001
+
 ushort Proto::mPktBulkRead(uint a_nRegisterAddress, uint a_nPacketLen, char **a_byArrPacket)
 {
-    *a_byArrPacket	=	new char[16];
+    ushort packetLen = static_cast<ushort>(a_nPacketLen);
+    *a_byArrPacket = new char[packetLen];
+    char *byArrPacket = *a_byArrPacket;
+    memset(byArrPacket, '\0', packetLen);
 
-    m_nPacketLength =   0;
-    char *byArrPacket;
-    byArrPacket	=	*a_byArrPacket;
+    m_nPacketLength = 0;
 
-    memset(byArrPacket,'\0',16);
+    // 🧩 Sync Byte (4 bytes)
+    uint sync = SYNC_BYTE;
+    mMemCpy(byArrPacket, (uchar*)&sync, 4);
+    m_nPacketLength += 4;
 
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
-    uchar *pchMagicByte;
-    pchMagicByte =  (uchar *) &nMagicByte;
-    mMemCpy(byArrPacket,pchMagicByte,2);
-    m_nPacketLength +=  2;
+    // 📦 Length (2 bytes)
+    mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&packetLen, 2);
+    m_nPacketLength += 2;
 
-    //length bytes (2 bytes)
-    ushort nLen	=	(ushort) a_nPacketLen;
-    uchar *pchPktLen	=	(uchar *) &nLen;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchPktLen,2);
-    m_nPacketLength +=  2;
+    // 🧭 Command (2 bytes)
+    ushort cmd = CMD_BULK_READ;
+    mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&cmd, 2);
+    m_nPacketLength += 2;
 
-    //cmnd bytes (4 bytes)
-    char chCommand[4];
-    chCommand[0]	=	'\0';
-    chCommand[1]	=	CMD_REG_READ; //0x1:RW, 0x2:RR, 0x3:Action
-    chCommand[2]	=	'\0';
-    chCommand[3]	=	'\0';
+    // 🔎 Address (4 bytes)
+    mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&a_nRegisterAddress, 4);
+    m_nPacketLength += 4;
 
-    memcpy(byArrPacket	+	m_nPacketLength, chCommand,4);
-    m_nPacketLength +=  4;
-
-    uchar *pchRegisterAddress;
-    pchRegisterAddress  =   (uchar *)&a_nRegisterAddress;
-    mMemCpy(byArrPacket	+	m_nPacketLength,pchRegisterAddress,4);
-    m_nPacketLength +=  4;
-
-    memset(byArrPacket	+	m_nPacketLength,'\0',4);
-    m_nPacketLength +=  4;
+    // 📥 Placeholder or padding (remaining)
+    ushort remaining = packetLen - m_nPacketLength;
+    if (remaining > 0) {
+        memset(byArrPacket + m_nPacketLength, '\0', remaining);
+        m_nPacketLength += remaining;
+    }
 
     return m_nPacketLength;
 }
