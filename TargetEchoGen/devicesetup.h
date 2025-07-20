@@ -7,6 +7,7 @@
 #include "udppl1gcon.h"
 #include "udppl_10gcon.h"
 #include <QLineEdit>
+#include "filesender.h"
 
 namespace Ui {
 class DeviceSetup;
@@ -33,11 +34,14 @@ private slots:
     void on_pushButton_device_setup_wr_reg3_clicked();
     void on_pushButton_device_setup_wr_reg4_clicked();
 
+    void on_pushButton_devsetup_mem_read_start_clicked();
+
 private:
     Ui::DeviceSetup *ui;
     UDP_PS1G_Con *EthPs01G;
     UDP_PL10G_Con *EthPl10G;
     UDP_PL1G_Con *EthPl01G;
+    FileSender  *UDPSender;
     Proto objProto;
     QHostAddress ipAddress;
     quint16 port;

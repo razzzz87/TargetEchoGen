@@ -24,6 +24,10 @@ public:
     QWidget *device_setup;
     QGroupBox *ddr_groupbox;
     ConnectionType *conn;
+    UDP_PS1G_Con *EthPs01G;
+    UDP_PL10G_Con *EthPl10G;
+    UDP_PL1G_Con *EthPl01G;
+
     void load_files();
 private slots:
     void on_pushButton_conn_settings_clicked();

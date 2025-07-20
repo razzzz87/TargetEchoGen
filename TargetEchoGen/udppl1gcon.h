@@ -19,6 +19,11 @@ class UDP_PL1G_Con : public QObject
     Q_OBJECT
 
 public:
+    QString remote_ip;
+    qint16 remote_port;
+    QString host_ip;
+    qint16 host_port;
+
     static UDP_PL1G_Con& getInstance() {
         static UDP_PL1G_Con instance;
         return instance;

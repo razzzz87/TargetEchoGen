@@ -57,7 +57,6 @@ int UDP_PS1G_Con::sendMessage(const char* message,int len, const QString &ipAddr
 }
 int UDP_PS1G_Con::readResponsPacket(char* recvdata,int len, QHostAddress ipAddress, quint16 port)
 {
-    LOG_TO_FILE(":Entry==>");
     qint64 bytesRead = -1;
     if(udpSocket->waitForReadyRead()){
         if(udpSocket->hasPendingDatagrams()){
@@ -66,16 +65,14 @@ int UDP_PS1G_Con::readResponsPacket(char* recvdata,int len, QHostAddress ipAddre
                 LOG_TO_FILE("Failed to send datagram.");
             } else {
                 LOG_TO_FILE("Bytes Read: %ld ",bytesRead);
-                Log::printHexRecvBuffer(recvdata,len);
+                Log::printHexRecvBuffer(recvdata,16);
             }
         }
     }else{
         LOG_TO_FILE("Timeout waiting for datagram.");
     }
-    LOG_TO_FILE(":Exit==>");
     return bytesRead;
 }
-
 
 void UDP_PS1G_Con::sendMessage(const QString &message, const QString &ipAddress, quint16 port)
 {

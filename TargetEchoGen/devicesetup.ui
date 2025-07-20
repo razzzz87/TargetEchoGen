@@ -801,28 +801,28 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton_2">
+         <widget class="QRadioButton" name="radioButton_device_setup_pl_1g">
           <property name="text">
            <string>PL 1G</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton_3">
+         <widget class="QRadioButton" name="radioButton_device_setup_pl_10g">
           <property name="text">
            <string>PL 10G</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton_4">
+         <widget class="QRadioButton" name="radioButton_device_setup_ps_serial">
           <property name="text">
            <string>PS Serial</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="radioButton_5">
+         <widget class="QRadioButton" name="radioButton_device_setup_pl_serial">
           <property name="text">
            <string>PL Serial</string>
           </property>
@@ -881,7 +881,7 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_4">
                <item row="0" column="2">
-                <widget class="QPushButton" name="pushButton_16">
+                <widget class="QPushButton" name="pushButton_device_setup__file_mem_read">
                  <property name="text">
                   <string/>
                  </property>
@@ -909,7 +909,7 @@
                 </widget>
                </item>
                <item row="0" column="5">
-                <widget class="QPushButton" name="pushButton_20">
+                <widget class="QPushButton" name="pushButton_devsetup_mem_read_start">
                  <property name="text">
                   <string>Read</string>
                  </property>

@@ -23,11 +23,14 @@ MainWindow::MainWindow(QWidget *parent)
     conn = new ConnectionType(this);
     DeviceSetup *deviceSetup = new DeviceSetup();
 
+    EthPs01G = &UDP_PS1G_Con::getInstance();
+    EthPl10G = &UDP_PL10G_Con::getInstance();
+    EthPl01G = &UDP_PL1G_Con::getInstance();
+
     ui->tabWidgetMainTab->addTab(new FileProcessing(),"File processing");
     ui->tabWidgetMainTab->addTab(deviceSetup,"Device setup");
     ui->tabWidgetMainTab->addTab(new SelfTest(),"Self Test");
     ui->tabWidgetMainTab->addTab(new Spectrum(),"Spectrum Analyzer");
-
 
     ui->tabWidget_subTab->addTab(new RF(),"RF");
 

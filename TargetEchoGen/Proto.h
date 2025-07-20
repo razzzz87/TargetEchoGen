@@ -15,6 +15,7 @@ typedef unsigned char uchar;
 
 #define SEND_MAGIC_BYTE 0xCCAABBEE
 #define RCEV_MAGIC_BYTE 0xCCBBDDFF
+
 #define CMD_BULK_WRITE 0x0001
 #define CMD_BULK_READ 0x0002
 
@@ -75,7 +76,7 @@ public:
 
     int mPktParse(char *byArrPacket);
     uint mParseResponsePkt(const char byArrPktResp[16]);
-    int mPktParseBulkRead(char *byArrPacket);
+    int mPktParseBulkRead(const char *byArrPktResp);
     ushort mGetPacketLength();
     uchar  mGetCommand();
     uint   mGetStatus();
@@ -94,7 +95,7 @@ public:
     void mRevStr(char *src, size_t n);
     ushort  m_nPacketLength;
 private:
-    ushort  m_nMagicBytes;
+    uint  m_nMagicBytes;
     uchar   m_chCommand;
 
     uint    m_nRegisterAddress;

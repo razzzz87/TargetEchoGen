@@ -4,6 +4,7 @@
 #include <QHostAddress>
 #include "log.h"
 #include "Proto.h"
+#include "filesender.h"
 
 DeviceSetup::DeviceSetup(QWidget *parent)
     : QWidget(parent)
@@ -14,6 +15,7 @@ DeviceSetup::DeviceSetup(QWidget *parent)
     EthPs01G = &UDP_PS1G_Con::getInstance();
     EthPl10G = &UDP_PL10G_Con::getInstance();
     EthPl01G = &UDP_PL1G_Con::getInstance();
+    UDPSender = new FileSender(this);
 
     QRegularExpression hexRegex("^(0x)?[0-9A-Fa-f]{1,8}$"); // max 8 hex digits
     QRegularExpressionValidator* hexValidator = new QRegularExpressionValidator(hexRegex, this);
@@ -169,5 +171,34 @@ void DeviceSetup::on_pushButton_device_setup_wr_reg3_clicked()
 void DeviceSetup::on_pushButton_device_setup_wr_reg4_clicked()
 {
     WriteRegisterValue(ui->lineEdit_reg_wr_addr4, ui->lineEdit_wr_reg_val4);
+}
+
+void DeviceSetup::on_pushButton_devsetup_mem_read_start_clicked()
+{
+    // if (!EthPs01G->getConStatus()) {
+    //     Log::showStatusMessage(this, "Device not connected", "Device not connected");
+    //     return;
+    // }
+    if(ui->radioButton_device_setup_ps_1g->isChecked()){
+        UDPSender->setupDevice(EthPs01G);
+        UDPSender->configure(EthPs01G->remote_ip,EthPs01G->remote_port,"file.txt",4096);
+        LOG_TO_FILE("PS 01G selected");
+        UDPSender->start();
+    }
+    // else if(ui->radioButton_device_setup_pl_1g->isChecked()){
+    //     UDPSender->setupDevice(EthPl01G);
+    //     UDPSender->configure(EthPl01G->remote_ip,EthPl01G->remote_port,"file.txt",5000);
+    //     LOG_TO_FILE("PL 01G selected");
+    //     //UDPSender->start();
+    // }
+    // else if(ui->radioButton_device_setup_pl_10g->isChecked()){
+    //     UDPSender->setupDevice(EthPl10G);
+    //     UDPSender->configure(EthPl01G->remote_ip,EthPl01G->remote_port,"file.txt",5000);
+    //     LOG_TO_FILE("PL 10G selected");
+    //     //UDPSender->start();
+    // }else{
+
+    // }
+
 }
 

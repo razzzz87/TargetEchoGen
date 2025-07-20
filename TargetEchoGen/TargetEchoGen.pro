@@ -35,6 +35,7 @@ SOURCES += \
     udppl_10gcon.cpp
 
 HEADERS += \
+    IUDPConnection.h \
     Proto.h \
     connectiontype.h \
     devicesetup.h \

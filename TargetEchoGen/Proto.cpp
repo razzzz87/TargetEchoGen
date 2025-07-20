@@ -85,9 +85,6 @@ ushort Proto::mPktRegWrite(uint a_nRegisterAddress, uint a_nRegisterData, char**
     return m_nPacketLength;
 }
 
-#define SYNC_BYTE 0xCCAABBEE
-#define CMD_BULK_READ 0x0001
-
 ushort Proto::mPktBulkRead(uint a_nRegisterAddress, uint a_nPacketLen, char **a_byArrPacket)
 {
     ushort packetLen = static_cast<ushort>(a_nPacketLen);
@@ -97,31 +94,31 @@ ushort Proto::mPktBulkRead(uint a_nRegisterAddress, uint a_nPacketLen, char **a_
 
     m_nPacketLength = 0;
 
-    // 🧩 Sync Byte (4 bytes)
-    uint sync = SYNC_BYTE;
+    //Sync Byte (4 bytes)
+    uint sync = SEND_MAGIC_BYTE;
     mMemCpy(byArrPacket, (uchar*)&sync, 4);
     m_nPacketLength += 4;
 
-    // 📦 Length (2 bytes)
+    //Length (2 bytes)
     mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&packetLen, 2);
     m_nPacketLength += 2;
 
-    // 🧭 Command (2 bytes)
-    ushort cmd = CMD_BULK_READ;
+    //Command (2 bytes)
+    //ushort cmd = CMD_BULK_READ;
+    ushort cmd = 0x1102;
     mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&cmd, 2);
     m_nPacketLength += 2;
 
-    // 🔎 Address (4 bytes)
+    //Address (4 bytes)
     mMemCpy(byArrPacket + m_nPacketLength, (uchar*)&a_nRegisterAddress, 4);
     m_nPacketLength += 4;
 
-    // 📥 Placeholder or padding (remaining)
+    //Placeholder or padding (remaining)
     ushort remaining = packetLen - m_nPacketLength;
     if (remaining > 0) {
         memset(byArrPacket + m_nPacketLength, '\0', remaining);
         m_nPacketLength += remaining;
     }
-
     return m_nPacketLength;
 }
 
@@ -163,7 +160,7 @@ ushort Proto::mPktRegRead(uint a_nRegisterAddress, char **a_byArrPacket)
 
     return m_nPacketLength;
 }
-
+#if 0
 ushort Proto::mPktBulkReadUART(uint a_nRegisterAddress, uint a_nRegData, uint a_nPacketLen, char **a_byArrPacket)
 {
     *a_byArrPacket	=	new char[16];
@@ -174,7 +171,7 @@ ushort Proto::mPktBulkReadUART(uint a_nRegisterAddress, uint a_nRegData, uint a_
 
     memset(byArrPacket,'\0',16);
 
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
+    ushort nMagicByte =   SEND_MAGIC_BYTE;
     uchar *pchMagicByte;
     pchMagicByte =  (uchar *) &nMagicByte;
     mMemCpy(byArrPacket,pchMagicByte,2);
@@ -214,7 +211,7 @@ ushort Proto::mPktBulkWriteUART(uint a_nRegisterAddress, uint a_nRegData, uint a
     m_nPacketLength =   0;
     memset(byArrPacket,'\0',16);
 
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
+    ushort nMagicByte =   SEND_MAGIC_BYTE;
     uchar *pchMagicByte;
     pchMagicByte =  (uchar *) &nMagicByte;
     mMemCpy(byArrPacket,pchMagicByte,2);
@@ -248,107 +245,7 @@ ushort Proto::mPktBulkWriteUART(uint a_nRegisterAddress, uint a_nRegData, uint a
 
     return m_nPacketLength;
 }
-
-/*ushort Proto::mPktAction(Proto::ACTION_TYPE a_enActionType, QByteArray &byArrPacket)
-{
-    m_nPacketLength =   0;
-
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
-    uchar *pchMagicByte;
-    pchMagicByte =  (uchar *) &nMagicByte;
-
-    //send magic bytes (2 bytes)
-    byArrPacket.append(pchMagicByte[0]);
-    byArrPacket.append(pchMagicByte[1]);
-    m_nPacketLength +=  2;
-
-    //length bytes (2 bytes)
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    m_nPacketLength +=  2;
-
-    //cmnd bytes (4 bytes)
-    byArrPacket.append('\0');
-    byArrPacket.append(CMD_ACTION);     //0x1:RW, 0x2:RR, 0x3:Action
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    m_nPacketLength +=  4;
-
-    unsigned char chActionType  =   0x01    <<  (int)a_enActionType;
-    byArrPacket.append(chActionType);
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    m_nPacketLength +=  4;
-
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    m_nPacketLength +=  4;
-
-    uchar *pchPktLen;
-    pchPktLen   =   (uchar *)&m_nPacketLength;
-    byArrPacket[2]  =   pchPktLen[0];
-    byArrPacket[3]  =   pchPktLen[1];
-
-    return m_nPacketLength;
-}
-
-ushort Proto::mPktSetProp(Proto::SET_PROP a_enProp, uint a_nValue, QByteArray &byArrPacket)
-{
-    m_nPacketLength =   0;
-
-    ushort nMagicByte =   SEND_MAGIC_BYTE_new;
-    uchar *pchMagicByte;
-    pchMagicByte =  (uchar *) &nMagicByte;
-
-    //send magic bytes (2 bytes)
-    byArrPacket.append(pchMagicByte[0]);
-    byArrPacket.append(pchMagicByte[1]);
-    m_nPacketLength +=  2;
-
-    //length bytes (2 bytes)
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    m_nPacketLength +=  2;
-
-    //cmnd bytes (4 bytes)
-    byArrPacket.append('\0');
-    byArrPacket.append(CMD_GET_PROP);     //0x1:RW, 0x2:RR, 0x3:Action
-    byArrPacket.append('\0');
-    byArrPacket.append('\0');
-    m_nPacketLength +=  4;
-
-    uchar *pchPropType;
-    uint nPropType      =   (int)a_enProp;
-    pchPropType  =   (uchar *)&nPropType;
-    byArrPacket.append(pchPropType[0]);
-    byArrPacket.append(pchPropType[1]);
-    byArrPacket.append(pchPropType[2]);
-    byArrPacket.append(pchPropType[3]);
-    m_nPacketLength +=  4;
-
-    uchar *pchData;
-    pchData  =   (uchar *)&a_nValue;
-    byArrPacket.append(pchData[0]);
-    byArrPacket.append(pchData[1]);
-    byArrPacket.append(pchData[2]);
-    byArrPacket.append(pchData[3]);
-    m_nPacketLength +=  4;
-
-    uchar *pchPktLen;
-    pchPktLen   =   (uchar *)&m_nPacketLength;
-    byArrPacket[2]  =   pchPktLen[0];
-    byArrPacket[3]  =   pchPktLen[1];
-
-    return m_nPacketLength;
-}
-
-ushort Proto::mPktReset(QByteArray &byArrPacket)
-{
-
-}*/
+#endif
 int Proto::mPktParse(char *a_byArrData)
 {
     qDebug()<<"PArse packet";
@@ -369,7 +266,7 @@ int Proto::mPktParse(char *a_byArrData)
 
     m_nMagicBytes               =   *((uint *)chArrMagicBytes);
 
-    if((m_nMagicBytes    ==  SEND_MAGIC_BYTE_new) |   (m_nMagicBytes   ==  RECV_MAGIC_BYTE_new))
+    if((m_nMagicBytes    ==  SEND_MAGIC_BYTE) |   (m_nMagicBytes   ==  RCEV_MAGIC_BYTE))
     {
         LOG_TO_FILE("Parse packet2");
 
@@ -439,8 +336,8 @@ int Proto::mPktParse(char *a_byArrData)
 }
 
 uint Proto::mParseResponsePkt(const char byArrPktResp[16]) {
-    size_t nParser = 0;
 
+    size_t nParser = 0;
     // Extract magic bytes (4 bytes, big endian)
     uint m_nMagicBytes = (static_cast<uint8_t>(byArrPktResp[nParser]) << 24) |
                          (static_cast<uint8_t>(byArrPktResp[nParser + 1]) << 16) |
@@ -481,89 +378,43 @@ uint Proto::mParseResponsePkt(const char byArrPktResp[16]) {
     return m_nRegisterData;
 }
 
-int Proto::mPktParseBulkRead(char *a_byArrData)
+int Proto::mPktParseBulkRead(const char* a_byArrData)
 {
-    if(a_byArrData  ==  NULL)
+    if (!a_byArrData) {
+        LOG_TO_FILE("Input data pointer is NULL");
         return -5;
-    //qDebug()<<"Packet parse step 1";
-    m_nPacketLength             =   0;
-    int nParser                 =   -1;
-    uchar chArrMagicBytes[2]    =   {'\0'};
-    nParser++;
-    chArrMagicBytes[0]          =   a_byArrData[nParser];
-    nParser++;
-    chArrMagicBytes[1]          =   a_byArrData[nParser];
-
-#ifdef BIG_ENDIAN
-    mRevStr(chArrMagicBytes, 2);
-#endif
-
-    m_nMagicBytes               =   *((uint *)chArrMagicBytes);
-    //qDebug("Magic Byte %x",m_nMagicBytes);
-    if((m_nMagicBytes    ==  SEND_MAGIC_BYTE_new) |   (m_nMagicBytes   ==  RECV_MAGIC_BYTE_new))
-    {
-        uchar chArrLength[2]    =   {'\0'};
-        nParser++;
-        chArrLength[0]    =   a_byArrData[nParser];
-        nParser++;
-        chArrLength[1]    =   a_byArrData[nParser];
-
-#ifdef BIG_ENDIAN
-        mRevStr(chArrLength,2);
-#endif
-
-        m_nPacketLength         =   *((uint *)chArrLength);
-
-        //TBD: Lenght could be any size
-        //if(m_nPacketLength  !=  16)
-        //    return -2;
-
-        nParser++;  //NULL Byte
-
-        nParser++;
-        m_chCommand =   a_byArrData[nParser];
-
-        nParser+=2;
-
-        uchar chArrStatus[4]    =   {'\0'};
-        nParser++;
-        chArrStatus[0]          =   a_byArrData[nParser];
-        nParser++;
-        chArrStatus[1]          =   a_byArrData[nParser];
-        nParser++;
-        chArrStatus[2]          =   a_byArrData[nParser];
-        nParser++;
-        chArrStatus[3]          =   a_byArrData[nParser];
-
-#ifdef BIG_ENDIAN
-        mRevStr(chArrStatus, 4);
-#endif
-
-        m_nStatus               =   *((uint *)chArrStatus);
-
-        uchar chArrValue[4]     =   {'\0'};
-        nParser++;
-        chArrValue[0]           =   a_byArrData[nParser];
-        nParser++;
-        chArrValue[1]           =   a_byArrData[nParser];
-        nParser++;
-        chArrValue[2]           =   a_byArrData[nParser];
-        nParser++;
-        chArrValue[3]           =   a_byArrData[nParser];
-
-#ifdef BIG_ENDIAN
-        mRevStr(chArrValue, 4);
-#endif
-
-        m_nRegisterData         =   *((uint *)chArrValue);
-
-    }
-    else
-    {
-        return -1;  // wrong magic byte
     }
 
-    return 0; //successful
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(a_byArrData);
+    int offset = 0;
+    //Magic bytes (Big-endian decode)
+    m_nMagicBytes = (unsigned int)((uint32_t(data[0]) << 24) | (uint32_t(data[1]) << 16) | (uint32_t(data[2]) << 8)  | uint32_t(data[3]));
+    offset += 4;
+
+    if (m_nMagicBytes != RCEV_MAGIC_BYTE) {
+        LOG_TO_FILE("Invalid Magic Byte: 0x%08X", m_nMagicBytes);
+        return -1;
+    }
+
+    //Length (2 bytes, Big-endian)
+    m_nPacketLength = (uint16_t(data[offset]) << 8) |
+                      uint16_t(data[offset + 1]);
+    offset += 2;
+
+    // ✅ Command (1 byte)
+    m_chCommand = data[offset];
+    offset += 1;
+
+    // Reserved byte (skip)
+    offset += 1;
+    //Status (4 bytes)
+    m_nStatus = (uint32_t(data[offset]) << 24) |
+                (uint32_t(data[offset + 1]) << 16) |
+                (uint32_t(data[offset + 2]) << 8) |
+                uint32_t(data[offset + 3]);
+    offset += 4;
+    LOG_TO_FILE("Status: 0x%08X Packet parsing done. Final offset: %d",m_nStatus, offset);
+    return 0;
 }
 
 void Proto::mRevStr(char *src, size_t n)
