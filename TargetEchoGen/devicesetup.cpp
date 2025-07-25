@@ -4,7 +4,8 @@
 #include <QHostAddress>
 #include "log.h"
 #include "Proto.h"
-#include "filesender.h"
+#include "FileTransferAgent.h"
+
 
 DeviceSetup::DeviceSetup(QWidget *parent)
     : QWidget(parent)
@@ -15,7 +16,7 @@ DeviceSetup::DeviceSetup(QWidget *parent)
     EthPs01G = &UDP_PS1G_Con::getInstance();
     EthPl10G = &UDP_PL10G_Con::getInstance();
     EthPl01G = &UDP_PL1G_Con::getInstance();
-    UDPSender = new FileSender(this);
+    setupTransferAgent = new FileTransferAgent(this);
 
     QRegularExpression hexRegex("^(0x)?[0-9A-Fa-f]{1,8}$"); // max 8 hex digits
     QRegularExpressionValidator* hexValidator = new QRegularExpressionValidator(hexRegex, this);
@@ -23,6 +24,9 @@ DeviceSetup::DeviceSetup(QWidget *parent)
     ui->lineEdit_reg_read_addr2->setValidator(hexValidator);
     ui->lineEdit_reg_read_addr3->setValidator(hexValidator);
     ui->lineEdit_reg_read_addr4->setValidator(hexValidator);
+
+    QIntValidator* validator = new QIntValidator(0, 2147483647);
+    ui->lineEdit_mem_read_file_size->setValidator(validator);
 
     ui->lineEdit_reg_read_val1->setReadOnly(true);
     ui->lineEdit_reg_read_val2->setReadOnly(true);
@@ -40,6 +44,37 @@ DeviceSetup::DeviceSetup(QWidget *parent)
     ui->lineEdit_reg_wr_addr3->setValidator(hexValidator);
     ui->lineEdit_reg_wr_addr4->setValidator(hexValidator);
 
+    ui->lineEdit_devicesetup_mem_read_filename->setReadOnly(true);
+
+    // 🔄 Initialize QProgressDialog for percentage-based progress tracking
+    transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
+    transferProgress->setWindowModality(Qt::WindowModal);
+    transferProgress->setWindowTitle("File Transfer Progress");
+    transferProgress->setAutoClose(false);     // Keep open until transfer finishes
+    transferProgress->setAutoReset(false);     // Manual control over reset
+    transferProgress->setMinimumDuration(1000); // Avoid premature popup (1s)
+    transferProgress->reset();                 // Clear stale values
+    transferProgress->hide();                  // Hide until file transfer starts
+
+    // Connect cancel behavior just once
+    connect(transferProgress, &QProgressDialog::canceled, this, [=]() {
+        transferCanceled = true;
+        setupTransferAgent->abortFileWrite(true);
+        LOG_TO_FILE("User canceled the file transfer.");
+    });
+    connect(setupTransferAgent, &FileTransferAgent::progressUpdated,this, &DeviceSetup::updateTransferProgress);
+    connect(setupTransferAgent, &FileTransferAgent::close_progress_pop,this, &DeviceSetup::close_Progress_pop);
+
+}
+
+void DeviceSetup::close_Progress_pop(void){
+
+    transferProgress->reset();
+    transferProgress->close();
+}
+void DeviceSetup::updateTransferProgress(qint64 percentage){
+
+    transferProgress->setValue(qBound(0, percentage, 100));
 }
 
 DeviceSetup::~DeviceSetup()
@@ -87,7 +122,6 @@ void DeviceSetup::on_pushButton_device_setup_reg4_read_clicked()
 
 void DeviceSetup::readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal) {
 
-    LOG_TO_FILE(":Entry==>");
     char* byArrPkt = nullptr;
     char ByteArr64BitPakt[64];
 
@@ -95,7 +129,6 @@ void DeviceSetup::readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEdit
         Log::showStatusMessage(this, "Device not connected", "Device not connected");
         return;
     }
-
     bool ok;
     uint addr = lineEditAddr->text().toUInt(&ok, 16);
     if (!ok) {
@@ -109,23 +142,18 @@ void DeviceSetup::readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEdit
         if (pktLen == EthPs01G->readResponsPacket(ByteArr64BitPakt, pktLen, ip, port)) {
             Proto objProtoRespPkt;
             int regval = objProtoRespPkt.mParseResponsePkt(ByteArr64BitPakt);
-            LOG_ONLY_DATA("Reg VAl: 0x%X\n", regval);
-
             if (regval > 0) {
                 lineEditVal->setText(QString("%1").arg(regval, 8, 16, QChar('0')).toUpper());
-                LOG_TO_FILE("Value updated in lineEdit");
             }
         }
     } else {
         LOG_TO_FILE("ERROR: Unable to send data to udp socket.");
     }
     delete byArrPkt;
-    LOG_TO_FILE(":Exit==>");
 }
 
 void DeviceSetup::WriteRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal) {
 
-    LOG_TO_FILE(":Entry==>");
     char* byArrPkt = nullptr;
     char ByteArr64BitPakt[64];
     if (!EthPs01G->getConStatus()) {
@@ -154,7 +182,6 @@ void DeviceSetup::WriteRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEdi
         LOG_TO_FILE("ERROR: Unable to send data to udp socket.");
     }
     delete byArrPkt;
-    LOG_TO_FILE(":Exit==>");
 }
 void DeviceSetup::on_pushButton_device_setup_wr_reg1_clicked()
 {
@@ -180,25 +207,39 @@ void DeviceSetup::on_pushButton_devsetup_mem_read_start_clicked()
     //     return;
     // }
     if(ui->radioButton_device_setup_ps_1g->isChecked()){
-        UDPSender->setupDevice(EthPs01G);
-        UDPSender->configure(EthPs01G->remote_ip,EthPs01G->remote_port,"file.txt",4096);
-        LOG_TO_FILE("PS 01G selected");
-        UDPSender->start();
+
+        QString filename = ui->lineEdit_devicesetup_mem_read_filename->text();
+        int size  = ui->lineEdit_mem_read_file_size->text().toInt();
+        if(size == 0 || ui->lineEdit_mem_read_file_size->text().isEmpty()){
+            Log::showStatusMessage(this, "Device Setup", "Size is zero");
+        }
+        setupTransferAgent->setupDevice(EthPs01G);
+        setupTransferAgent->configure(EthPs01G->remote_ip,EthPs01G->remote_port,filename,size,TargetToHost);
+        LOG_TO_FILE("PS 01G selected %d file name",size,filename.toStdString().c_str());
+        setupTransferAgent->start();
+        transferProgress->setRange(0,100);
+        transferProgress->show();
     }
-    // else if(ui->radioButton_device_setup_pl_1g->isChecked()){
-    //     UDPSender->setupDevice(EthPl01G);
-    //     UDPSender->configure(EthPl01G->remote_ip,EthPl01G->remote_port,"file.txt",5000);
-    //     LOG_TO_FILE("PL 01G selected");
-    //     //UDPSender->start();
-    // }
-    // else if(ui->radioButton_device_setup_pl_10g->isChecked()){
-    //     UDPSender->setupDevice(EthPl10G);
-    //     UDPSender->configure(EthPl01G->remote_ip,EthPl01G->remote_port,"file.txt",5000);
-    //     LOG_TO_FILE("PL 10G selected");
-    //     //UDPSender->start();
-    // }else{
+}
 
-    // }
-
+void DeviceSetup::on_pushButton_device_setup_file_mem_read_clicked()
+{
+    QString title = "Device setup memory read";
+    QString filePath = QFileDialog::getSaveFileName(this, title, QDir::homePath(), NULL);
+    if (filePath.isEmpty()) {
+        LOG_TO_FILE("User canceled file creation dialog.");
+        return;
+    }
+    LOG_TO_FILE("Creating file: %s", filePath.toUtf8().constData());
+    QFile file(filePath);
+    if (file.open(QIODevice::WriteOnly)) {
+        QTextStream out(&file);
+        out << "Created by Log::showFileCreateDialog\n";
+        file.close();
+        ui->lineEdit_devicesetup_mem_read_filename->setText(filePath);
+        LOG_TO_FILE("File successfully written.");
+    } else {
+        LOG_TO_FILE("Error creating file: %s", file.errorString().toUtf8().constData());
+    }
 }
 

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "devicesetup.h"
 #include "fileprocessing.h"
+#include "filesender.h"
 #include "rf.h"
 #include "selftest.h"
 #include "spectrum.h"
@@ -26,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     EthPs01G = &UDP_PS1G_Con::getInstance();
     EthPl10G = &UDP_PL10G_Con::getInstance();
     EthPl01G = &UDP_PL1G_Con::getInstance();
-
+    setupTransferAgent = new FileTransferAgent(this);
     ui->tabWidgetMainTab->addTab(new FileProcessing(),"File processing");
     ui->tabWidgetMainTab->addTab(deviceSetup,"Device setup");
     ui->tabWidgetMainTab->addTab(new SelfTest(),"Self Test");
@@ -40,6 +41,26 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label_device_temp_dig_val->setText(tr("%1 °C").arg(100));
     ui->label_device_temp_ana_val->setText(tr("%1 °C").arg(100));
     load_files();
+
+
+    // 🔄 Initialize QProgressDialog for percentage-based progress tracking
+    transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
+    transferProgress->setWindowModality(Qt::WindowModal);
+    transferProgress->setWindowTitle("File Transfer Progress");
+    transferProgress->setAutoClose(false);     // Keep open until transfer finishes
+    transferProgress->setAutoReset(false);     // Manual control over reset
+    transferProgress->setMinimumDuration(1000); // Avoid premature popup (1s)
+    transferProgress->reset();                 // Clear stale values
+    transferProgress->hide();                  // Hide until file transfer starts
+
+    // Connect cancel behavior just once
+    connect(transferProgress, &QProgressDialog::canceled, this, [=]() {
+        transferCanceled = true;
+        setupTransferAgent->abortFileWrite(true);
+        LOG_TO_FILE("User canceled the file transfer.");
+    });
+    connect(setupTransferAgent, &FileTransferAgent::progressUpdated,this, &MainWindow::updateTransferProgress);
+    connect(setupTransferAgent, &FileTransferAgent::close_progress_pop,this, &MainWindow::close_Progress_pop);
 }
 
 MainWindow::~MainWindow()
@@ -52,6 +73,11 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_conn_settings_clicked()
 {
     conn->show();
+}
+
+void MainWindow::onTimeout()
+{
+
 }
 
 void MainWindow::load_files()
@@ -94,7 +120,7 @@ void MainWindow::on_pushButton_ddr_if_file_browse_clicked()
     if (!fileName.isEmpty()){
         qDebug() << "FileName" << fileName;
         LOG_TO_FILE("Filename:%s",fileName.toStdString().c_str());
-        ui->lineEdit_ddr_if_file_path->setText(fileName);
+        ui->lineEdit_ddr_dac_iq_file_name_path->setText(fileName);
     }
     LOG_TO_FILE(":Exit==>\n");
 }
@@ -102,15 +128,11 @@ void MainWindow::on_pushButton_ddr_if_file_browse_clicked()
 void MainWindow::on_pushButton_ddr_if_amplitude_file_browse_clicked()
 {
     LOG_TO_FILE(":Entry==>");
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    "Open File",
-                                                    ".",
-                                                    "Text Files (*.txt);;All Files (*)");
-
+    QString fileName = QFileDialog::getOpenFileName(this,"Open File",".","Text Files (*.txt);;All Files (*)");
     if (!fileName.isEmpty()){
         qDebug() << "FileName" << fileName;
         LOG_TO_FILE("Filename:%s",fileName.toStdString().c_str());
-        ui->lineEdit_ddr_if_file_path->setText(fileName);
+        ui->lineEdit_ddr_dac_iq_file_name_path->setText(fileName);
     }
     LOG_TO_FILE(":Exit==>\n");
 }
@@ -119,13 +141,9 @@ void MainWindow::on_pushButton_ddr_if_amplitude_file_browse_clicked()
 void MainWindow::on_pushButton__ddr_if_amplitude_file_send_clicked()
 {
      LOG_TO_FILE(":Entry==>");
-    if(ui->lineEdit_ddr_if_file_path->text().isEmpty()){
-        QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::Information);
-        msgBox.setText("Please select file\n");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.exec();
+    if(ui->lineEdit_ddr_dac_iq_file_name_path->text().isEmpty()){
         LOG_TO_FILE("Return after showing msgbox\n");
+        Log::showStatusMessage(this, "DDR IF DAC1", "Please select file");
         return;
     }
     LOG_TO_FILE("Continue to send file\n");
@@ -135,16 +153,11 @@ void MainWindow::on_pushButton__ddr_if_amplitude_file_send_clicked()
 void MainWindow::on_pushButton_ddr_if_dac1_send_clicked()
 {
     LOG_TO_FILE(":Entry==>");
-    if(ui->lineEdit_ddr_if_file_path->text().isEmpty()){
-        QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::Information);
-        msgBox.setText("Please select file\n");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.exec();
+    if(ui->lineEdit_ddr_dac_iq_file_name_path->text().isEmpty()){
+        Log::showStatusMessage(this, "DDR IF DAC1", "Please select file");
         LOG_TO_FILE("Return after showing msgbox\n");
         return;
     }
-    qDebug() << "Continue to send file\n";
     LOG_TO_FILE("Continue to send file\n");
     LOG_TO_FILE(":Exit==>\n");
 }
@@ -152,17 +165,54 @@ void MainWindow::on_pushButton_ddr_if_dac1_send_clicked()
 
 void MainWindow::on_pushButton_ddr_lx_file_browse_clicked()
 {
+
+}
+
+void MainWindow::on_pushButton_ddr_dac_iq_file_browse_clicked()
+{
     LOG_TO_FILE(":Entry==>");
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     "Open File",
                                                     ".",
-                                                    "Text Files (*.txt);;All Files (*)");
-
-    if (!fileName.isEmpty()){
+                                                    "Text Files (*.bin);;All Files (*)");
+    if (!fileName.isEmpty())
+    {
         qDebug() << "FileName" << fileName;
         LOG_TO_FILE("Filename:%s",fileName.toStdString().c_str());
-        ui->lineEdit_ddr_lx_file_path->setText(fileName);
+        ui->lineEdit_ddr_dac_iq_file_name_path->setText(fileName);
     }
     LOG_TO_FILE(":Exit==>\n");
 }
+
+void MainWindow::close_Progress_pop(void){
+
+    transferProgress->reset();
+    transferProgress->close();
+}
+void MainWindow::updateTransferProgress(qint64 percentage){
+
+    transferProgress->setValue(qBound(0, percentage, 100));
+}
+
+void MainWindow::on_pushButton_ddr_dac_iq_file_send_clicked()
+{
+    QString selectedFile = ui->lineEdit_ddr_dac_iq_file_name_path->text();
+    if (selectedFile.isEmpty()) return;
+
+    QFile file(selectedFile);
+    if (!file.open(QIODevice::ReadOnly)) {
+        LOG_TO_FILE("Failed to open file: %s", selectedFile.toUtf8().constData());
+        return;
+    }
+    int totalSize = file.size();
+    file.close();
+
+    LOG_TO_FILE("File selected (%d bytes): %s", totalSize, selectedFile.toUtf8().constData());
+    setupTransferAgent->setupDevice(EthPs01G);
+    setupTransferAgent->configure(EthPs01G->remote_ip, EthPs01G->remote_port, selectedFile, totalSize,HostToTarget);
+    setupTransferAgent->start();
+    transferProgress->setRange(0, 100);
+    transferProgress->show();
+}
+
 

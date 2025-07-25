@@ -8,6 +8,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 #define LogFileName "logfile.log"
 #define LOG_TO_FILE(format, ...) Log::logToFile(__FILE__, __FUNCTION__, (std::string(format) + "\n").c_str(), ##__VA_ARGS__)
@@ -22,6 +23,7 @@ public:
     static void printHexCStyle(const QByteArray &buffer);
     static void printHexRecvBuffer(char* buffer, int len);
     static void showStatusMessage(QWidget* parent, const QString& logText, const QString& dialogText);
+    static void showProgressDialog(QWidget* parent, const QString& logText,const QString& dialogText,std::function<void(QProgressDialog*)> taskRunner);
 
 private:
     static QMutex mutex;

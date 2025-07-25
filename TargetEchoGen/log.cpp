@@ -35,6 +35,34 @@ void Log::showStatusMessage(QWidget* parent, const QString& logText, const QStri
 
     LOG_TO_FILE("Closed status dialog: %s", dialogText.toUtf8().constData());
 }
+void Log::showProgressDialog(QWidget* parent,
+                             const QString& logText,
+                             const QString& dialogText,
+                             std::function<void(QProgressDialog*)> taskRunner)
+{
+    LOG_TO_FILE("Starting progress: %s", logText.toUtf8().constData());
+
+    QProgressDialog* progressDialog = new QProgressDialog(dialogText, "Cancel", 0, 100, parent);
+    progressDialog->setWindowModality(Qt::WindowModal);
+    progressDialog->setWindowTitle("Progress");
+    progressDialog->setAutoClose(false);
+    progressDialog->setAutoReset(false);
+    progressDialog->setMinimumDuration(0); // shows immediately
+
+    // Optional: connect cancel signal
+    QObject::connect(progressDialog, &QProgressDialog::canceled, [=]() {
+        LOG_TO_FILE("User canceled progress: %s", dialogText.toUtf8().constData());
+    });
+
+    // Run external task logic that updates progress
+    taskRunner(progressDialog);
+
+    progressDialog->close();
+    delete progressDialog;
+
+    LOG_TO_FILE("Finished progress: %s", dialogText.toUtf8().constData());
+}
+
 void Log::logToFileOnlyData(const char *format, ...) {
     QFile file(LogFileName);
     if (!file.open(QIODevice::Append | QIODevice::Text)) {

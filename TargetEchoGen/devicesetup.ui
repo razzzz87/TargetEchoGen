@@ -881,7 +881,7 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_4">
                <item row="0" column="2">
-                <widget class="QPushButton" name="pushButton_device_setup__file_mem_read">
+                <widget class="QPushButton" name="pushButton_device_setup_file_mem_read">
                  <property name="text">
                   <string/>
                  </property>
@@ -892,7 +892,7 @@
                 </widget>
                </item>
                <item row="0" column="4">
-                <widget class="QLineEdit" name="lineEdit_3"/>
+                <widget class="QLineEdit" name="lineEdit_mem_read_file_size"/>
                </item>
                <item row="0" column="3">
                 <widget class="QLabel" name="label_23">
@@ -902,7 +902,7 @@
                 </widget>
                </item>
                <item row="0" column="0">
-                <widget class="QLabel" name="label_24">
+                <widget class="QLabel" name="label__mem_rw_filename">
                  <property name="text">
                   <string>File</string>
                  </property>
@@ -916,7 +916,7 @@
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLineEdit" name="lineEdit"/>
+                <widget class="QLineEdit" name="lineEdit_devicesetup_mem_read_filename"/>
                </item>
               </layout>
              </item>

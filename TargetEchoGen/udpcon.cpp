@@ -44,15 +44,10 @@ bool UDP_PS1G_Con ::Disconnect() {
 
 int UDP_PS1G_Con::sendMessage(const char* message,int len, const QString &ipAddress, quint16 port)
 {
-    LOG_TO_FILE(":Entry==>");
     qint64 bytesWritten = udpSocket->writeDatagram(message,len,QHostAddress(ipAddress), port);
     if (bytesWritten == -1) {
         LOG_TO_FILE("Failed to send datagram.");
-
-    } else {
-        LOG_TO_FILE("Bytes written: %ld ",bytesWritten);
     }
-    LOG_TO_FILE(":Exit==>");
     return bytesWritten;
 }
 int UDP_PS1G_Con::readResponsPacket(char* recvdata,int len, QHostAddress ipAddress, quint16 port)

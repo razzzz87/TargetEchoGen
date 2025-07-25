@@ -19,7 +19,7 @@ SOURCES += \
     devicesetup.cpp \
     fileprocessing.cpp \
     fileprocessingconf.cpp \
-    filesender.cpp \
+    FileTransferAgent.cpp \
     log.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -41,7 +41,7 @@ HEADERS += \
     devicesetup.h \
     fileprocessing.h \
     fileprocessingconf.h \
-    filesender.h \
+    FileTransferAgent.h \
     log.h \
     mainwindow.h \
     matfileprocessing.h \

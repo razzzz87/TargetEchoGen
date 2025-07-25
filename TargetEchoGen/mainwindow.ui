@@ -71,7 +71,7 @@
        </rect>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -135,7 +135,7 @@
                  </widget>
                 </item>
                 <item row="0" column="0">
-                 <widget class="QLabel" name="label_iq_data_channel1">
+                 <widget class="QLabel" name="label_ddr_dac_iq_file_name">
                   <property name="text">
                    <string>IQ File Name</string>
                   </property>
@@ -184,7 +184,7 @@
                  </widget>
                 </item>
                 <item row="0" column="3">
-                 <widget class="QPushButton" name="pushButton_ddr_if_dac1_send">
+                 <widget class="QPushButton" name="pushButton_ddr_dac_iq_file_send">
                   <property name="text">
                    <string>Send</string>
                   </property>
@@ -205,7 +205,7 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QLineEdit" name="lineEdit_ddr_if_file_path"/>
+                 <widget class="QLineEdit" name="lineEdit_ddr_dac_iq_file_name_path"/>
                 </item>
                 <item row="3" column="0">
                  <widget class="QLabel" name="label_interpolation">
@@ -215,7 +215,7 @@
                  </widget>
                 </item>
                 <item row="0" column="2">
-                 <widget class="QPushButton" name="pushButton_ddr_if_file_browse">
+                 <widget class="QPushButton" name="pushButton_ddr_dac_iq_file_browse">
                   <property name="text">
                    <string/>
                   </property>
