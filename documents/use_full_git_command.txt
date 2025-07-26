@@ -34,4 +34,24 @@ Change commit message of previous commits, for current commit we can use "git co
 	#4. Git will open a new editor for each commit you marked with reword. Edit the commit message and save it.
     #5. run "git rebase --continue" will complete the rebaseing.
 
+#Setup SSH key with git.
+1.create ssh key using bellow command:
+    
+	ssh-keygen -t ed25519 -C "razzzz87@gmail.com"
+
+2.start ssh-agent on local PC using below command.
+
+	eval "$(ssh-agent -s)"
+
+3.add ssh key in into ssh-agent.
+
+	ssh-add ~/.ssh/id_ed25519
+
+4.open public key file. copy the complete content. 
+
+	cat ~/.ssh/id_ed25519.pub
+
+5. Verify your setting: run bellow command.
+  
+  	ssh -T git@github.com
 
