@@ -17,6 +17,9 @@ public:
     ~Spectrum();
     void makePlot();
 
+private slots:
+    void on_pd_show_hide_menu_clicked();
+
 private:
     Ui::Spectrum *ui;
     QCustomPlot *customPlot;

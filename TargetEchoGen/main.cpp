@@ -5,6 +5,10 @@
 #include <QDebug>
 #include <QDateTime>
 #include <log.h>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
+#include <QScrollArea>
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +23,6 @@ int main(int argc, char *argv[])
 
     // Set the main window size to match the screen resolution
     w.setGeometry(0, 0, screenWidth, screenHeight);
-    //w.setGeometry(0, 0, 1600, 900);
 
     if(QFile::exists("dark_mode_style_sheet.qss")){
         LOG_TO_FILE("width:%d Height:%d",screenWidth ,screenHeight);
