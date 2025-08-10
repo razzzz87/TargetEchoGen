@@ -55,3 +55,17 @@ Change commit message of previous commits, for current commit we can use "git co
   
   	ssh -T git@github.com
 
+
+
+FFTw lib build steps:
+1. Install mysys2 MINGW64.
+2. Install build environment using bellow command.
+    "pacman -Syu"
+    "pacman -S base-devel mingw-w64-x86_64-toolchain"
+3. Download fftw lib source from https://www.fftw.org/download.html
+4. Extract that source. go to source directory.
+5. Run bellow command
+    "./configure --enable-shared --enable-static --host=mingw32 && make"
+6. Got to .lib directory copy the all lib file into your qt source.
+7. Include this lib path  into pro files. and copy all h files in to same directory fftw/api/
+8. copy the dll files into debug/release directory. build qt code and run.

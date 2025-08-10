@@ -25,10 +25,12 @@ SOURCES += \
     mainwindow.cpp \
     matfileprocessing.cpp \
     qcustomplot.cpp \
+    qspectrogram.cpp \
     rf.cpp \
     selftest.cpp \
     serial_port_singletonPl.cpp \
     serial_port_singletonPs.cpp \
+    spectrogram.cpp \
     spectrum.cpp \
     udpcon.cpp \
     udppl1gcon.cpp \
@@ -46,10 +48,12 @@ HEADERS += \
     mainwindow.h \
     matfileprocessing.h \
     qcustomplot.h \
+    qspectrogram.h \
     rf.h \
     selftest.h \
     serial_port_singletonPl.h \
     serial_port_singletonPs.h \
+    spectrogram.h \
     spectrum.h \
     udpcon.h \
     udppl1gcon.h \
@@ -76,3 +80,21 @@ QTPLUGIN += qled
 
 DISTFILES += \
     dark_mode_style_sheet.qss
+
+
+# Paths
+FFTW_PATH = $$PWD/fftwlib
+QWTLIB_PATH = $$PWD/qwtlib\qwt-6.3.0\lib
+
+RELEASE_LIB_PATH = $$PWD/release
+DEBUG_LIB_PATH   = $$PWD/debug
+
+# Include and dependency paths
+INCLUDEPATH += $$FFTW_PATH
+DEPENDPATH  += $$FFTW_PATH
+
+LIBS += -L$$FFTW_PATH -lfftw3
+LIBS += -L$$QWTLIB_PATH -lqwt
+
+INCLUDEPATH += $$PWD/qwtlib/qwt-6.3.0/include
+DEPENDPATH += $$PWD/qwtlib/qwt-6.3.0/include

@@ -39,7 +39,7 @@
       <widget class="QWidget" name="scrollAreaWidgetContents">
        <property name="geometry">
         <rect>
-         <x>-34</x>
+         <x>0</x>
          <y>0</y>
          <width>1920</width>
          <height>1025</height>
@@ -675,7 +675,7 @@
           <x>2</x>
           <y>194</y>
           <width>1893</width>
-          <height>736</height>
+          <height>750</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -3120,10 +3120,10 @@
        <widget class="QGroupBox" name="groupBox_con_settings">
         <property name="geometry">
          <rect>
-          <x>1530</x>
-          <y>40</y>
-          <width>131</width>
-          <height>158</height>
+          <x>1506</x>
+          <y>35</y>
+          <width>167</width>
+          <height>160</height>
          </rect>
         </property>
         <property name="title">
@@ -3259,10 +3259,10 @@
        <widget class="QLabel" name="label_12">
         <property name="geometry">
          <rect>
-          <x>1697</x>
-          <y>931</y>
+          <x>1686</x>
+          <y>943</y>
           <width>197</width>
-          <height>66</height>
+          <height>50</height>
          </rect>
         </property>
         <property name="sizePolicy">
