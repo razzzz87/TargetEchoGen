@@ -51,7 +51,7 @@ private:
     QHostAddress ipAddress;
     quint16 port;
 
-    QProgressDialog* transferProgress = nullptr;
+    //QProgressDialog* transferProgress = nullptr;
     bool transferCanceled = false;
 };
 

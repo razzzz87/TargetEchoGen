@@ -46,35 +46,35 @@ DeviceSetup::DeviceSetup(QWidget *parent)
 
     ui->lineEdit_devicesetup_mem_read_filename->setReadOnly(true);
 
-    // 🔄 Initialize QProgressDialog for percentage-based progress tracking
-    transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
-    transferProgress->setWindowModality(Qt::WindowModal);
-    transferProgress->setWindowTitle("File Transfer Progress");
-    transferProgress->setAutoClose(false);     // Keep open until transfer finishes
-    transferProgress->setAutoReset(false);     // Manual control over reset
-    transferProgress->setMinimumDuration(1000); // Avoid premature popup (1s)
-    transferProgress->reset();                 // Clear stale values
-    transferProgress->hide();                  // Hide until file transfer starts
+    // // 🔄 Initialize QProgressDialog for percentage-based progress tracking
+    // transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
+    // transferProgress->setWindowModality(Qt::WindowModal);
+    // transferProgress->setWindowTitle("File Transfer Progress");
+    // transferProgress->setAutoClose(false);     // Keep open until transfer finishes
+    // transferProgress->setAutoReset(false);     // Manual control over reset
+    // transferProgress->setMinimumDuration(1000); // Avoid premature popup (1s)
+    // transferProgress->reset();                 // Clear stale values
+    // transferProgress->hide();                  // Hide until file transfer starts
 
-    // Connect cancel behavior just once
-    connect(transferProgress, &QProgressDialog::canceled, this, [=]() {
-        transferCanceled = true;
-        setupTransferAgent->abortFileWrite(true);
-        LOG_TO_FILE("User canceled the file transfer.");
-    });
-    connect(setupTransferAgent, &FileTransferAgent::progressUpdated,this, &DeviceSetup::updateTransferProgress);
-    connect(setupTransferAgent, &FileTransferAgent::close_progress_pop,this, &DeviceSetup::close_Progress_pop);
+    // // Connect cancel behavior just once
+    // connect(transferProgress, &QProgressDialog::canceled, this, [=]() {
+    //     transferCanceled = true;
+    //     setupTransferAgent->abortFileWrite(true);
+    //     LOG_TO_FILE("User canceled the file transfer.");
+    // });
+    // connect(setupTransferAgent, &FileTransferAgent::progressUpdated,this, &DeviceSetup::updateTransferProgress);
+    // connect(setupTransferAgent, &FileTransferAgent::close_progress_pop,this, &DeviceSetup::close_Progress_pop);
 
 }
 
 void DeviceSetup::close_Progress_pop(void){
 
-    transferProgress->reset();
-    transferProgress->close();
+    //transferProgress->reset();
+    //transferProgress->close();
 }
 void DeviceSetup::updateTransferProgress(qint64 percentage){
 
-    transferProgress->setValue(qBound(0, percentage, 100));
+    //transferProgress->setValue(qBound(0, percentage, 100));
 }
 
 DeviceSetup::~DeviceSetup()
@@ -213,12 +213,12 @@ void DeviceSetup::on_pushButton_devsetup_mem_read_start_clicked()
         if(size == 0 || ui->lineEdit_mem_read_file_size->text().isEmpty()){
             Log::showStatusMessage(this, "Device Setup", "Size is zero");
         }
-        setupTransferAgent->setupDevice(EthPs01G);
-        setupTransferAgent->configure(EthPs01G->remote_ip,EthPs01G->remote_port,filename,size,TargetToHost);
-        LOG_TO_FILE("PS 01G selected %d file name",size,filename.toStdString().c_str());
-        setupTransferAgent->start();
-        transferProgress->setRange(0,100);
-        transferProgress->show();
+        // setupTransferAgent->setupDevice(EthPs01G);
+        // setupTransferAgent->configure(EthPs01G->remote_ip,EthPs01G->remote_port,filename,size,TargetToHost);
+        // LOG_TO_FILE("PS 01G selected %d file name",size,filename.toStdString().c_str());
+        // setupTransferAgent->start();
+        // transferProgress->setRange(0,100);
+        // transferProgress->show();
     }
 }
 

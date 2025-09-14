@@ -1,0 +1,177 @@
+/*-----QWidget-----*/
+QWidget {
+    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
+        stop:0 rgba(3, 1, 50, 32),
+        stop:0.3 rgba(6, 82, 125, 255),
+        stop:0.5 rgba(8, 117, 178, 255),
+        stop:0.75 rgba(7, 100, 164, 255),
+        stop:1 rgba(3, 1, 50, 10));
+    color: #ffffff;
+    font-family: "Segoe UI", "Arial";
+}
+
+/*-----QLabel-----*/
+QLabel {
+    background-color: transparent;
+    color: #FF5733; /* Orange for emphasis */
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/*-----QPushButton-----*/
+QPushButton {
+    background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:1, y2:1,
+        stop:0 rgba(42, 95, 113, 255),
+        stop:1 rgba(12, 53, 97, 255));
+    color: #ffffff;
+    border: 1px solid #00ff00;
+    border-radius: 4px;
+    padding: 6px;
+    font-weight: bold;
+    font-size: 14px;
+    min-height: 30px;
+}
+
+QPushButton:hover {
+    background-color: #00aa00;
+    border: 1px solid #ffffff;
+}
+
+QPushButton:pressed {
+    background-color: #000000;
+    color: #ffffff;
+    border-style: inset;
+}
+
+/*-----QProgressBar-----*/
+QProgressBar {
+    min-height: 20px;
+    max-height: 20px;
+    border: 1px solid #ffffff;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #000000;
+}
+
+QProgressBar::chunk {
+    background-color: #00ff00;
+    margin: 1px;
+}
+
+/*-----QGroupBox-----*/
+QGroupBox::title {
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 5px;
+}
+QGroupBox {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 13px;
+    border: 1px solid #00ff00;
+    margin-top: 10px;
+}
+
+/*-----QLineEdit-----*/
+QLineEdit {
+    background-color: #000000;
+    color: #00ff00;
+    font-weight: bold;
+    border: 1px solid #333333;
+    padding: 4px;
+    max-width: 150px;
+    min-height: 20px;
+}
+
+/*-----QComboBox-----*/
+QComboBox {
+    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
+        stop:0 rgba(3, 1, 50, 32),
+        stop:0.3 rgba(6, 82, 125, 255),
+        stop:0.5 rgba(8, 117, 178, 255),
+        stop:0.75 rgba(7, 100, 164, 255),
+        stop:1 rgba(3, 1, 50, 10));
+    border: 1px solid #00ff00;
+    border-radius: 3px;
+    padding-left: 6px;
+    color: lightgray;
+    font-weight: bold;
+    min-height: 30px;
+}
+
+QComboBox:hover {
+    background-color: #008b8b;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    border-left: 1px solid darkgray;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    min-width: 30px;
+}
+
+QComboBox::down-arrow {
+    image: url(:/images/icons8-dropdown-26.png);
+    width: 20px;
+    height: 8px;
+}
+
+/*-----QCheckBox-----*/
+QCheckBox {
+    color: white;
+    font-weight: bold;
+    min-height: 25px;
+    max-height: 25px;
+}
+
+/*-----QScrollBar-----*/
+QScrollBar:vertical {
+    border: none;
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:1, y2:1,
+        stop:0 rgba(167, 214, 50, 255),
+        stop:1 rgba(98, 169, 67, 255));
+    min-height: 50px;
+    width: 16px;
+}
+
+/*-----QRadioButton-----*/
+QRadioButton {
+    color: white;
+    min-height: 30px;
+}
+
+QRadioButton::indicator::unchecked {
+    border: 2px solid #607cff;
+    border-radius: 11px;
+    background-color: #fff;
+    width: 18px;
+    height: 18px;
+}
+
+QRadioButton::indicator::checked {
+    border: 2px solid #f8f8ff;
+    border-radius: 11px;
+    background-color: #ffa500;
+    width: 18px;
+    height: 18px;
+}
+
+/*-----QTableWidget-----*/
+QTableWidget::item {
+    color: white;
+    font-weight: bold;
+}
+
+QTableWidget::item:selected {
+    background-color: green;
+    color: white;
+}

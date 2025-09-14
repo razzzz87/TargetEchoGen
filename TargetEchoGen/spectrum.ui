@@ -6,184 +6,221 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1900</width>
-    <height>710</height>
+    <width>1781</width>
+    <height>756</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_main">
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>2</number>
+    <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>1</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>1</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>1</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>1</number>
+    <number>0</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>1</number>
-     </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
-     </property>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
-       <property name="sizeConstraint">
-        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-      </layout>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>300</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QLabel" name="frequency_label">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>30</height>
-        </size>
-       </property>
        <property name="font">
         <font>
-         <pointsize>20</pointsize>
+         <pointsize>16</pointsize>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>0.0000</string>
+        <string>0.00000</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::TextFormat::RichText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <property name="sizeConstraint">
-        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-      </layout>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Preferred</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QLabel" name="label_mhz">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>30</height>
-        </size>
-       </property>
        <property name="font">
         <font>
-         <pointsize>20</pointsize>
+         <pointsize>16</pointsize>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
         <string>MHz</string>
        </property>
+       <property name="textFormat">
+        <enum>Qt::TextFormat::PlainText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_5">
-       <property name="sizeConstraint">
-        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-      </layout>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Preferred</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="frequency_label2">
+      <widget class="QLabel" name="frequency_label_db">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>30</height>
-        </size>
-       </property>
        <property name="font">
         <font>
-         <pointsize>20</pointsize>
+         <pointsize>16</pointsize>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>0.000000000</string>
+        <string>0.00000000</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::TextFormat::RichText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
-       <property name="sizeConstraint">
-        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-      </layout>
+       <property name="sizeType">
+        <enum>QSizePolicy::Policy::Preferred</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QLabel" name="label_db">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>30</height>
-        </size>
-       </property>
        <property name="font">
         <font>
-         <pointsize>20</pointsize>
+         <pointsize>16</pointsize>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
         <string>dB</string>
        </property>
+       <property name="textFormat">
+        <enum>Qt::TextFormat::PlainText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <property name="spacing">
-        <number>1</number>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
-       <property name="sizeConstraint">
-        <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
        </property>
-       <property name="leftMargin">
-        <number>30</number>
-       </property>
-      </layout>
+      </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pb_show_hide_menu">
+      <widget class="QPushButton" name="pb_hide_show_menu">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Show Menu</string>
+        <string>Hide/Show Menu</string>
        </property>
       </widget>
      </item>
@@ -195,18 +232,18 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QFrame" name="frame_plot_area">
+      <widget class="QFrame" name="spectrum_plot_frame">
        <property name="minimumSize">
         <size>
-         <width>1600</width>
-         <height>660</height>
+         <width>1473</width>
+         <height>720</height>
         </size>
        </property>
        <property name="frameShape">
-        <enum>QFrame::Shape::StyledPanel</enum>
+        <enum>QFrame::Shape::NoFrame</enum>
        </property>
        <property name="frameShadow">
-        <enum>QFrame::Shadow::Raised</enum>
+        <enum>QFrame::Shadow::Plain</enum>
        </property>
       </widget>
      </item>
@@ -218,21 +255,39 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="minimumSize">
+       <property name="maximumSize">
         <size>
-         <width>254</width>
-         <height>0</height>
+         <width>236</width>
+         <height>16777215</height>
         </size>
        </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <property name="frameShape">
-        <enum>QFrame::Shape::StyledPanel</enum>
+        <enum>QFrame::Shape::NoFrame</enum>
        </property>
        <property name="frameShadow">
         <enum>QFrame::Shadow::Raised</enum>
        </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="16" column="0">
-         <widget class="QPushButton" name="spectrumPlot_pushButton">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>9</number>
+        </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item row="26" column="3">
+         <widget class="QPushButton" name="pb_play_snap_shot">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -240,150 +295,87 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Spectrum Plot</string>
+           <string>Single SNAP</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
-         <widget class="QCheckBox" name="byteReverse_checkBox">
+        <item row="17" column="2">
+         <widget class="QCheckBox" name="enableWeight_checkBox">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
           <property name="text">
-           <string>Front End Direct</string>
+           <string>Enable Weight</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QRadioButton" name="IOnly_radioButton">
+        <item row="8" column="2">
+         <widget class="QCheckBox" name="ChkBoxCFIRData">
           <property name="text">
-           <string>I Only</string>
+           <string>CFIR Data</string>
           </property>
          </widget>
         </item>
-        <item row="16" column="1">
-         <widget class="QPushButton" name="saveGraph_pushButton">
+        <item row="27" column="3">
+         <widget class="QPushButton" name="m_PBGetADCData">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
           <property name="text">
-           <string>Save Graph</string>
+           <string>GET ADC DATA</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
-         <widget class="QCheckBox" name="m_CBMaxHold">
+        <item row="19" column="3">
+         <widget class="QCheckBox" name="m_CBSpectrumdata">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
           <property name="text">
-           <string>MAx Hold</string>
+           <string>Spectrum</string>
           </property>
          </widget>
         </item>
-        <item row="14" column="0">
-         <widget class="QPushButton" name="plotWithFile_pushButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="4" column="2">
+         <widget class="QRadioButton" name="DDC_DataradioButton">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
           </property>
           <property name="text">
-           <string>PLOT with File </string>
+           <string>Data Enable</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QRadioButton" name="raw_radioButton">
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>ADC Raw</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_7">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Fs</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QRadioButton" name="strmnStrt_radioButton">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Start</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QLineEdit" name="refrestRate_lineEdit">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QRadioButton" name="autoRefreshOff_radioButton">
-          <property name="text">
-           <string>Auto Refresh Off</string>
-          </property>
-         </widget>
-        </item>
-        <item row="13" column="0" colspan="2">
+        <item row="25" column="2" colspan="2">
          <widget class="QProgressBar" name="progressBar">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="value">
-           <number>0</number>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_9">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="text">
-           <string>Channel</string>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Data Size</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLineEdit" name="lineEdit">
+        <item row="13" column="3">
+         <widget class="QLineEdit" name="windowSize_lineEdit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -391,24 +383,28 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>10</string>
+           <string>2048</string>
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
-         <widget class="QRadioButton" name="strmnStop_radioButton">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
+        <item row="20" column="2">
+         <widget class="QLabel" name="LblRefreshRate">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
           </property>
           <property name="text">
-           <string> Stop</string>
+           <string>Refresh Rate</string>
           </property>
          </widget>
         </item>
-        <item row="12" column="0" colspan="2">
-         <widget class="QPushButton" name="pb_play_from_file">
+        <item row="24" column="2" colspan="2">
+         <widget class="QPushButton" name="m_PBPlayRecordData">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -420,43 +416,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QRadioButton" name="IQInterleved_radioButton">
-          <property name="text">
-           <string>I Q Interleaved</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
-         <widget class="QLabel" name="label_6">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Refresh Rate</string>
-          </property>
-         </widget>
-        </item>
-        <item row="15" column="0">
-         <widget class="QPushButton" name="pushButton_4">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>plot</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
+        <item row="11" column="3">
          <widget class="QComboBox" name="DataSize_comboBox">
           <item>
            <property name="text">
@@ -475,46 +435,18 @@
           </item>
          </widget>
         </item>
-        <item row="6" column="1">
-         <widget class="QLineEdit" name="enableWeight_lineEdit">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>1700000004000</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QCheckBox" name="checkBox">
-          <property name="text">
-           <string>FFT Shift</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0">
-         <widget class="QRadioButton" name="autoRefreshOn_radioButton">
-          <property name="text">
-           <string>Auto Refresh On</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QRadioButton" name="DDC_DataradioButton">
-          <property name="text">
-           <string>DDC Data</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="chnl_comboBox">
+        <item row="18" column="3">
+         <widget class="QCheckBox" name="byteReverse_checkBox">
           <property name="styleSheet">
-           <string notr="true">background:none;
-</string>
+           <string notr="true">color: rgb(0, 0, 0);</string>
           </property>
+          <property name="text">
+           <string>Front End Direct</string>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="3">
+         <widget class="QComboBox" name="chnl_comboBox">
           <item>
            <property name="text">
             <string>1</string>
@@ -597,31 +529,61 @@
           </item>
          </widget>
         </item>
-        <item row="8" column="1">
-         <widget class="QCheckBox" name="m_CBSpectrumdata">
+        <item row="11" column="2">
+         <widget class="QLabel" name="LblDataSize">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+          </property>
           <property name="text">
-           <string>Spectrum</string>
+           <string>Data Size</string>
           </property>
          </widget>
         </item>
-        <item row="15" column="1">
-         <widget class="QPushButton" name="m_PBGetADCData">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="21" column="3">
+         <widget class="QRadioButton" name="strmnStop_radioButton">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
           </property>
           <property name="styleSheet">
-           <string notr="true"/>
+           <string notr="true">color: rgb(0, 0, 0);</string>
           </property>
           <property name="text">
-           <string>GET ADC DATA</string>
+           <string> Stop</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_5">
+        <item row="5" column="2">
+         <widget class="QRadioButton" name="IQInterleved_radioButton">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>I Q Interleaved</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="2">
+         <widget class="QCheckBox" name="ChkBoxMixerData">
+          <property name="text">
+           <string>Mixer Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="3">
+         <widget class="QCheckBox" name="ChkBoxCICData">
+          <property name="text">
+           <string>CIC Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="2">
+         <widget class="QLabel" name="LblWindowSize">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -630,40 +592,35 @@
           </property>
           <property name="font">
            <font>
-            <bold>true</bold>
+            <bold>false</bold>
            </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
           </property>
           <property name="text">
            <string>Window Size</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
-         <widget class="QLineEdit" name="windowSize_lineEdit">
+        <item row="10" column="2">
+         <widget class="QLabel" name="LblChannel">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="styleSheet">
-           <string notr="true">
-color: rgb(0, 0, 0);</string>
+           <string notr="true">color: rgb(0, 0, 0);</string>
           </property>
           <property name="text">
-           <string>2048</string>
+           <string>Channel</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="0">
-         <widget class="QCheckBox" name="enableWeight_checkBox">
-          <property name="text">
-           <string>Enable Weight</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="1">
-         <widget class="QPushButton" name="pushButton_5">
+        <item row="27" column="2">
+         <widget class="QPushButton" name="pb_plot">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -671,7 +628,193 @@ color: rgb(0, 0, 0);</string>
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Single SNAP</string>
+           <string>Plot</string>
+          </property>
+         </widget>
+        </item>
+        <item row="18" column="2">
+         <widget class="QCheckBox" name="ChkBoxFFtShift">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>FFT Shift</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="2">
+         <widget class="QLabel" name="LblFs">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>Fs</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="3">
+         <widget class="QLineEdit" name="lineEdit_fs">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>10</string>
+          </property>
+         </widget>
+        </item>
+        <item row="28" column="3">
+         <widget class="QPushButton" name="saveGraph_pushButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Save Graph</string>
+          </property>
+         </widget>
+        </item>
+        <item row="26" column="2">
+         <widget class="QPushButton" name="pb_plot_with_file">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>PLOT with File </string>
+          </property>
+         </widget>
+        </item>
+        <item row="29" column="3">
+         <widget class="QLabel" name="warning_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="22" column="2">
+         <widget class="QRadioButton" name="autoRefreshOn_radioButton">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>Auto Refresh On</string>
+          </property>
+         </widget>
+        </item>
+        <item row="22" column="3">
+         <widget class="QRadioButton" name="autoRefreshOff_radioButton">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>Auto Refresh Off</string>
+          </property>
+         </widget>
+        </item>
+        <item row="21" column="2">
+         <widget class="QRadioButton" name="strmnStrt_radioButton">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>Start</string>
+          </property>
+         </widget>
+        </item>
+        <item row="28" column="2">
+         <widget class="QPushButton" name="spectrumPlot_pushButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Spectrum Plot</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="3">
+         <widget class="QCheckBox" name="ChkBoxPFIRData">
+          <property name="text">
+           <string>PFIR Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="17" column="3">
+         <widget class="QLineEdit" name="enableWeight_lineEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>1700000004000</string>
+          </property>
+         </widget>
+        </item>
+        <item row="19" column="2">
+         <widget class="QCheckBox" name="m_CBMaxHold">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>MAx Hold</string>
+          </property>
+         </widget>
+        </item>
+        <item row="20" column="3" colspan="4">
+         <widget class="QLineEdit" name="refrestRate_lineEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="3">
+         <widget class="QRadioButton" name="IOnly_radioButton">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(0, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>I Only</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <widget class="QCheckBox" name="ChkBoxADCData">
+          <property name="text">
+           <string>ADC Data</string>
           </property>
          </widget>
         </item>

@@ -31,15 +31,9 @@ public:
     UDP_PL1G_Con *EthPl01G;
     FileTransferAgent  *setupTransferAgent;
     void load_files();
-//protected:
-    //void resizeEvent(QResizeEvent *event) override;
+
 private slots:
-    //void on_pushButton_conn_settings_clicked();
-    //void on_pushButton_ddr_if_amplitude_file_browse_clicked();
-    //void on_pushButton__ddr_if_amplitude_file_send_clicked();
-    //void on_pushButton_ddr_lx_file_browse_clicked();
-    //void on_pushButton_ddr_dac_iq_file_browse_clicked();
-    //void on_pushButton_ddr_dac_iq_file_send_clicked();
+
     void onTimeout();
     void updateTransferProgress(qint64 percentage);
     void close_Progress_pop(void);
@@ -53,7 +47,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QProgressDialog* transferProgress = nullptr;
+    //QProgressDialog* transferProgress = nullptr;
     bool transferCanceled = false;
 };
 #endif // MAINWINDOW_H

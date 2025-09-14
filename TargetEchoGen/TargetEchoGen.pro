@@ -7,7 +7,7 @@ CONFIG += c++11
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
-
+win32:LIBS += -lws2_32
 QMAKE_CXXFLAGS += -Wa,-mbig-obj
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -17,6 +17,8 @@ SOURCES += \
     Proto.cpp \
     connectiontype.cpp \
     devicesetup.cpp \
+    ethernetsocket.cpp \
+    ethernetsocket10G.cpp \
     fileprocessing.cpp \
     fileprocessingconf.cpp \
     FileTransferAgent.cpp \
@@ -32,6 +34,7 @@ SOURCES += \
     serial_port_singletonPs.cpp \
     spectrogram.cpp \
     spectrum.cpp \
+    uartserial.cpp \
     udpcon.cpp \
     udppl1gcon.cpp \
     udppl_10gcon.cpp
@@ -39,8 +42,12 @@ SOURCES += \
 HEADERS += \
     IUDPConnection.h \
     Proto.h \
+    RegDef.h \
+    Utils.h \
     connectiontype.h \
     devicesetup.h \
+    ethernetsocket.h \
+    ethernetsocket10G.h \
     fileprocessing.h \
     fileprocessingconf.h \
     FileTransferAgent.h \
@@ -55,6 +62,7 @@ HEADERS += \
     serial_port_singletonPs.h \
     spectrogram.h \
     spectrum.h \
+    uartserial.h \
     udpcon.h \
     udppl1gcon.h \
     udppl_10gcon.h

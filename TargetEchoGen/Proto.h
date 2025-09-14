@@ -3,6 +3,9 @@
 
 //#define LIL_ENDIAN
 #define BIG_ENDIAN
+#define CC77_PACKET_STRUCT
+#define SEND_MAGIC_BYTE_new     0xCC77
+#define RECV_MAGIC_BYTE_new     0xAA88
 
 typedef unsigned short int ushort;
 typedef unsigned int uint;
@@ -13,8 +16,11 @@ typedef unsigned char uchar;
 #define CMD_ACTION          0x03
 #define CMD_GET_PROP        0x05
 
-#define SEND_MAGIC_BYTE 0xCCAABBEE
-#define RCEV_MAGIC_BYTE 0xCCBBDDFF
+//#define SEND_MAGIC_BYTE 0xCCAABBEE
+//#define RCEV_MAGIC_BYTE 0xCCBBDDFF
+
+#define SEND_MAGIC_BYTE 0xCC77
+#define RCEV_MAGIC_BYTE 0xAA88
 
 #define CMD_BULK_WRITE 0x0001
 #define CMD_BULK_READ 0x0002
