@@ -34,6 +34,7 @@ SOURCES += \
     serial_port_singletonPs.cpp \
     spectrogram.cpp \
     spectrum.cpp \
+    transferprogressdialog.cpp \
     uartserial.cpp \
     udpcon.cpp \
     udppl1gcon.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
     serial_port_singletonPs.h \
     spectrogram.h \
     spectrum.h \
+    transferprogressdialog.h \
     uartserial.h \
     udpcon.h \
     udppl1gcon.h \
