@@ -45,6 +45,8 @@ private slots:
 
     void on_pb_ddr_dac_iq_file_send_clicked();
 
+    void on_pushButton_161_clicked();
+
 private:
     Ui::MainWindow *ui;
     //QProgressDialog* transferProgress = nullptr;

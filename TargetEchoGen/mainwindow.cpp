@@ -146,16 +146,16 @@ void MainWindow::on_pb_ddr_dac_iq_file_browse_clicked()
 
 void MainWindow::on_pb_ddr_dac_iq_file_send_clicked()
 {
-    QString selectedFile = ui->lineEdit_ddr_dac_iq_file_name_path->text();
-    if (selectedFile.isEmpty()) return;
+    // QString selectedFile = ui->lineEditddr_dac_iq_file_name_path->text();
+    // if (selectedFile.isEmpty()) return;
 
-    QFile file(selectedFile);
-    if (!file.open(QIODevice::ReadOnly)) {
-        LOG_TO_FILE("Failed to open file: %s", selectedFile.toUtf8().constData());
-        return;
-    }
-    int totalSize = file.size();
-    file.close();
+    // QFile file(selectedFile);
+    // if (!file.open(QIODevice::ReadOnly)) {
+    //     LOG_TO_FILE("Failed to open file: %s", selectedFile.toUtf8().constData());
+    //     return;
+    // }
+    // int totalSize = file.size();
+    // file.close();
 
     // LOG_TO_FILE("File selected (%d bytes): %s", totalSize, selectedFile.toUtf8().constData());
     // setupTransferAgent->setupDevice(EthPs01G);
@@ -163,5 +163,11 @@ void MainWindow::on_pb_ddr_dac_iq_file_send_clicked()
     // setupTransferAgent->start();
     // transferProgress->setRange(0, 100);
     // transferProgress->show();
+}
+
+
+void MainWindow::on_pushButton_161_clicked()
+{
+
 }
 
