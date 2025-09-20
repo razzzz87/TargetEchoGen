@@ -12,7 +12,7 @@ ConnectionType::ConnectionType(QWidget *parent)
     ui->LeConnPL1GIP->setText("10.0.0.123");
     ui->LeConn10GIP->setText("192.168.30.245");
     ui->LeConnPS1GPort->setText("12345");
-    ui->LeConnPL1GPort->setText("12345");
+    ui->LeConnPL1GPort->setText("50002");
     ui->LeConn10GPort->setText("12345");
 
     ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
@@ -83,7 +83,7 @@ void ConnectionType::on_PbConnPL1GConn_clicked()
     if(ui->PbConnPL1GConn->text() == "Connect")
     {
         QString TargetIP = ui->LeConnPL1GPort->text();
-        _pEthPL1G = EthernetSocketPL1G::Create("192.168.30.240",0,TargetIP,ui->LeConnPL1GPort->text().toInt());
+        _pEthPL1G = EthernetSocketPL1G::Create("0.0.0.0",0,"10.0.0.80",ui->LeConnPL1GPort->text().toInt());
         if(_pEthPL1G != nullptr){
             ui->PbConnPL1GConn->setText("Disconnect");
             ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));

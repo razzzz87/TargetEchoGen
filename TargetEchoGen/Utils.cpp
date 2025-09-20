@@ -65,15 +65,16 @@ inline void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state) {
 
 void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal)
 {
-    LOG_INFO("[Utils::readRegisterValue] <ENTER> Addr:0x%08X",lineEditAddr->text().toInt());
+    bool ok;
+
+    LOG_INFO("[Utils::readRegisterValue] <ENTER> Addr:0x%08X",lineEditAddr->text().toUInt(&ok, 16));
     char* byArrPkt = nullptr;
     char ByteArr64BitPakt[64] = {0};
-    bool ok;
     Proto protocolobj;
 
     uint addr = lineEditAddr->text().toUInt(&ok, 16);
     if (!ok) {
-        LOG_ERROR("ERROR: Invalid address format.");
+        LOG_ERROR("Invalid address format.");
         return;
     }
 
@@ -83,7 +84,7 @@ void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lin
     {
     case iface::eSERIAL:
         if (!serial) {
-            LOG_TO_FILE("ERROR: Serial pointer is null.");
+            LOG_ERROR("ERROR: Serial pointer is null.");
             return;
         }
         if (serial->sendData(byArrPkt, pktLen) &&
@@ -96,14 +97,14 @@ void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lin
         break;
 
     case iface::eETHPL1G:
-        if (!eth1G) {
-            LOG_ERROR("ERROR: Ethernet pointer is null.");
+        ethPl1G = EthernetSocketPL1G::getInstance();
+        if (!ethPl1G) {
+            LOG_ERROR("Ethernet pointer is null.");
             return;
         }
-        if (eth1G->sendData(byArrPkt, pktLen, eth1G->RemoteIP.toStdString(), eth1G->Port)) {
-            std::string senderIp;
-            uint16_t senderport;
-            if (eth1G->receiveData(ByteArr64BitPakt, pktLen, senderIp, senderport)) {
+        if (ethPl1G->sendData(byArrPkt, pktLen)) {
+            int RecvByte;
+            if (ethPl1G->receiveData(ByteArr64BitPakt, pktLen, RecvByte)) {
                 int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
                 lineEditVal->setText(QString("%1").arg(reg_val, 8, 16, QChar('0')).toUpper());
                 LOG_TO_FILE("REG_VAL:0x%08X", reg_val);
@@ -113,7 +114,7 @@ void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lin
 
     case iface::eETH10G:
         if (!eth10G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
+            LOG_ERROR("Ethernet pointer is null.");
             return;
         }
         if (eth10G->sendData(byArrPkt, pktLen, eth10G->RemoteIP.toStdString(), eth10G->Port)) {
@@ -152,19 +153,19 @@ uint readRegisterValue(iface deviceType,uint addr)
         serial = UartSerial::getInstance();
         if (!serial)
         {
-            LOG_TO_FILE("ERROR: Serial pointer is null.");
+            LOG_ERROR("ERROR: Serial pointer is null.");
             return -1;
         }
         if(!serial->sendData(byArrPkt, pktLen))
         {
-            LOG_TO_FILE("Sent filed!!!<Serial>");
+            LOG_ERROR("Sent filed!!!<Serial>");
         }
         else
         {
             serial->sendData(byArrPkt, pktLen);
             if(serial->receiveData(ByteArr64BitPakt, pktLen)){
                 int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("REG_VAL:0x%08X",reg_val);
+                LOG_INFO("REG_VAL:0x%08X",reg_val);
             }
         }
         break;
@@ -239,37 +240,31 @@ void RegisterWrite(iface deviceType, uint iaddr, uint ival)
     {
         serial = UartSerial::getInstance();
         if (!serial) {
-            LOG_TO_FILE("ERROR: Serial pointer is null.");
+            LOG_ERROR("ERROR: Serial pointer is null.");
             return;
         }
         if(!serial->sendData(byArrPkt, pktLen)){
-            LOG_TO_FILE("Sent filed!!!<Serial>");
+            LOG_ERROR("Sent filed!!!<Serial>");
         }
         break;
     }
 
     case iface::eETHPL1G:
     {
-        eth1G = EthernetSocket::getInstance();
-        if (!eth1G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
+        ethPl1G = EthernetSocketPL1G::getInstance();
+        if (!ethPl1G) {
+            LOG_ERROR("Ethernet pointer is null.");
             return;
         }
-        if(!eth1G->sendData(byArrPkt,pktLen,eth1G->RemoteIP.toStdString(),eth1G->Port)){
-            LOG_TO_FILE("Sent filed!!!<eth1G>");
+        if(!ethPl1G->sendData(byArrPkt,pktLen)){
+            LOG_ERROR("Sent filed!!!<eth1G>");
         }
         {
             char ByteArr64BitPakt[64]={0};
-            std::string senderIp;
-            uint16_t senderport;
-            //Read and discard the packet
-            if(eth10G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
-            {
+            int RecvByte;
+            if (ethPl1G->receiveData(ByteArr64BitPakt, pktLen, RecvByte)) {
                 int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("RegVal:0x%08X",reg_val);
-
-            }else{
-                LOG_TO_FILE("Receive filed!!!<eth10G>");
+                LOG_INFO("REG_VAL:0x%08X", reg_val);
             }
         }
         break;
@@ -277,11 +272,11 @@ void RegisterWrite(iface deviceType, uint iaddr, uint ival)
     case eETH10G:
         eth10G = EthernetSocket10G::getInstance();
         if (!eth10G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
+            LOG_ERROR("Ethernet pointer is null.");
             return;
         }
         if(!eth10G->sendData(byArrPkt,pktLen,eth10G->RemoteIP.toStdString(),eth10G->Port)){
-            LOG_TO_FILE("Sent filed!!!<eth1G>");
+            LOG_ERROR("Sent filed!!!<eth1G>");
         }
         {
             char ByteArr64BitPakt[64]={0};
@@ -291,10 +286,10 @@ void RegisterWrite(iface deviceType, uint iaddr, uint ival)
             if(eth10G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
             {
                 int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("RegVal:0x%08X",reg_val);
+                LOG_INFO("RegVal:0x%08X",reg_val);
 
             }else{
-                LOG_TO_FILE("Receive filed!!!<eth10G>");
+                LOG_ERROR("Receive filed!!!<eth10G>");
             }
         }
         break;

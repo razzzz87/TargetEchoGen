@@ -240,8 +240,9 @@ void DeviceSetup::on_PbRegRead1_clicked()
 
 void DeviceSetup::on_PbRegWrite1_clicked()
 {
-    uint iAddr = ui->LeRegWriteAddr1->text().toUInt();
-    uint iVal = ui->LeRegWriteVal1->text().toUInt();
+    bool ok;
+    uint iAddr = ui->LeRegWriteAddr1->text().toUInt(&ok,16);
+    uint iVal = ui->LeRegWriteVal1->text().toUInt(&ok,16);
     Utils::RegisterWrite(eETHPL1G,iAddr,iVal);
 }
 
