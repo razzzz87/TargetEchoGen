@@ -86,9 +86,6 @@ inline uint64_t clearBit64(uint64_t& value, int pos) {
     return value;
 }
 
-inline uint32_t isBitSet(uint32_t value, int pos) {
-    return (value >> pos) & 1U;
-}
 inline uint32_t setBits(uint32_t value, int start, int end) {
     uint32_t mask = ((1U << (end - start + 1)) - 1) << start;
     return value | mask;

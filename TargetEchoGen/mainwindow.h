@@ -7,6 +7,8 @@
 #include <udpcon.h>
 #include "FileTransferAgent.h"
 #include <QTimer>
+#include "transferprogressdialog.h"
+#include "uartserial.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,30 +28,24 @@ public:
     QWidget *device_setup;
     QGroupBox *ddr_groupbox;
     ConnectionType *conn;
-    UDP_PS1G_Con *EthPs01G;
-    UDP_PL10G_Con *EthPl10G;
-    UDP_PL1G_Con *EthPl01G;
+    UartSerial *serial;
+    TransferProgressDialog* progressDialog;
     FileTransferAgent  *setupTransferAgent;
     void load_files();
+    void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
 
 private slots:
 
     void onTimeout();
     void updateTransferProgress(qint64 percentage);
     void close_Progress_pop(void);
-    void on_pb_conn_settings_clicked();
-
-    void on_pb_refresh_button_clicked();
-
-    void on_pb_ddr_dac_iq_file_browse_clicked();
-
-    void on_pb_ddr_dac_iq_file_send_clicked();
-
-    void on_pushButton_161_clicked();
+    void on_PbConnSettings_clicked();
+    void onConnectionSuccess(iface eInterface);
+    void onConnectionFailure(iface eInterface);
+    void on_PbDAC1IQFileSend_clicked();
 
 private:
     Ui::MainWindow *ui;
-    //QProgressDialog* transferProgress = nullptr;
     bool transferCanceled = false;
 };
 #endif // MAINWINDOW_H

@@ -8,7 +8,7 @@ void FileTransferAgent::run()
 {
     LOG_INFO("FileTransferAgent::run() <ENTER>");
     LOG_DEBUG("eInterFace:%d",_eInterFace);
-    if(_eInterFace == eETH1G){
+    if(_eInterFace == eETHPL1G){
 
         if(this->_Dir == eWrite){
              LOG_DEBUG("FileTransferAgent::run()eWrite ");
@@ -64,7 +64,7 @@ void FileTransferAgent::configure(stFileReadWriteConf stReadWriteCng){
 }
 void FileTransferAgent::setupDevice(iface deviceType) {
 
-    if(deviceType == eETH1G){
+    if(deviceType == eETHPL1G){
         this->eth0 = EthernetSocket::getInstance();
     }
     else if(deviceType == eETH10G){

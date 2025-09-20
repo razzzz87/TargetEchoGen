@@ -1301,7 +1301,7 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
         }
         break;
     }
-    case iface::eETH1G:
+    case iface::eETHPL1G:
     {
         stFileReadWriteConf Cnf;
         Cnf.iFileSize = iFileSize;
@@ -1355,8 +1355,7 @@ void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
         }
         break;
     }
-
-    case iface::eETH1G:
+    case iface::eETHPL1G:
     {
         eth1G = EthernetSocket::getInstance();
         if (!eth1G) {
@@ -1410,6 +1409,8 @@ void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
         break;
     case eNONE:
         break;
+    case eETHPS1G:
+        break;
     }
     LOG_INFO("MainWindow::handleRegisterWrite() <EXIT>");
 }
@@ -1446,7 +1447,7 @@ uint Spectrum::readRegisterValue(iface deviceType,uint addr)
         }
         break;
     }
-    case iface::eETH1G:
+    case iface::eETHPL1G:
     {
         eth1G = EthernetSocket::getInstance();
         if (!eth1G) {
@@ -1506,72 +1507,70 @@ uint Spectrum::readRegisterValue(iface deviceType,uint addr)
 
 void Spectrum::on_strmnStrt_radioButton_clicked()
 {
+    if(ui->DDC_DataradioButton->isChecked())
     {
-        if(ui->DDC_DataradioButton->isChecked())
+        /// Device reset
+        //unsigned int regData=0;
+        if(ui->IOnly_radioButton->isChecked())
         {
-            /// Device reset
-            //unsigned int regData=0;
-            if(ui->IOnly_radioButton->isChecked())
-            {
-                int dataSize = ui->DataSize_comboBox->currentIndex();
-                switch (dataSize) {
-                case 0:
-                    handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/4);
+            int dataSize = ui->DataSize_comboBox->currentIndex();
+            switch (dataSize) {
+            case 0:
+                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/4);
 
-                    break;
-                case 1:
-                    handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
+                break;
+            case 1:
+                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
 
-                    break;
-                case 2:
-                    handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt());
-                                        break;
-                default:
-                    break;
-                }
+                break;
+            case 2:
+                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt());
+                break;
+            default:
+                break;
             }
-            if(ui->IQInterleved_radioButton->isChecked())
-            {
-                int dataSize = ui->DataSize_comboBox->currentIndex();
-                switch (dataSize) {
-                case 0:
-                    handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
-                    break;
-                case 1:
-                    handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt());
-                    break;
-                case 2:
-                    handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()*2);
-                    break;
-                default:
-                    break;
-                }
-            }
-            uint reg_val = readRegisterValue(iface::eETH10G,0x2F8);
-            reg_val = BitUtils::setValueInBits19to12(reg_val,ui->chnl_comboBox->currentIndex());
-            handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
-
-            reg_val = readRegisterValue(iface::eETH10G,0x2F8);
-            BitUtils::setBit(reg_val,0);
-            handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
-            reg_val = readRegisterValue(iface::eETH10G,0x2F8);
-            BitUtils::clearBit(reg_val,0);
-            handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
-
-            // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x0C,0x3);
-           // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x04,0x10);
-            if(ui->IQInterleved_radioButton->isChecked())
-                X_graphPlot->setAxisScale(QwtPlot::xBottom,0,ui->lineEdit_fs->text().toInt(),1);
-            if(ui->IOnly_radioButton->isChecked())
-                X_graphPlot->setAxisScale(QwtPlot::xBottom,0,ui->lineEdit_fs->text().toInt()/2,1);
-            Fs = ui->lineEdit_fs->text().toInt();
-            windowSize = ui->windowSize_lineEdit->text().toInt();
         }
-        ui->DDC_DataradioButton->setDisabled(true);
-        //ui->raw_radioButton->setDisabled(true);
-        ui->IQInterleved_radioButton->setDisabled(true);
-        ui->IOnly_radioButton->setDisabled(true);
+        if(ui->IQInterleved_radioButton->isChecked())
+        {
+            int dataSize = ui->DataSize_comboBox->currentIndex();
+            switch (dataSize) {
+            case 0:
+                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
+                break;
+            case 1:
+                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt());
+                break;
+            case 2:
+                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()*2);
+                break;
+            default:
+                break;
+            }
+        }
+        uint reg_val = readRegisterValue(iface::eETH10G,0x2F8);
+        reg_val = BitUtils::setValueInBits19to12(reg_val,ui->chnl_comboBox->currentIndex());
+        handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
+
+        reg_val = readRegisterValue(iface::eETH10G,0x2F8);
+        BitUtils::setBit(reg_val,0);
+        handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
+        reg_val = readRegisterValue(iface::eETH10G,0x2F8);
+        BitUtils::clearBit(reg_val,0);
+        handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
+
+        // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x0C,0x3);
+        // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x04,0x10);
+        if(ui->IQInterleved_radioButton->isChecked())
+            X_graphPlot->setAxisScale(QwtPlot::xBottom,0,ui->lineEdit_fs->text().toInt(),1);
+        if(ui->IOnly_radioButton->isChecked())
+            X_graphPlot->setAxisScale(QwtPlot::xBottom,0,ui->lineEdit_fs->text().toInt()/2,1);
+        Fs = ui->lineEdit_fs->text().toInt();
+        windowSize = ui->windowSize_lineEdit->text().toInt();
     }
+    ui->DDC_DataradioButton->setDisabled(true);
+    //ui->raw_radioButton->setDisabled(true);
+    ui->IQInterleved_radioButton->setDisabled(true);
+    ui->IOnly_radioButton->setDisabled(true);
 }
 
 

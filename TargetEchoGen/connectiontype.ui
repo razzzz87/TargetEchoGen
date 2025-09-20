@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
+    <width>621</width>
     <height>324</height>
    </rect>
   </property>
@@ -21,7 +21,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="GbConType">
      <property name="title">
       <string>Connection type</string>
      </property>
@@ -50,50 +50,50 @@
             <number>2</number>
            </property>
            <item row="1" column="0">
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="LblConnPS1G">
              <property name="text">
               <string>PS 1G</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_2">
+            <widget class="QLabel" name="LblConnPL1G">
              <property name="text">
               <string>PL 1G</string>
              </property>
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_pl_1g_ip"/>
+            <widget class="QLineEdit" name="LeConnPL1GIP"/>
            </item>
            <item row="4" column="2">
-            <widget class="QLineEdit" name="lineEdit_9"/>
+            <widget class="QLineEdit" name="LeConnPSUartBaudRate"/>
            </item>
            <item row="0" column="1">
-            <widget class="QLabel" name="label_7">
+            <widget class="QLabel" name="LblConnIPAddr">
              <property name="text">
               <string>IP Address</string>
              </property>
             </widget>
            </item>
            <item row="1" column="2">
-            <widget class="QLineEdit" name="lineEdit_ps_1g_port"/>
+            <widget class="QLineEdit" name="LeConnPS1GPort"/>
            </item>
            <item row="6" column="2">
-            <widget class="QLineEdit" name="lineEdit_10"/>
+            <widget class="QLineEdit" name="LeConnPLUartBaudRate"/>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_ps_1g_ip"/>
+            <widget class="QLineEdit" name="LeConnPS1GIP"/>
            </item>
            <item row="6" column="0">
-            <widget class="QLabel" name="label_5">
+            <widget class="QLabel" name="LblConnPLUart">
              <property name="text">
               <string>PL UART</string>
              </property>
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="QLabel" name="label_6">
+            <widget class="QLabel" name="LblConnType">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                <horstretch>0</horstretch>
@@ -106,24 +106,24 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_3">
+            <widget class="QLabel" name="LblConn10G">
              <property name="text">
               <string>PL 10G</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QLineEdit" name="lineEdit_pl_10g_ip"/>
+            <widget class="QLineEdit" name="LeConn10GIP"/>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_4">
+            <widget class="QLabel" name="LblConnPSUart">
              <property name="text">
               <string>PS UART</string>
              </property>
             </widget>
            </item>
            <item row="0" column="2">
-            <widget class="QLabel" name="label_8">
+            <widget class="QLabel" name="LblConnPort">
              <property name="text">
               <string>Port</string>
              </property>
@@ -137,42 +137,72 @@
             </widget>
            </item>
            <item row="1" column="4">
-            <widget class="QPushButton" name="pushButton_connect_ps1g">
+            <widget class="QPushButton" name="PbConnPS1GConn">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Connect</string>
              </property>
             </widget>
            </item>
            <item row="6" column="4">
-            <widget class="QPushButton" name="pushButton_conn_pl_uart">
+            <widget class="QPushButton" name="PbConnPLUartConn">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Connect</string>
              </property>
             </widget>
            </item>
            <item row="4" column="4">
-            <widget class="QPushButton" name="pushButton_conn_ps_uart">
+            <widget class="QPushButton" name="PbConnPSUartConn">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Connect</string>
              </property>
             </widget>
            </item>
            <item row="3" column="4">
-            <widget class="QPushButton" name="pushButton_connect_pl_10g">
+            <widget class="QPushButton" name="PbConn10GConn">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Connect</string>
              </property>
             </widget>
            </item>
            <item row="2" column="4">
-            <widget class="QPushButton" name="pushButton_connect_pl_1g">
+            <widget class="QPushButton" name="PbConnPL1GConn">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Connect</string>
              </property>
             </widget>
            </item>
            <item row="1" column="3">
-            <widget class="QLabel" name="label_conn_ps_1g_led">
+            <widget class="QLabel" name="LblConnPS1GStatusLed">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -203,7 +233,7 @@
             </widget>
            </item>
            <item row="2" column="3">
-            <widget class="QLabel" name="label_conn_pl_1g_led">
+            <widget class="QLabel" name="LblConnPL1GStatusLed">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -234,7 +264,7 @@
             </widget>
            </item>
            <item row="3" column="3">
-            <widget class="QLabel" name="label_conn_pl_10g_led">
+            <widget class="QLabel" name="LblConn10GStatusLed">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -265,7 +295,7 @@
             </widget>
            </item>
            <item row="4" column="3">
-            <widget class="QLabel" name="label_con_ps_uart_led">
+            <widget class="QLabel" name="LblConnPSUartStatusLed">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -296,7 +326,7 @@
             </widget>
            </item>
            <item row="6" column="3">
-            <widget class="QLabel" name="label_conn_pl_uart_led">
+            <widget class="QLabel" name="LblConnPLUartStatusLed">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -363,6 +393,12 @@
               </property>
              </item>
             </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLineEdit" name="LeConnPL1GPort"/>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLineEdit" name="LeConn10GPort"/>
            </item>
           </layout>
          </item>

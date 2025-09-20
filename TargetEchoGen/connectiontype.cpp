@@ -8,29 +8,34 @@ ConnectionType::ConnectionType(QWidget *parent)
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
 
-    ui->lineEdit_ps_1g_ip->setText("127.0.0.1");
-    ui->lineEdit_pl_1g_ip->setText("10.0.0.123");
-    ui->lineEdit_pl_10g_ip->setText("192.168.30.245");
-    ui->lineEdit_ps_1g_port->setText("12345");
+    ui->LeConnPS1GIP->setText("127.0.0.1");
+    ui->LeConnPL1GIP->setText("10.0.0.123");
+    ui->LeConn10GIP->setText("192.168.30.245");
+    ui->LeConnPS1GPort->setText("12345");
+    ui->LeConnPL1GPort->setText("12345");
+    ui->LeConn10GPort->setText("12345");
 
-    ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-circle-grey.png"));
-    ui->label_conn_pl_1g_led->setPixmap(QPixmap(":/images/led-circle-grey.png"));
-    ui->label_conn_pl_10g_led->setPixmap(QPixmap(":/images/led-circle-grey.png"));
-    ui->label_con_ps_uart_led->setPixmap(QPixmap(":/images/led-circle-grey.png"));
-    ui->label_conn_pl_uart_led->setPixmap(QPixmap(":/images/led-circle-grey.png"));
+    ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
+    ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
+    ui->LblConn10GStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
+    ui->LblConnPSUartStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
+    ui->LblConnPLUartStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
 
     // Regular expression for IPv4
     QRegularExpression ipv4Regex("^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$");
     QRegularExpressionValidator *ipv4Validator = new QRegularExpressionValidator(ipv4Regex, this);
-    ui->lineEdit_ps_1g_ip->setValidator(ipv4Validator);
-    ui->lineEdit_pl_1g_ip->setValidator(ipv4Validator);
-    ui->lineEdit_pl_10g_ip->setValidator(ipv4Validator);
+    ui->LeConnPS1GIP->setValidator(ipv4Validator);
+    ui->LeConnPL1GIP->setValidator(ipv4Validator);
+    ui->LeConn10GIP->setValidator(ipv4Validator);
+    //ui->PbConnPL1GConn->setFixedWidth(100);
+    int maxWidth = std::max(
+        ui->PbConnPL1GConn->fontMetrics().horizontalAdvance("Connect"),
+        ui->PbConnPL1GConn->fontMetrics().horizontalAdvance("Disconnect")
+        );
+    ui->PbConnPL1GConn->setMinimumWidth(maxWidth + 20);
 
     QRegularExpression portregex("^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$");
-    ui->lineEdit_ps_1g_port->setValidator(new QRegularExpressionValidator(portregex));
-    UDPPS_01G_Con = &UDP_PS1G_Con::getInstance();
-    UDPPL_10G_Con = &UDP_PL10G_Con::getInstance();
-    UDPPL_01G_Con = &UDP_PL1G_Con::getInstance();
+    ui->LeConnPS1GIP->setValidator(new QRegularExpressionValidator(portregex));
 
 }
 
@@ -39,122 +44,100 @@ ConnectionType::~ConnectionType()
     delete ui;
 }
 
-void ConnectionType::on_pushButton_connect_pl_1g_clicked()
+void ConnectionType::on_PbConnPS1GConn_clicked()
 {
-    LOG_TO_FILE(":Entry:");
-    if(ui->pushButton_connect_pl_1g->text() == "Connect"){
-
-        QString ip = ui->lineEdit_pl_1g_ip->text();
-        LOG_TO_FILE("PS 1G IP Address:%s\n",ip.toStdString().c_str());
-        UDPPL_01G_Con->bindSocket(ip,000);
-        if(UDPPL_01G_Con->getConStatus() == NOT_CONNECTED){
-            LOG_TO_FILE("ERROR: Con Failed : PS 1G IP Address:%s\n",ip.toStdString().c_str());
-            ui->label_conn_pl_1g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-            ui->pushButton_connect_pl_1g->setText("Connect");
-        }else{
-            ui->pushButton_connect_pl_1g->setText("Disconnect");
-            ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
-            LOG_TO_FILE("UDP Connection succeeded\n");
+    LOG_INFO("ConnectionType::on_PbConnPS1GConn_clicked() <ENTER>");
+    if(ui->PbConnPS1GConn->text() == "Connect")
+    {
+        QString TargetIP = ui->LeConnPL1GPort->text();
+        _pEthPL1G = EthernetSocketPL1G::Create("0.0.0.0",0,TargetIP,ui->LeConnPL1GPort->text().toInt());
+        if(_pEthPL1G != nullptr){
+            ui->PbConnPS1GConn->setText("Disconnect");
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
+            emit connectionSucceeded(eETHPS1G);
         }
-    }else{
-        if(ui->pushButton_connect_pl_1g->text() == "Disconnect")
+        else
         {
-            if(UDPPL_01G_Con->Disconnect()){
-                ui->pushButton_connect_pl_1g->setText("Connect");
-                qDebug() << "Diconnection done: IP:";
-                ui->label_conn_pl_1g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-                LOG_TO_FILE("UDP Connection closed successfully\n");
-            }else{
-                ui->pushButton_connect_pl_1g->setText("Disconnect");
-                LOG_TO_FILE("ERROR: Disconnection failed\n");
-            }
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+            ui->PbConnPL1GConn->setText("Connect   ");
+            emit connectionFailed(eETHPS1G);
         }
     }
-    LOG_TO_FILE(":Exit==>");
+    else
+    {
+        if(ui->PbConnPL1GConn->text() == "Disconnect")
+        {
+            EthernetSocket::destroyInstance();
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+            ui->PbConnPL1GConn->setText("Connect   ");
+            emit connectionFailed(eETHPS1G);
+        }
+    }
+    LOG_INFO("ConnectionType::on_PbConnPS1GConn_clicked() <EXIT>");
 }
 
 
-void ConnectionType::on_pushButton_connect_ps1g_clicked()
+void ConnectionType::on_PbConnPL1GConn_clicked()
 {
-    LOG_TO_FILE(":Entry:");
-    if(ui->pushButton_connect_ps1g->text() == "Connect"){
-
-        QString remote_ip = ui->lineEdit_ps_1g_ip->text();
-        qint16 remote_port = ui->lineEdit_ps_1g_port->text().toInt();
-        LOG_TO_FILE("PS 1G IP Address:%s Port: %d",remote_ip.toStdString().c_str(),remote_port);
-        qDebug() << "IP:"<<remote_ip << " port " << remote_port;
-
-        UDPPS_01G_Con->bindSocket(remote_port);
-        UDPPS_01G_Con->remote_ip = remote_ip;
-        UDPPS_01G_Con->remote_port = remote_port;
-
-        if(UDPPS_01G_Con->getConStatus() == NOT_CONNECTED){
-            qDebug() << "Failed IP:"<<remote_ip << " port " << remote_port;
-            LOG_TO_FILE("ERROR: Con Failed : PS 1G IP Address:%s Port: %d",remote_ip.toStdString().c_str(),remote_port);
-            ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-            ui->pushButton_connect_ps1g->setText("Connect");
-        }else{
-            ui->pushButton_connect_ps1g->setText("Disconnect");
-            ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
-            LOG_TO_FILE("UDP Connection succeeded");
+    LOG_INFO("ConnectionType::on_PbConnPL1GConn_clicked() <ENTER>");
+    if(ui->PbConnPL1GConn->text() == "Connect")
+    {
+        QString TargetIP = ui->LeConnPL1GPort->text();
+        _pEthPL1G = EthernetSocketPL1G::Create("192.168.30.240",0,TargetIP,ui->LeConnPL1GPort->text().toInt());
+        if(_pEthPL1G != nullptr){
+            ui->PbConnPL1GConn->setText("Disconnect");
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
+            emit connectionSucceeded(eETHPL1G);
         }
-    }else{
-        if(ui->pushButton_connect_ps1g->text() == "Disconnect")
+        else
         {
-            if(UDPPS_01G_Con->Disconnect()){
-                ui->pushButton_connect_ps1g->setText("Connect");
-                qDebug() << "Diconnection done: IP:";
-                UDPPS_01G_Con->IsConnected = false;
-                ui->label_conn_ps_1g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-                LOG_TO_FILE("UDP Connection closed successfully");
-
-            }else{
-                ui->pushButton_connect_ps1g->setText("Disconnect");
-                LOG_TO_FILE("ERROR: Disconnection failed");
-            }
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+            ui->PbConnPL1GConn->setText("Connect");
+            emit connectionFailed(eETHPL1G);
         }
     }
-    LOG_TO_FILE(":Exit==>");
-}
-
-
-void ConnectionType::on_pushButton_connect_pl_10g_clicked()
-{
-    LOG_TO_FILE(":Entry");
-    if(ui->pushButton_connect_pl_10g->text() == "Connect"){
-
-        QString ip = ui->lineEdit_pl_10g_ip->text();
-        LOG_TO_FILE("PS 1G IP Address:%s",ip.toStdString().c_str());
-        UDPPL_10G_Con->bindSocket(ip,000);
-        if(UDPPL_10G_Con->getConStatus() == NOT_CONNECTED){
-            LOG_TO_FILE("ERROR: Con Failed : PS 1G IP Address:%s",ip.toStdString().c_str());
-            ui->label_conn_pl_10g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-            ui->pushButton_connect_pl_10g->setText("Connect");
-        }else{
-            ui->pushButton_connect_pl_10g->setText("Disconnect");
-            ui->label_conn_pl_10g_led->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
-            LOG_TO_FILE("UDP Connection succeeded");
-        }
-    }else{
-        if(ui->pushButton_connect_pl_10g->text() == "Disconnect")
+    else
+    {
+        if(ui->PbConnPL1GConn->text() == "Disconnect")
         {
-            if(UDPPL_01G_Con->Disconnect()){
-                ui->pushButton_connect_pl_10g->setText("Connect");
-                qDebug() << "Diconnection done: IP:";
-                ui->label_conn_pl_10g_led->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-                LOG_TO_FILE("UDP Connection closed successfully");
-            }else{
-                ui->pushButton_connect_pl_10g->setText("Disconnect");
-                LOG_TO_FILE("ERROR: Disconnection failed");
-            }
+            EthernetSocketPL1G::destroyInstance();
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+            ui->PbConnPL1GConn->setText("Connect");
+            emit connectionFailed(eETHPL1G);
         }
     }
-    LOG_TO_FILE(":Exit==>");
+    LOG_INFO("ConnectionType::on_PbConnPL1GConn_clicked() <EXIT>");
 }
 
-
-void ConnectionType::on_pushButton_conn_ps_uart_clicked()
+void ConnectionType::on_PbConn10GConn_clicked()
 {
-
+    LOG_INFO("ConnectionType::on_PbConn10GConn_clicked() <ENTER>");
+    if(ui->PbConnPL1GConn->text() == "Connect")
+    {
+        QString TargetIP = ui->LeConnPL1GPort->text();
+        _pEthPL10G = EthernetSocket10G::Create("192.168.30.240",0,TargetIP,ui->LeConnPL1GPort->text().toInt());
+        if(_pEthPL10G != nullptr){
+            ui->PbConn10GConn->setText("Disconnect");
+            ui->LblConn10GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
+            emit connectionSucceeded(eETH10G);
+        }
+        else
+        {
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+            ui->PbConnPL1GConn->setText("Connect");
+            emit connectionFailed(eETH10G);
+        }
+    }
+    else
+    {
+        if(ui->PbConn10GConn->text() == "Disconnect")
+        {
+            EthernetSocket10G::destroyInstance();
+            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+            ui->PbConnPL1GConn->setText("Connect");
+            emit connectionFailed(eETH10G);
+        }
+    }
+    LOG_INFO("ConnectionType::on_PbConnPL1GConn_clicked() <EXIT>");
 }
 

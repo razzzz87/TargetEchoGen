@@ -9,6 +9,7 @@
 #include <QLineEdit>
 #include "FileTransferAgent.h"
 #include <QFileDialog>
+#include "transferprogressdialog.h"
 
 namespace Ui {
 class DeviceSetup;
@@ -24,34 +25,32 @@ public:
     uint64_t ParseRegReadResponsePkt(char *rcvpkt, int pktLen);
     void readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
     void WriteRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
+    void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
+    TransferProgressDialog* progressDialog;
+    FileTransferAgent  *setupTransferAgent;
+    UartSerial *_pSerial;
+    EthernetSocket *_pEthPS1G;
+    EthernetSocketPL1G *_pEthPL1G;
+    EthernetSocket10G *_pEth10G;
 private slots:
-    void on_pushButton_device_setup_reg1_read_clicked();
-    void on_pushButton_device_setup_reg2_read_clicked();
-    void on_pushButton_device_setup_reg3_read_clicked();
-    void on_pushButton_device_setup_reg4_read_clicked();
-
-    void on_pushButton_device_setup_wr_reg1_clicked();
-    void on_pushButton_device_setup_wr_reg2_clicked();
-    void on_pushButton_device_setup_wr_reg3_clicked();
-    void on_pushButton_device_setup_wr_reg4_clicked();
-
-    void on_pushButton_devsetup_mem_read_start_clicked();
-    void on_pushButton_device_setup_file_mem_read_clicked();
-
     void updateTransferProgress(qint64 percentage);
     void close_Progress_pop(void);
+    void on_PbRegRead1_clicked();
+    void on_PbRegWrite1_clicked();
+
+    void on_PbMemReadFileNameBrowse_clicked();
+
+    void on_PbMemReadRead_clicked();
+
+    void on_PbMemWriteFileBrowse_clicked();
+
+    void on_PbMemWrite_clicked();
 
 private:
     Ui::DeviceSetup *ui;
-    UDP_PS1G_Con *EthPs01G;
-    UDP_PL10G_Con *EthPl10G;
-    UDP_PL1G_Con *EthPl01G;
-    FileTransferAgent  *setupTransferAgent;
     Proto objProto;
     QHostAddress ipAddress;
     quint16 port;
-
-    //QProgressDialog* transferProgress = nullptr;
     bool transferCanceled = false;
 };
 

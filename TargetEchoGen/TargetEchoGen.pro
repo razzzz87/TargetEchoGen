@@ -15,10 +15,12 @@ QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 SOURCES += \
     Proto.cpp \
+    Utils.cpp \
     connectiontype.cpp \
     devicesetup.cpp \
     ethernetsocket.cpp \
     ethernetsocket10G.cpp \
+    ethernetsocketpl1g.cpp \
     fileprocessing.cpp \
     fileprocessingconf.cpp \
     FileTransferAgent.cpp \
@@ -49,6 +51,7 @@ HEADERS += \
     devicesetup.h \
     ethernetsocket.h \
     ethernetsocket10G.h \
+    ethernetsocketpl1g.h \
     fileprocessing.h \
     fileprocessingconf.h \
     FileTransferAgent.h \
