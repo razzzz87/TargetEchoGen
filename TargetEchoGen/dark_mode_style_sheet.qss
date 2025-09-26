@@ -29,7 +29,7 @@ QPushButton {
     padding: 6px;
     font-weight: bold;
     font-size: 14px;
-    min-height: 22px;
+    min-height: 25px;
 }
 
 QPushButton:hover {

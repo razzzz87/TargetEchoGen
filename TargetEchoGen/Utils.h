@@ -62,4 +62,5 @@ void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lin
 uint readRegisterValue(iface deviceType,uint addr);
 void RegisterWrite(iface deviceType, uint iaddr, uint ival);
 }
+
 #endif // UTILS_H

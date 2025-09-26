@@ -43,6 +43,7 @@ SOURCES += \
     udppl_10gcon.cpp
 
 HEADERS += \
+    AvrRegAddrDef.h \
     IUDPConnection.h \
     Proto.h \
     RegDef.h \

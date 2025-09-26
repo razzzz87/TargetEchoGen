@@ -667,7 +667,7 @@
          </size>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="elideMode">
          <enum>Qt::TextElideMode::ElideRight</enum>
@@ -686,7 +686,7 @@
            </rect>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
@@ -2113,7 +2113,7 @@
             <x>10</x>
             <y>10</y>
             <width>551</width>
-            <height>631</height>
+            <height>671</height>
            </rect>
           </property>
           <property name="title">
@@ -2130,9 +2130,9 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_45">
               <item>
-               <widget class="QTableWidget" name="tableWidget_playback_3">
+               <widget class="QTableWidget" name="TwPlayback">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -2140,7 +2140,7 @@
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
-                  <height>521</height>
+                  <height>568</height>
                  </size>
                 </property>
                 <column>
@@ -2224,10 +2224,10 @@
          <widget class="QGroupBox" name="groupBox_playback_if_data_send_3">
           <property name="geometry">
            <rect>
-            <x>583</x>
-            <y>0</y>
+            <x>584</x>
+            <y>12</y>
             <width>419</width>
-            <height>629</height>
+            <height>673</height>
            </rect>
           </property>
           <property name="title">
@@ -2378,6 +2378,12 @@
                 </item>
                 <item row="0" column="2">
                  <widget class="QPushButton" name="PBplaybackssdbrowse">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
                   <property name="icon">
                    <iconset resource="TargetEchoGen.qrc">
                     <normaloff>:/images/file-browser-icon-23.jpg</normaloff>:/images/file-browser-icon-23.jpg</iconset>
@@ -2392,6 +2398,12 @@
                 </item>
                 <item row="0" column="3">
                  <widget class="QPushButton" name="PBplaybackssdsend">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Send</string>
                   </property>
@@ -2446,16 +2458,35 @@
                <layout class="QGridLayout" name="gridLayout_66">
                 <item row="1" column="3">
                  <widget class="QPushButton" name="PBpbssdAMPLsend">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Send</string>
                   </property>
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QSpinBox" name="SBpbssdAMPLfixlevel"/>
+                 <widget class="QSpinBox" name="SBpbssdAMPLfixlevel">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item row="2" column="3">
                  <widget class="QPushButton" name="PBpbssdAMPLdecr">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Decr</string>
                   </property>
@@ -2476,17 +2507,37 @@
                  </widget>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QLineEdit" name="LEpbssdAMPLbasevalue"/>
+                 <widget class="QLineEdit" name="LEpbssdAMPLbasevalue">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item row="2" column="2">
                  <widget class="QPushButton" name="PBpbssdAMPLincr">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Incr</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QLineEdit" name="LEpbssdAMPLfile"/>
+                 <widget class="QLineEdit" name="LEpbssdAMPLfile">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item row="0" column="0">
                  <widget class="QRadioButton" name="radioButton_27">
@@ -2497,6 +2548,12 @@
                 </item>
                 <item row="0" column="3">
                  <widget class="QPushButton" name="PBpbssdAMPLset">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Set</string>
                   </property>
@@ -2504,6 +2561,12 @@
                 </item>
                 <item row="1" column="2">
                  <widget class="QPushButton" name="PBpbssdAMPLbrowse">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Browse</string>
                   </property>
@@ -2516,6 +2579,18 @@
            </item>
            <item>
             <widget class="QPushButton" name="PBpbssdAMPLapply">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>32</height>
+              </size>
+             </property>
              <property name="text">
               <string>Apply</string>
              </property>
@@ -2525,6 +2600,18 @@
             <layout class="QHBoxLayout" name="horizontalLayout_75">
              <item>
               <widget class="QPushButton" name="PBpbssdAMPLplay">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>32</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Play</string>
                </property>
@@ -2532,6 +2619,18 @@
              </item>
              <item>
               <widget class="QPushButton" name="PBpbssdAMPLstart">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>32</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Start</string>
                </property>
@@ -2539,6 +2638,18 @@
              </item>
              <item>
               <widget class="QPushButton" name="PBpbssdAMPLstop">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>32</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Stop</string>
                </property>
@@ -2552,9 +2663,9 @@
           <property name="geometry">
            <rect>
             <x>1023</x>
-            <y>320</y>
+            <y>378</y>
             <width>427</width>
-            <height>258</height>
+            <height>271</height>
            </rect>
           </property>
           <property name="title">
@@ -2620,6 +2731,12 @@
                 </item>
                 <item row="6" column="0">
                  <widget class="QPushButton" name="pushButton_153">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="text">
                    <string>Start</string>
                   </property>
@@ -2641,6 +2758,12 @@
                 </item>
                 <item row="6" column="3">
                  <widget class="QPushButton" name="pushButton_154">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="text">
                    <string>Stop</string>
                   </property>
@@ -2674,9 +2797,9 @@
           <property name="geometry">
            <rect>
             <x>1024</x>
-            <y>180</y>
+            <y>222</y>
             <width>424</width>
-            <height>138</height>
+            <height>149</height>
            </rect>
           </property>
           <property name="title">
@@ -2687,6 +2810,12 @@
             <layout class="QGridLayout" name="gridLayout_68">
              <item row="2" column="5">
               <widget class="QPushButton" name="pushButton_155">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Set</string>
                </property>
@@ -2708,6 +2837,12 @@
              </item>
              <item row="0" column="5">
               <widget class="QPushButton" name="pushButton_156">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Set</string>
                </property>
@@ -2743,6 +2878,12 @@
              </item>
              <item row="1" column="5">
               <widget class="QPushButton" name="pushButton_157">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Set</string>
                </property>
@@ -2787,9 +2928,9 @@
           <property name="geometry">
            <rect>
             <x>1023</x>
-            <y>4</y>
+            <y>11</y>
             <width>424</width>
-            <height>174</height>
+            <height>203</height>
            </rect>
           </property>
           <property name="title">
@@ -2800,6 +2941,12 @@
             <layout class="QHBoxLayout" name="horizontalLayout_78">
              <item>
               <widget class="QPushButton" name="pushButton_158">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>DAC1 Default</string>
                </property>
@@ -2807,6 +2954,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_159">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>DAC2 Default</string>
                </property>
@@ -2814,6 +2967,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_160">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>DAC3 Default</string>
                </property>
@@ -2856,6 +3015,12 @@
              </item>
              <item row="0" column="2">
               <widget class="QPushButton" name="pushButton_161">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Update</string>
                </property>
@@ -2905,6 +3070,12 @@
              </item>
              <item row="0" column="2">
               <widget class="QPushButton" name="pushButton_162">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Update</string>
                </property>
@@ -2954,6 +3125,12 @@
              </item>
              <item row="0" column="2">
               <widget class="QPushButton" name="pushButton_163">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Update</string>
                </property>
@@ -2974,8 +3151,8 @@
           <property name="geometry">
            <rect>
             <x>1467</x>
-            <y>4</y>
-            <width>427</width>
+            <y>10</y>
+            <width>418</width>
             <height>509</height>
            </rect>
           </property>
@@ -3083,6 +3260,12 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_164">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
              <property name="text">
               <string>Refresh</string>
              </property>
@@ -3090,6 +3273,12 @@
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_165">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
              <property name="text">
               <string>Save Log</string>
              </property>
@@ -3101,10 +3290,16 @@
           <property name="geometry">
            <rect>
             <x>1024</x>
-            <y>590</y>
+            <y>656</y>
             <width>431</width>
-            <height>24</height>
+            <height>30</height>
            </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
           </property>
           <property name="text">
            <string>Prepare SSD</string>
