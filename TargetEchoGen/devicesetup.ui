@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QGroupBox" name="groupBox_2">
+  <widget class="QGroupBox" name="GbDevSetupLMXSetup">
    <property name="geometry">
     <rect>
      <x>1080</x>
@@ -38,7 +38,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="1">
-          <widget class="QComboBox" name="comboBox_2">
+          <widget class="QComboBox" name="CbLMXInitDevice">
            <item>
             <property name="text">
              <string>LMX</string>
@@ -47,28 +47,28 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QPushButton" name="pushButton_6">
+          <widget class="QPushButton" name="PbLMXInitPreset">
            <property name="text">
             <string>Preset</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_6">
+          <widget class="QLabel" name="LblLMXInitDevice">
            <property name="text">
             <string>Device </string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QPushButton" name="pushButton_5">
+          <widget class="QPushButton" name="PbLMXInitDefault">
            <property name="text">
             <string>Default</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QPushButton" name="pushButton_7">
+          <widget class="QPushButton" name="PbLMXInitFileLoad">
            <property name="text">
             <string>File Load</string>
            </property>
@@ -81,7 +81,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_3">
+  <widget class="QGroupBox" name="GbDevSetupTASSetup">
    <property name="geometry">
     <rect>
      <x>719</x>
@@ -106,34 +106,34 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="1">
-          <widget class="QSpinBox" name="spinBox_5"/>
+          <widget class="QSpinBox" name="SpTASTmpDegree"/>
          </item>
          <item row="1" column="1">
-          <widget class="QSpinBox" name="spinBox_6"/>
+          <widget class="QSpinBox" name="SpTASTmpAna"/>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_8">
+          <widget class="QLabel" name="LblTASTmpAna">
            <property name="text">
             <string>Temp_Ana</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_7">
+          <widget class="QLabel" name="LblTASTmpDegree">
            <property name="text">
             <string>Temp_Dig</string>
            </property>
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="pushButton_9">
+          <widget class="QPushButton" name="PbTASTmpDegree">
            <property name="text">
             <string>Set</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QPushButton" name="pushButton_8">
+          <widget class="QPushButton" name="PbTASTmpAna">
            <property name="text">
             <string>Set</string>
            </property>
@@ -146,7 +146,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_5">
+  <widget class="QGroupBox" name="GbDevSetupDACInit">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -171,21 +171,21 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="1" column="2">
-          <widget class="QPushButton" name="pushButton_12">
+          <widget class="QPushButton" name="PbDACInitFileLoad">
            <property name="text">
             <string>File Load</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QPushButton" name="pushButton_10">
+          <widget class="QPushButton" name="PbDACInitPreset">
            <property name="text">
             <string>Preset</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QComboBox" name="comboBox_4">
+          <widget class="QComboBox" name="CbDACInit">
            <item>
             <property name="text">
              <string>DAC 1</string>
@@ -204,7 +204,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QPushButton" name="pushButton_13">
+          <widget class="QPushButton" name="PbDACInitDefault">
            <property name="text">
             <string>Default</string>
            </property>
@@ -994,7 +994,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_10">
+  <widget class="QGroupBox" name="GbDevSetupLMKInit">
    <property name="geometry">
     <rect>
      <x>374</x>
@@ -1019,7 +1019,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_6">
          <item row="0" column="1">
-          <widget class="QComboBox" name="comboBox_3">
+          <widget class="QComboBox" name="CbLMKInit">
            <item>
             <property name="text">
              <string>LMK</string>
@@ -1028,28 +1028,28 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QPushButton" name="pushButton_11">
+          <widget class="QPushButton" name="PbLMKInitPreset">
            <property name="text">
             <string>Preset</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_9">
+          <widget class="QLabel" name="LblLMKInitCbLbl">
            <property name="text">
             <string>Device </string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QPushButton" name="pushButton_14">
+          <widget class="QPushButton" name="PbLMKInitDefault">
            <property name="text">
             <string>Default</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QPushButton" name="pushButton_15">
+          <widget class="QPushButton" name="PbLMKInitFileLoad">
            <property name="text">
             <string>File Load</string>
            </property>
