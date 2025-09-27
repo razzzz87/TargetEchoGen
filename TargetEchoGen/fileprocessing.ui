@@ -23,9 +23,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>20</y>
-        <width>681</width>
-        <height>190</height>
+        <y>26</y>
+        <width>715</width>
+        <height>210</height>
        </rect>
       </property>
       <property name="title">
@@ -33,7 +33,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <property name="topMargin">
-        <number>2</number>
+        <number>9</number>
        </property>
        <item>
         <widget class="QGroupBox" name="groupBox_3">
@@ -173,9 +173,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>220</y>
+        <y>250</y>
         <width>271</width>
-        <height>212</height>
+        <height>232</height>
        </rect>
       </property>
       <property name="title">
@@ -241,9 +241,9 @@
       <property name="geometry">
        <rect>
         <x>290</x>
-        <y>220</y>
-        <width>401</width>
-        <height>211</height>
+        <y>250</y>
+        <width>439</width>
+        <height>231</height>
        </rect>
       </property>
       <property name="title">

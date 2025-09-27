@@ -12,7 +12,7 @@
 #include <QThread>
 #include <QUdpSocket>
 #include <QMutex>
-#include "Proto.h"
+#include "proto.h"
 #include "ethernetsocket.h"
 #include "uartserial.h"
 #include "ethernetsocket10G.h"

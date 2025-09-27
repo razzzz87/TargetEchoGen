@@ -25,9 +25,9 @@
    <property name="title">
     <string>LMX Setup</string>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_5">
+   <layout class="QHBoxLayout" name="HLayoutLMX">
     <item>
-     <widget class="QFrame" name="frame_2">
+     <widget class="QFrame" name="FrameDevSetupLMXInit">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -36,7 +36,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
        <item>
-        <layout class="QGridLayout" name="gridLayout_2">
+        <layout class="QGridLayout" name="GLayoutLMX">
          <item row="0" column="1">
           <widget class="QComboBox" name="CbLMXInitDevice">
            <item>
@@ -93,9 +93,9 @@
    <property name="title">
     <string>Temprature Alarm Setup</string>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_7">
+   <layout class="QHBoxLayout" name="HLayoutTAS">
     <item>
-     <widget class="QFrame" name="frame_3">
+     <widget class="QFrame" name="FrameDevSetupTASInit">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -104,7 +104,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_10">
        <item>
-        <layout class="QGridLayout" name="gridLayout_3">
+        <layout class="QGridLayout" name="GLayoutTAS">
          <item row="0" column="1">
           <widget class="QSpinBox" name="SpTASTmpDegree"/>
          </item>
@@ -158,9 +158,9 @@
    <property name="title">
     <string>DAC Init</string>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_9">
+   <layout class="QHBoxLayout" name="HLayoutDAC">
     <item>
-     <widget class="QFrame" name="frame_5">
+     <widget class="QFrame" name="FrameDACInit">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -169,7 +169,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_12">
        <item>
-        <layout class="QGridLayout" name="gridLayout_5">
+        <layout class="QGridLayout" name="GLayoutDAC">
          <item row="1" column="2">
           <widget class="QPushButton" name="PbDACInitFileLoad">
            <property name="text">
@@ -217,7 +217,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_6">
+  <widget class="QGroupBox" name="GbDeviceRegisterAccess">
    <property name="geometry">
     <rect>
      <x>5</x>
@@ -231,14 +231,14 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_17">
     <item>
-     <widget class="QFrame" name="frame">
+     <widget class="QFrame" name="FrameDevSetupRegisterReadWrite">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Shadow::Raised</enum>
       </property>
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="GbRegisterRead">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -252,7 +252,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="HLayoutRegRead1">
           <item>
            <widget class="QLabel" name="label_2">
             <property name="sizePolicy">
@@ -315,7 +315,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QHBoxLayout" name="HLayoutRegRead2">
           <item>
            <widget class="QLabel" name="label_27">
             <property name="sizePolicy">
@@ -378,7 +378,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_13">
+         <layout class="QHBoxLayout" name="HLayoutRegRead3">
           <item>
            <widget class="QLabel" name="label_29">
             <property name="sizePolicy">
@@ -441,7 +441,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_14">
+         <layout class="QHBoxLayout" name="HLayoutRegRead4">
           <item>
            <widget class="QLabel" name="label_31">
             <property name="sizePolicy">
@@ -505,7 +505,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_9">
+      <widget class="QGroupBox" name="GbRegisterWrite">
        <property name="geometry">
         <rect>
          <x>732</x>
@@ -519,7 +519,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="HLayoutRegWrite1">
           <item>
            <widget class="QLabel" name="label_3">
             <property name="sizePolicy">
@@ -568,7 +568,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_15">
+         <layout class="QHBoxLayout" name="HLayoutRegWrite2">
           <item>
            <widget class="QLabel" name="label_33">
             <property name="sizePolicy">
@@ -617,7 +617,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_18">
+         <layout class="QHBoxLayout" name="HLayoutRegWrite3">
           <item>
            <widget class="QLabel" name="label_37">
             <property name="sizePolicy">
@@ -666,7 +666,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_16">
+         <layout class="QHBoxLayout" name="HLayoutRegWrite4">
           <item>
            <widget class="QLabel" name="label_35">
             <property name="sizePolicy">
@@ -834,7 +834,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_8">
+  <widget class="QGroupBox" name="GbMemReadWrite">
    <property name="geometry">
     <rect>
      <x>7</x>
@@ -848,7 +848,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QFrame" name="frame_7">
+     <widget class="QFrame" name="FrameDevSetupMemReadWrite">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -857,20 +857,13 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_21">
        <item>
-        <widget class="QLabel" name="label_26">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_7">
+        <widget class="QGroupBox" name="GbMemRead">
          <property name="title">
           <string>Memory Read</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_11">
           <item>
-           <widget class="QFrame" name="frame_6">
+           <widget class="QFrame" name="FrameMemRead">
             <property name="frameShape">
              <enum>QFrame::Shape::StyledPanel</enum>
             </property>
@@ -879,7 +872,7 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_19">
              <item>
-              <layout class="QGridLayout" name="gridLayout_4">
+              <layout class="QGridLayout" name="GLayoutMemRead">
                <item row="0" column="2">
                 <widget class="QPushButton" name="PbMemReadFileNameBrowse">
                  <property name="text">
@@ -927,13 +920,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_4">
+        <widget class="QGroupBox" name="GbMemWrite">
          <property name="title">
           <string>Memory Write</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
-           <widget class="QFrame" name="frame_4">
+           <widget class="QFrame" name="FrameMemWrite">
             <property name="frameShape">
              <enum>QFrame::Shape::StyledPanel</enum>
             </property>
@@ -942,7 +935,7 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_20">
              <item>
-              <layout class="QGridLayout" name="gridLayout">
+              <layout class="QGridLayout" name="GLayoutMemWrite">
                <item row="0" column="5">
                 <widget class="QPushButton" name="PbMemWrite">
                  <property name="text">
@@ -1006,9 +999,9 @@
    <property name="title">
     <string>LMK Init</string>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_22">
+   <layout class="QHBoxLayout" name="HLayoutLMK">
     <item>
-     <widget class="QFrame" name="frame_8">
+     <widget class="QFrame" name="FrameDevSetupLMKInit">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -1017,7 +1010,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_23">
        <item>
-        <layout class="QGridLayout" name="gridLayout_6">
+        <layout class="QGridLayout" name="GLayoutLMK">
          <item row="0" column="1">
           <widget class="QComboBox" name="CbLMKInit">
            <item>
@@ -1062,11 +1055,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_11">
+  <widget class="QGroupBox" name="GbRTCClockSetting">
    <property name="geometry">
     <rect>
      <x>1460</x>
-     <y>7</y>
+     <y>6</y>
      <width>291</width>
      <height>131</height>
     </rect>
@@ -1076,7 +1069,7 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_24">
     <item>
-     <widget class="QFrame" name="frame_9">
+     <widget class="QFrame" name="FrameRTCClockSetting">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -1085,30 +1078,30 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_25">
        <item>
-        <layout class="QGridLayout" name="gridLayout_7">
+        <layout class="QGridLayout" name="GLayoutRTC">
          <item row="1" column="1">
-          <widget class="QPushButton" name="pushButton_27">
+          <widget class="QPushButton" name="PbRTCDateTimeSet">
            <property name="text">
             <string>Set Time</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QPushButton" name="pushButton_25">
+          <widget class="QPushButton" name="PbRTCDateTimeGet">
            <property name="text">
             <string>Get Time</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLineEdit" name="lineEdit_6">
+          <widget class="QLineEdit" name="LeRTCDateTimeSet">
            <property name="text">
             <string>09-10-2024:10:30</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLineEdit" name="lineEdit_5">
+          <widget class="QLineEdit" name="LeRTCDateTimeGet">
            <property name="text">
             <string>09-10-2024:10:30</string>
            </property>

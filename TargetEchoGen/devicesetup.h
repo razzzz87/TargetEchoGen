@@ -2,7 +2,7 @@
 #define DEVICESETUP_H
 
 #include <QWidget>
-#include "Proto.h"
+#include "proto.h"
 #include "udpcon.h"
 #include "udppl1gcon.h"
 #include "udppl_10gcon.h"

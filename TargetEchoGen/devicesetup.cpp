@@ -3,7 +3,7 @@
 #include <QMessageBox>
 #include <QHostAddress>
 #include "log.h"
-#include "Proto.h"
+#include "proto.h"
 #include "FileTransferAgent.h"
 #include "Utils.h"
 

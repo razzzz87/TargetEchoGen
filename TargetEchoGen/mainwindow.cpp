@@ -28,8 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tabWidgetMainTab->addTab(deviceSetup,"Device setup");
     ui->tabWidgetMainTab->addTab(new SelfTest(),"Self Test");
     ui->tabWidgetMainTab->addTab(new Spectrum(),"Spectrum Analyzer");
-
-    //ui->tabWidget_subTab->addTab(new RF(),"RF");
+    ui->tabWidget->addTab(new RF(),"RF");
 
     ui->PbRefresh->setIconSize(QSize(ui->PbRefresh->width(), ui->PbRefresh->height()));
     ui->PbConnSettings->setIconSize(QSize(ui->PbConnSettings->width(), ui->PbConnSettings->height()));

@@ -14,26 +14,27 @@ QMAKE_CXXFLAGS += -Wa,-mbig-obj
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    Proto.cpp \
     Utils.cpp \
     connectiontype.cpp \
+    ddriflfRf.cpp \
     devicesetup.cpp \
+    devicesetuphelper.cpp \
     ethernetsocket.cpp \
     ethernetsocket10G.cpp \
     ethernetsocketpl1g.cpp \
     fileprocessing.cpp \
-    fileprocessingconf.cpp \
     FileTransferAgent.cpp \
+    fileprocessinghelper.cpp \
     log.cpp \
     main.cpp \
     mainwindow.cpp \
     matfileprocessing.cpp \
+    playbackhelper.cpp \
+    proto.cpp \
     qcustomplot.cpp \
     qspectrogram.cpp \
     rf.cpp \
     selftest.cpp \
-    serial_port_singletonPl.cpp \
-    serial_port_singletonPs.cpp \
     spectrogram.cpp \
     spectrum.cpp \
     transferprogressdialog.cpp \
@@ -45,26 +46,27 @@ SOURCES += \
 HEADERS += \
     AvrRegAddrDef.h \
     IUDPConnection.h \
-    Proto.h \
     RegDef.h \
     Utils.h \
     connectiontype.h \
+    ddriflfRf.h \
     devicesetup.h \
+    devicesetuphelper.h \
     ethernetsocket.h \
     ethernetsocket10G.h \
     ethernetsocketpl1g.h \
     fileprocessing.h \
-    fileprocessingconf.h \
     FileTransferAgent.h \
+    fileprocessinghelper.h \
     log.h \
     mainwindow.h \
     matfileprocessing.h \
+    playbackhelper.h \
+    proto.h \
     qcustomplot.h \
     qspectrogram.h \
     rf.h \
     selftest.h \
-    serial_port_singletonPl.h \
-    serial_port_singletonPs.h \
     spectrogram.h \
     spectrum.h \
     transferprogressdialog.h \

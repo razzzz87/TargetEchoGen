@@ -14,7 +14,7 @@
 #include "ethernetsocket10G.h"
 #include "ethernetsocketpl1g.h"
 #include "uartserial.h"
-#include "Proto.h"
+#include "proto.h"
 
 enum iface { eNONE,eETHPS1G,eETHPL1G, eETH10G, eSERIAL, ePCIe };
 enum TransferMode { SendBulk, ReceiveBulk, Streaming };
