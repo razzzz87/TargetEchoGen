@@ -15,6 +15,7 @@
 #include "ethernetsocketpl1g.h"
 #include "uartserial.h"
 #include "proto.h"
+#include "AvrRegAddrDef.h"
 
 enum iface { eNONE,eETHPS1G,eETHPL1G, eETH10G, eSERIAL, ePCIe };
 enum TransferMode { SendBulk, ReceiveBulk, Streaming };
@@ -57,10 +58,60 @@ uint32_t clearBits(uint32_t value, int start, int end);
 
 uint32_t setValueInBits19to12(uint32_t reg, uint8_t value);
 uint16_t extractBits15to0(uint32_t value);
+
 void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state);
 void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
+
 uint readRegisterValue(iface deviceType,uint addr);
 void RegisterWrite(iface deviceType, uint iaddr, uint ival);
+
+// SPI Control Interface
+void     SpiCtrlWriteReg(iface deviceType, uint32_t offset, uint32_t value);
+uint32_t SpiCtrlReadReg (iface deviceType, uint32_t offset);
+
+// DDR3 Test Data Generator/Checker
+void     Ddr3TdgWriteReg(iface deviceType, uint32_t offset, uint32_t value);
+uint32_t Ddr3TdgReadReg (iface deviceType, uint32_t offset);
+
+// DDR3 Read/Write Adapter
+void     Ddr3RwWriteReg (iface deviceType, uint32_t offset, uint32_t value);
+uint32_t Ddr3RwReadReg  (iface deviceType, uint32_t offset);
+
+// DAC Interface
+void     DacIfWriteReg  (iface deviceType, uint32_t offset, uint32_t value);
+uint32_t DacIfReadReg   (iface deviceType, uint32_t offset);
+
+// DAC0 DDR3 Adapter
+void     Dac0AdaWriteReg(iface deviceType, uint32_t offset, uint32_t value);
+uint32_t Dac0AdaReadReg (iface deviceType, uint32_t offset);
+
+// DAC1 DDR3 Adapter
+void     Dac1AdaWriteReg(iface deviceType, uint32_t offset, uint32_t value);
+uint32_t Dac1AdaReadReg (iface deviceType, uint32_t offset);
+
+// LVDS Interface
+void     LvdsIfWriteReg (iface deviceType, uint32_t offset, uint32_t value);
+uint32_t LvdsIfReadReg  (iface deviceType, uint32_t offset);
+
+// SPI Flash Interface
+void     SpiFlashWriteReg(iface deviceType, uint32_t offset, uint32_t value);
+uint32_t SpiFlashReadReg (iface deviceType, uint32_t offset);
+
+// Manufacturing Ctrl & Status (read-only)
+uint32_t ManufReadReg   (iface deviceType, uint32_t offset);
+
+// I2C Slave Control
+void     I2cSlvWriteReg (iface deviceType, uint32_t offset, uint32_t value);
+uint32_t I2cSlvReadReg  (iface deviceType, uint32_t offset);
+
+// Common SW Interface Registers
+void     IfCommonWriteReg(iface deviceType, uint32_t offset, uint32_t value);
+uint32_t IfCommonReadReg (iface deviceType, uint32_t offset);
+
+// Clock & Reset Control
+void     ClkRstWriteReg (iface deviceType, uint32_t offset, uint32_t value);
+uint32_t ClkRstReadReg  (iface deviceType, uint32_t offset);
+
 }
 
 #endif // UTILS_H

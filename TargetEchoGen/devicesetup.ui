@@ -254,7 +254,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegRead1">
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="LblRegReadAddr1">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -317,7 +317,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegRead2">
           <item>
-           <widget class="QLabel" name="label_27">
+           <widget class="QLabel" name="LblRegReadAddr2">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -380,7 +380,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegRead3">
           <item>
-           <widget class="QLabel" name="label_29">
+           <widget class="QLabel" name="LblRegReadAddr3">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -443,7 +443,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegRead4">
           <item>
-           <widget class="QLabel" name="label_31">
+           <widget class="QLabel" name="LblRegReadAddr4">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -521,7 +521,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegWrite1">
           <item>
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="LblRegWriteAddr1">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -537,7 +537,7 @@
            <widget class="QLineEdit" name="LeRegWriteAddr1"/>
           </item>
           <item>
-           <widget class="QLabel" name="label_4">
+           <widget class="QLabel" name="LblRegWriteVal1">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -570,7 +570,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegWrite2">
           <item>
-           <widget class="QLabel" name="label_33">
+           <widget class="QLabel" name="LblRegWriteAddr2">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -586,7 +586,7 @@
            <widget class="QLineEdit" name="LeRegWriteAddr2"/>
           </item>
           <item>
-           <widget class="QLabel" name="label_34">
+           <widget class="QLabel" name="LblRegWriteVal2">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -619,7 +619,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegWrite3">
           <item>
-           <widget class="QLabel" name="label_37">
+           <widget class="QLabel" name="LblRegWriteAddr3">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -635,7 +635,7 @@
            <widget class="QLineEdit" name="LeRegWriteAddr3"/>
           </item>
           <item>
-           <widget class="QLabel" name="label_38">
+           <widget class="QLabel" name="LblRegWriteVal3">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -668,7 +668,7 @@
         <item>
          <layout class="QHBoxLayout" name="HLayoutRegWrite4">
           <item>
-           <widget class="QLabel" name="label_35">
+           <widget class="QLabel" name="LblRegWriteAddr4">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -684,7 +684,7 @@
            <widget class="QLineEdit" name="LeRegWriteAddr4"/>
           </item>
           <item>
-           <widget class="QLabel" name="label_36">
+           <widget class="QLabel" name="LblRegWriteVal4">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>

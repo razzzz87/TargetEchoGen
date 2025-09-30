@@ -148,13 +148,13 @@
     <string>DAC 2 Default</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox_ddr_status_5">
+  <widget class="QGroupBox" name="GbRFDAC3TriggerSetup">
    <property name="geometry">
     <rect>
-     <x>450</x>
-     <y>170</y>
-     <width>375</width>
-     <height>250</height>
+     <x>440</x>
+     <y>150</y>
+     <width>385</width>
+     <height>300</height>
     </rect>
    </property>
    <property name="title">
@@ -171,7 +171,7 @@
      <number>4</number>
     </property>
     <item>
-     <widget class="QFrame" name="frame_15">
+     <widget class="QFrame" name="FrameDAC3TriggerSetup">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -186,47 +186,47 @@
         <number>4</number>
        </property>
        <item>
-        <layout class="QGridLayout" name="gridLayout_17">
+        <layout class="QGridLayout" name="GLayoutTriggerSetup">
          <item row="4" column="3">
-          <widget class="QPushButton" name="pushButton_32">
+          <widget class="QPushButton" name="PbDAC3TriggerSetup">
            <property name="text">
             <string>Trigger setup</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_trigger_source_4">
+          <widget class="QLabel" name="LblDAC3TriggerSource">
            <property name="text">
             <string>Trigger source</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_loop_back_enable_4">
+          <widget class="QLabel" name="LblDAC3SWLoopBack">
            <property name="text">
             <string>SW Loop Back</string>
            </property>
           </widget>
          </item>
          <item row="1" column="3">
-          <widget class="QCheckBox" name="checkBox_10">
+          <widget class="QCheckBox" name="ChkBoxDAC3SWLoopBack">
            <property name="text">
             <string>Enable</string>
            </property>
           </widget>
          </item>
          <item row="2" column="3">
-          <widget class="QLineEdit" name="lineEdit_trigger_pulse_width_4"/>
+          <widget class="QLineEdit" name="LeDAC3TriggerPulseWidthSample"/>
          </item>
          <item row="6" column="0">
-          <widget class="QPushButton" name="pushButton_37">
+          <widget class="QPushButton" name="PbDAC3TriggerStart">
            <property name="text">
             <string>Start</string>
            </property>
           </widget>
          </item>
          <item row="0" column="3">
-          <widget class="QComboBox" name="comboBox_trigger_source_4">
+          <widget class="QComboBox" name="CbDAC3TriggerSource">
            <item>
             <property name="text">
              <string>External</string>
@@ -240,28 +240,28 @@
           </widget>
          </item>
          <item row="6" column="3">
-          <widget class="QPushButton" name="pushButton_38">
+          <widget class="QPushButton" name="PbDAC3TriggerStop">
            <property name="text">
             <string>Stop</string>
            </property>
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="label_16">
+          <widget class="QLabel" name="LblDAC3TriggerPulseGapSample">
            <property name="text">
             <string>Trigger pulse gap (Sample)</string>
            </property>
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="label_trigger_pulse_width_sample_4">
+          <widget class="QLabel" name="LblDAC3TriggerPulseWidthSample">
            <property name="text">
             <string>Trigger pulse width (Sample)</string>
            </property>
           </widget>
          </item>
          <item row="3" column="3">
-          <widget class="QLineEdit" name="lineEdit_9"/>
+          <widget class="QLineEdit" name="LeDAC3TriggerPulseGapSample"/>
          </item>
         </layout>
        </item>
@@ -270,13 +270,13 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox_ddr_status_6">
+  <widget class="QGroupBox" name="GbRFDAC3FIFOStatus">
    <property name="geometry">
     <rect>
-     <x>450</x>
-     <y>60</y>
-     <width>375</width>
-     <height>90</height>
+     <x>440</x>
+     <y>40</y>
+     <width>385</width>
+     <height>100</height>
     </rect>
    </property>
    <property name="title">
@@ -319,7 +319,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_16">
          <item row="0" column="1">
-          <widget class="QLabel" name="label_dac_fifo_entery_error_led_2">
+          <widget class="QLabel" name="LblRFDAC3FIFOStatusLed">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -344,14 +344,14 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="pushButton_36">
+          <widget class="QPushButton" name="PbRFDAC3FIFOStatusUpdate">
            <property name="text">
             <string>Update</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_dac_fifo_entery_error_2">
+          <widget class="QLabel" name="LblRFDAC3FIFOStatus">
            <property name="text">
             <string>DAC3 FIFO entry error</string>
            </property>
@@ -364,10 +364,10 @@
     </item>
    </layout>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="PbRFDAC3Default">
    <property name="geometry">
     <rect>
-     <x>670</x>
+     <x>680</x>
      <y>5</y>
      <width>150</width>
      <height>30</height>
@@ -377,25 +377,34 @@
     <string>DAC 3 Default</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox_dac_setup_if_mode_2">
+  <widget class="QGroupBox" name="GbRFDAC3">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
+     <x>5</x>
+     <y>5</y>
      <width>430</width>
-     <height>520</height>
+     <height>650</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>650</height>
+    </size>
    </property>
    <property name="title">
     <string>DAC3</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_6">
+    <property name="topMargin">
+     <number>6</number>
+    </property>
     <item>
      <widget class="QFrame" name="frame_7">
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>259</height>
+        <height>340</height>
        </size>
       </property>
       <property name="frameShape">
@@ -404,169 +413,141 @@
       <property name="frameShadow">
        <enum>QFrame::Shadow::Raised</enum>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_16">
-       <property name="spacing">
-        <number>16</number>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="topMargin">
+        <number>3</number>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <layout class="QGridLayout" name="gridLayout_4">
-           <item row="8" column="3">
-            <widget class="QLabel" name="label_29">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
+          <number>9</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>9</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>30</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="LblDAC3IQFileName">
+           <property name="text">
+            <string>IQ File Name</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="LeDAC3IQFilePath"/>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="PbDAC3IQFileBrowse">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="TargetEchoGen.qrc">
+             <normaloff>:/images/file-browser-icon-23.jpg</normaloff>:/images/file-browser-icon-23.jpg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="PbDAC3IQFileSend">
+           <property name="text">
+            <string>Send</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="LblDAC3Interpo">
+           <property name="text">
+            <string>Interpolation</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="CbDAC3Interpo">
+           <item>
+            <property name="text">
+             <string>2</string>
+            </property>
            </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_signal_delay_ch1_2">
-             <property name="text">
-              <string>Doppler Shift In Hz</string>
-             </property>
-            </widget>
+           <item>
+            <property name="text">
+             <string>4</string>
+            </property>
            </item>
-           <item row="3" column="1">
-            <widget class="QComboBox" name="comboBox_4">
-             <item>
-              <property name="text">
-               <string>2</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>4</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>8</string>
-              </property>
-             </item>
-            </widget>
+           <item>
+            <property name="text">
+             <string>8</string>
+            </property>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_iq_data_channel1_2">
-             <property name="text">
-              <string>IQ File Name</string>
-             </property>
-            </widget>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="LblDAC3PWSample">
+           <property name="text">
+            <string>PW Samples</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSpinBox" name="SpDAC3PWSample"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="LblDAC3SignalDelay">
+           <property name="text">
+            <string>Signal Delay </string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QSpinBox" name="SpDAC3SignalDelay"/>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLabel" name="LblDAC3SignalDelayMs">
+           <property name="text">
+            <string>ns</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="LblDAC3DoplerShiftHz">
+           <property name="text">
+            <string>Doppler Shift In Hz</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QSpinBox" name="SpDAC3DoplerShiftHz"/>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="LblDAC3IQSwapIQ">
+           <property name="text">
+            <string>Swap IQ</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QComboBox" name="CbDAC3IQSwapIQ">
+           <item>
+            <property name="text">
+             <string>Normal</string>
+            </property>
            </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_interpolation_2">
-             <property name="text">
-              <string>Interpolation</string>
-             </property>
-            </widget>
+           <item>
+            <property name="text">
+             <string>Swap</string>
+            </property>
            </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_7"/>
-           </item>
-           <item row="6" column="1">
-            <widget class="QSpinBox" name="spinBox_7"/>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_pulse_with_sample_ch1_2">
-             <property name="text">
-              <string>PW Samples</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QSpinBox" name="spinBox_10"/>
-           </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_iq_data_channel2_2">
-             <property name="text">
-              <string>Swap IQ</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_pulse_with_sample_ch_2">
-             <property name="text">
-              <string>Signal Delay </string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="2">
-            <widget class="QLabel" name="label_17">
-             <property name="text">
-              <string>ns</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QPushButton" name="pushButton_12">
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset resource="TargetEchoGen.qrc">
-               <normaloff>:/images/file-browser-icon-23.jpg</normaloff>:/images/file-browser-icon-23.jpg</iconset>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QPushButton" name="pushButton_6">
-             <property name="text">
-              <string>Send</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="1">
-            <widget class="QLabel" name="label_18">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QComboBox" name="comboBox_6">
-             <item>
-              <property name="text">
-               <string>Normal</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Swap</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QSpinBox" name="spinBox_8"/>
-           </item>
-           <item row="9" column="0">
-            <widget class="QLabel" name="label_30">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="1">
-            <widget class="QLabel" name="label_31">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="3">
-            <widget class="QLabel" name="label_32">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          </widget>
          </item>
         </layout>
        </item>
@@ -574,7 +555,13 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox_6">
+     <widget class="QGroupBox" name="GbDAC3Ampl">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>184</height>
+       </size>
+      </property>
       <property name="title">
        <string>Amplitude</string>
       </property>
@@ -582,65 +569,65 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_18">
          <item row="1" column="3">
-          <widget class="QPushButton" name="pushButton_13">
+          <widget class="QPushButton" name="PbDAC3FileSend">
            <property name="text">
             <string>Send</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QSpinBox" name="spinBox_2"/>
+          <widget class="QSpinBox" name="SpDAC3FixedLevel"/>
          </item>
          <item row="2" column="3">
-          <widget class="QPushButton" name="pushButton_27">
+          <widget class="QPushButton" name="PbDAC3BaseValueDecr">
            <property name="text">
             <string>Decr</string>
            </property>
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QRadioButton" name="radioButton_4">
+          <widget class="QRadioButton" name="RbDAC3BaseValue">
            <property name="text">
             <string>Base Value</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QRadioButton" name="radioButton_5">
+          <widget class="QRadioButton" name="LblDAC3File">
            <property name="text">
             <string>File</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QLineEdit" name="lineEdit_11"/>
+          <widget class="QLineEdit" name="LeDAC3BaseValue"/>
          </item>
          <item row="2" column="2">
-          <widget class="QPushButton" name="pushButton_39">
+          <widget class="QPushButton" name="PbDAC3BaseValueIncr">
            <property name="text">
             <string>Incr</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEdit_12"/>
+          <widget class="QLineEdit" name="LeDAC3FilePath"/>
          </item>
          <item row="0" column="0">
-          <widget class="QRadioButton" name="radioButton_6">
+          <widget class="QRadioButton" name="RbDAC3FixedLevel">
            <property name="text">
             <string>Fixed Level</string>
            </property>
           </widget>
          </item>
          <item row="0" column="3">
-          <widget class="QPushButton" name="pushButton_44">
+          <widget class="QPushButton" name="PbDAC3FixedLevelSet">
            <property name="text">
             <string>Set</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QPushButton" name="pushButton_45">
+          <widget class="QPushButton" name="PbDAC3FileBrowse">
            <property name="text">
             <string>Browse</string>
            </property>
@@ -652,62 +639,60 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_46">
+     <widget class="QPushButton" name="PbDAC3Apply">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>35</height>
+       </size>
+      </property>
       <property name="text">
        <string>Apply</string>
       </property>
      </widget>
     </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>43</x>
-     <y>532</y>
-     <width>397</width>
-     <height>38</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_8">
     <item>
-     <widget class="QPushButton" name="pushButton_40">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Start</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_41">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Stop</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton_42">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Restart</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <item>
+       <widget class="QPushButton" name="PbDAC3Start">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="PbDAC3Stop">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="PbDAC3Restart">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Restart</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

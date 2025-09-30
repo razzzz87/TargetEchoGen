@@ -3,9 +3,6 @@
 
 #include <QWidget>
 #include "proto.h"
-#include "udpcon.h"
-#include "udppl1gcon.h"
-#include "udppl_10gcon.h"
 #include <QLineEdit>
 #include "FileTransferAgent.h"
 #include <QFileDialog>
@@ -28,24 +25,14 @@ public:
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
     TransferProgressDialog* progressDialog;
     FileTransferAgent  *setupTransferAgent;
-    UartSerial *_pSerial;
-    EthernetSocket *_pEthPS1G;
-    EthernetSocketPL1G *_pEthPL1G;
-    EthernetSocket10G *_pEth10G;
+
 private slots:
-    void updateTransferProgress(qint64 percentage);
-    void close_Progress_pop(void);
     void on_PbRegRead1_clicked();
     void on_PbRegWrite1_clicked();
-
     void on_PbMemReadFileNameBrowse_clicked();
-
     void on_PbMemReadRead_clicked();
-
     void on_PbMemWriteFileBrowse_clicked();
-
     void on_PbMemWrite_clicked();
-
 private:
     Ui::DeviceSetup *ui;
     Proto objProto;

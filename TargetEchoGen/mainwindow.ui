@@ -682,7 +682,7 @@
             <x>5</x>
             <y>5</y>
             <width>838</width>
-            <height>641</height>
+            <height>697</height>
            </rect>
           </property>
           <property name="currentIndex">
@@ -698,7 +698,7 @@
               <x>5</x>
               <y>5</y>
               <width>430</width>
-              <height>590</height>
+              <height>650</height>
              </rect>
             </property>
             <property name="title">
@@ -710,7 +710,7 @@
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>318</height>
+                 <height>340</height>
                 </size>
                </property>
                <property name="frameShape">
@@ -937,6 +937,12 @@
              </item>
              <item>
               <widget class="QGroupBox" name="groupBox_20">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>182</height>
+                </size>
+               </property>
                <property name="title">
                 <string>Amplitude</string>
                </property>
@@ -1062,6 +1068,12 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>35</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Restart</string>
                  </property>
@@ -1074,10 +1086,10 @@
            <widget class="QGroupBox" name="groupBox_ddr_status_11">
             <property name="geometry">
              <rect>
-              <x>441</x>
-              <y>151</y>
+              <x>440</x>
+              <y>150</y>
               <width>385</width>
-              <height>297</height>
+              <height>300</height>
              </rect>
             </property>
             <property name="title">
@@ -1206,12 +1218,12 @@
              <string>DAC 1 Default</string>
             </property>
            </widget>
-           <widget class="QGroupBox" name="groupBox_ddr_status_12">
+           <widget class="QGroupBox" name="GbDDRIfStatus">
             <property name="geometry">
              <rect>
               <x>440</x>
               <y>40</y>
-              <width>388</width>
+              <width>385</width>
               <height>100</height>
              </rect>
             </property>
@@ -1255,7 +1267,7 @@
                 <item>
                  <layout class="QGridLayout" name="gridLayout_58">
                   <item row="0" column="1">
-                   <widget class="QLabel" name="LbIddc1ledSta">
+                   <widget class="QLabel" name="LblDAC1FIFOEntryErrorStatusLed">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -1286,7 +1298,7 @@
                    </widget>
                   </item>
                   <item row="0" column="2">
-                   <widget class="QPushButton" name="PBddc1STAupdate">
+                   <widget class="QPushButton" name="PbDAC1FIFOEntryErrorUpdate">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
@@ -1299,7 +1311,7 @@
                    </widget>
                   </item>
                   <item row="0" column="0">
-                   <widget class="QLabel" name="LbIddc1StaFIFOentery">
+                   <widget class="QLabel" name="LblDAC1FIFOEntryError">
                     <property name="text">
                      <string>DAC1 FIFO entry error</string>
                     </property>
@@ -1321,9 +1333,9 @@
             <property name="geometry">
              <rect>
               <x>440</x>
-              <y>146</y>
-              <width>388</width>
-              <height>314</height>
+              <y>150</y>
+              <width>385</width>
+              <height>300</height>
              </rect>
             </property>
             <property name="title">
@@ -1444,8 +1456,8 @@
              <rect>
               <x>440</x>
               <y>40</y>
-              <width>390</width>
-              <height>90</height>
+              <width>385</width>
+              <height>100</height>
              </rect>
             </property>
             <property name="title">
@@ -1552,13 +1564,13 @@
              <string>DAC 2 Default</string>
             </property>
            </widget>
-           <widget class="QGroupBox" name="groupBox_dac_setup_if_mode_6">
+           <widget class="QGroupBox" name="GbLxDAC2">
             <property name="geometry">
              <rect>
               <x>5</x>
               <y>5</y>
               <width>430</width>
-              <height>590</height>
+              <height>650</height>
              </rect>
             </property>
             <property name="title">
@@ -1566,11 +1578,11 @@
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_42">
              <item>
-              <widget class="QFrame" name="frame_35">
+              <widget class="QFrame" name="FrameDDRLXDAC2">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>260</height>
+                 <height>340</height>
                 </size>
                </property>
                <property name="frameShape">
@@ -1587,6 +1599,24 @@
                  <layout class="QVBoxLayout" name="verticalLayout_43">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_61">
+                    <property name="leftMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="horizontalSpacing">
+                     <number>9</number>
+                    </property>
+                    <property name="verticalSpacing">
+                     <number>30</number>
+                    </property>
                     <item row="5" column="1">
                      <widget class="QSpinBox" name="SbDAC2SignalDelay">
                       <property name="maximum">
@@ -2113,7 +2143,7 @@
             <x>10</x>
             <y>10</y>
             <width>551</width>
-            <height>671</height>
+            <height>675</height>
            </rect>
           </property>
           <property name="title">

@@ -3,143 +3,93 @@
 
 namespace  DeviceSetupHelper{
 
-static inline uint32_t AVRRegAccessRead(iface deviceType,AvrTegRegs::AvrTegOffset off) {
-    uint32_t addr = AvrTegRegs::address(off);
-    return Utils::readRegisterValue(deviceType, addr);
-}
-
-/// Write a full 32-bit LMK register
-static inline int AVRRegAccessWrite(iface deviceType, AvrTegRegs::AvrTegOffset off, uint32_t propValue)
-{
-    uint32_t addr = AvrTegRegs::address(off);
-    Utils::RegisterWrite(deviceType, addr, propValue);
-    return 0;
-}
-
-int LMKRegAccessWrite(iface deviceType, AvrTegRegs::AvrTegOffset regOffset, unsigned int propValue)
-{
-    // --- debug print ---
-    LOG_INFO("LMKRegAccessWrite(iface=%d, RegAddr=0x%X, Val=0x%X)",deviceType, regOffset, propValue);
-
-    // Decode packed REG16_DEF: [31:16]=offset, [15:8]=bitPos, [7:0]=width
-    uint32_t addr = address(regOffset);
-    const unsigned int baseOffset = (addr >> 16) & 0xFFFF;
-    const unsigned int bitPos     = (addr >> 8)  & 0xFF;
-    const unsigned int width      = (addr) & 0xFF;
-
-    // Turn numeric offset into our scoped enum
-    auto off = static_cast<AvrTegRegs::AvrTegOffset>(baseOffset);
-
-    // For sub-32-bit fields: read-mask-modify
-    uint32_t regVal = 0;
-    if (width < 32) {
-        regVal    = AVRRegAccessRead(deviceType, off);
-        uint32_t mask = ((1u << width) - 1u) << bitPos;
-        regVal   &= ~mask;
-        propValue &= (1u << width) - 1u;
-    }
-    // Insert new bits (or full-width overwrite)
-    regVal |= static_cast<uint32_t>(propValue) << bitPos;
-
-    // Write back
-    AVRRegAccessWrite(deviceType, off, regVal);
-    return 0;
-}
-//------------------------------------------------------------------------------
-// Updated ProgramDefaultInLMKRegisters using the simplified LMKRegAccessWrite()
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// Updated ProgramDefaultInLMKRegisters using the new three-arg API
-//------------------------------------------------------------------------------
-
 long ProgramDefaultInLMKRegisters(iface deviceType, unsigned int moduleID)
 {
-    unsigned int RegLmkFreq = 0;
-    // Always apply the default 120 MHz LMK map
-    switch(RegLmkFreq){
-    case 1:
-        LOG_INFO("**** DEFAULT SETTINGS FOR LMK @ 120 MHz ****");
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR1,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR2,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR3,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR4,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR5,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR6,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR7,  0x02808800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR8,  0x00408800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR9,  0x048E0210);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR10, 0x0888800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR11, 0x48E0210);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR12, 0x1BF8880);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR13, 0x098600D);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR14, 0x1D81033);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR15, 0x0900000);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR16, 0x4000400);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR17, 0x00AA820);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR18, 0x00000006);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR19, 0x0080800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR20, 0x047D18E0);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR21, 0x08000C1);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR22, 0x2EE0180);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR23, 0x0000EA6);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR24, 0x0000EA6);
-    case 2:
-        LOG_INFO("**** DEFAULT SETTINGS FOR LMK @ 120 MHz ****");
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR1,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR2,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR3,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR4,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR5,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR6,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR7,  0x02808800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR8,  0x00408800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR9,  0x048E0210);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR10, 0x0888800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR11, 0x48E0210);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR12, 0x1BF8880);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR13, 0x098600D);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR14, 0x1D81033);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR15, 0x0900000);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR16, 0x4000400);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR17, 0x00AA820);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR18, 0x00000006);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR19, 0x0080800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR20, 0x047D18E0);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR21, 0x08000C1);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR22, 0x2EE0180);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR23, 0x0000EA6);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR24, 0x0000EA6);
-    case 3:
-        LOG_INFO("**** DEFAULT SETTINGS FOR LMK @ 120 MHz ****");
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR1,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR2,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR3,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR4,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR5,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR6,  0x0000010);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR7,  0x02808800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR8,  0x00408800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR9,  0x048E0210);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR10, 0x0888800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR11, 0x48E0210);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR12, 0x1BF8880);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR13, 0x098600D);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR14, 0x1D81033);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR15, 0x0900000);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR16, 0x4000400);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR17, 0x00AA820);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR18, 0x00000006);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR19, 0x0080800);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR20, 0x047D18E0);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR21, 0x08000C1);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR22, 0x2EE0180);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR23, 0x0000EA6);
-        LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR24, 0x0000EA6);
-    default:
-        LOG_INFO("Invalid value\n");
-    }
-    return 0;
+    // unsigned int RegLmkFreq = 0;
+    // // Always apply the default 120 MHz LMK map
+    // switch(RegLmkFreq){
+    // case 1:
+    //     LOG_INFO("**** DEFAULT SETTINGS FOR LMK @ 120 MHz ****");
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR1,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR2,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR3,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR4,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR5,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR6,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR7,  0x02808800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR8,  0x00408800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR9,  0x048E0210);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR10, 0x0888800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR11, 0x48E0210);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR12, 0x1BF8880);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR13, 0x098600D);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR14, 0x1D81033);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR15, 0x0900000);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR16, 0x4000400);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR17, 0x00AA820);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR18, 0x00000006);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR19, 0x0080800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR20, 0x047D18E0);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR21, 0x08000C1);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR22, 0x2EE0180);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR23, 0x0000EA6);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR24, 0x0000EA6);
+    // case 2:
+    //     LOG_INFO("**** DEFAULT SETTINGS FOR LMK @ 120 MHz ****");
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR1,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR2,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR3,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR4,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR5,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR6,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR7,  0x02808800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR8,  0x00408800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR9,  0x048E0210);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR10, 0x0888800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR11, 0x48E0210);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR12, 0x1BF8880);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR13, 0x098600D);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR14, 0x1D81033);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR15, 0x0900000);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR16, 0x4000400);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR17, 0x00AA820);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR18, 0x00000006);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR19, 0x0080800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR20, 0x047D18E0);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR21, 0x08000C1);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR22, 0x2EE0180);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR23, 0x0000EA6);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR24, 0x0000EA6);
+    // case 3:
+    //     LOG_INFO("**** DEFAULT SETTINGS FOR LMK @ 120 MHz ****");
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR1,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR2,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR3,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR4,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR5,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR6,  0x0000010);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR7,  0x02808800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR8,  0x00408800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR9,  0x048E0210);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR10, 0x0888800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR11, 0x48E0210);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR12, 0x1BF8880);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR13, 0x098600D);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR14, 0x1D81033);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR15, 0x0900000);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR16, 0x4000400);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR17, 0x00AA820);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR18, 0x00000006);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR19, 0x0080800);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR20, 0x047D18E0);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR21, 0x08000C1);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR22, 0x2EE0180);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR23, 0x0000EA6);
+    //     LMKRegAccessWrite(deviceType, AvrTegRegs::AvrTegOffset::AVR_TEG_ADDR24, 0x0000EA6);
+    // default:
+    //     LOG_INFO("Invalid value\n");
+    // }
+    // return 0;
 }
 
 void LMKDefaultSetting(iface deviceType)
