@@ -17,7 +17,7 @@
 #include "proto.h"
 #include "AvrRegAddrDef.h"
 
-enum iface { eNONE,eETHPS1G,eETHPL1G, eETH10G, eSERIAL, ePCIe };
+enum iface { eNONE,eETHPS1G,eETHPL1G, eETH10G, eSERIAL,ePLSERIAL, ePCIe };
 enum TransferMode { SendBulk, ReceiveBulk, Streaming };
 
 enum eXferDir {
@@ -66,8 +66,9 @@ uint readRegisterValue(iface deviceType,uint addr);
 void RegisterWrite(iface deviceType, uint iaddr, uint ival);
 
 // SPI Control Interface
-void     SpiCtrlWriteReg(iface deviceType, uint32_t offset, uint32_t value);
-uint32_t SpiCtrlReadReg (iface deviceType, uint32_t offset);
+void SpiCtrlWriteReg(iface deviceType, uint32_t offset, uint32_t value);
+void WriteSpiSynth(iface deviceType, uint32_t address, uint32_t data);
+uint32_t SpiCtrlReadReg (iface deviceType, uint32_t uiAddr);
 
 // DDR3 Test Data Generator/Checker
 void     Ddr3TdgWriteReg(iface deviceType, uint32_t offset, uint32_t value);

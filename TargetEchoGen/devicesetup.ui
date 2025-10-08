@@ -1015,7 +1015,12 @@
           <widget class="QComboBox" name="CbLMKInit">
            <item>
             <property name="text">
-             <string>LMK</string>
+             <string>60MHz</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>120MHz</string>
             </property>
            </item>
           </widget>

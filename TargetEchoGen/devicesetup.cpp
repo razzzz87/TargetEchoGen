@@ -6,6 +6,7 @@
 #include "proto.h"
 #include "FileTransferAgent.h"
 #include "Utils.h"
+#include "devicesetuphelper.h"
 
 DeviceSetup::DeviceSetup(QWidget *parent)
     : QWidget(parent)
@@ -155,5 +156,47 @@ void DeviceSetup::on_PbMemWriteFileBrowse_clicked()
 void DeviceSetup::on_PbMemWrite_clicked()
 {
     FileReadWriteSetup(eETH10G,ui->LeMemWriteFileSize->text().toInt(),ui->LeMemWriteFileNamePath->text(),eWrite);
+}
+
+
+void DeviceSetup::on_PbLMKInitDefault_clicked()
+{
+
+    // Map selected radio button to deviceType enum used by DeviceSetupHelper
+    iface deviceType = eNONE;
+    if (ui->RbPS1G->isChecked())
+    {
+        deviceType = eETHPS1G;
+    }
+    else if (ui->RbPL1G->isChecked())
+    {
+        deviceType = eETHPL1G;
+    }
+    else if (ui->RbPL10G->isChecked())
+    {
+        deviceType = eETH10G;
+    }
+    else if (ui->RbPSSerial->isChecked())
+    {
+         deviceType = eSERIAL;
+    }
+    else if(ui->RbPLSerial->isChecked())
+    {
+        deviceType = ePLSERIAL;
+    }
+    else {
+        Log::showStatusMessage(this,"Device Setup","Please selection interface");
+    }
+
+    // Determine frequency selection
+    const QString freq = ui->CbLMKInit->currentText().trimmed();
+    bool ok = false;
+    if (freq == QLatin1String("60MHz")) {
+        DeviceSetupHelper::LmkDefault60MhzSetting(deviceType);
+    } else if (freq == QLatin1String("120MHz")) {
+        DeviceSetupHelper::LmkDefault120MhzSetting(deviceType);
+    } else {
+
+    }
 }
 

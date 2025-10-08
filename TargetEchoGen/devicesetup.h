@@ -33,6 +33,8 @@ private slots:
     void on_PbMemReadRead_clicked();
     void on_PbMemWriteFileBrowse_clicked();
     void on_PbMemWrite_clicked();
+    void on_PbLMKInitDefault_clicked();
+
 private:
     Ui::DeviceSetup *ui;
     Proto objProto;
