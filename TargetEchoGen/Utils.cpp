@@ -293,6 +293,8 @@ void RegisterWrite(iface deviceType, uint iaddr, uint ival)
         break;
     case eETHPS1G:
         break;
+    case ePLSERIAL:
+        break;
     }
     LOG_INFO("[Utils::RegisterWrite] <EXIT>");
 }
@@ -319,10 +321,10 @@ uint32_t Ddr3RwReadReg(iface deviceType, uint32_t off) {
 }
 
 void DacWriteReg(iface deviceType, uint32_t uiAddr, uint32_t v) {
-    RegisterWrite(deviceType, uiAddr, v);
+    RegisterWrite(deviceType,uiAddr, v);
 }
 uint32_t DacReadReg(iface deviceType, uint32_t uiAddr) {
-    return readRegisterValue(deviceType,uiAddr);
+    return readRegisterValue(deviceType,AVR_SPI_CTRL_BASE_ADDR+uiAddr);
 }
 
 void Dac0AdaWriteReg(iface deviceType, uint32_t off, uint32_t v) {
@@ -417,11 +419,11 @@ uint32_t ReadSpiSynth(iface deviceType,uint32_t uiAddr)
 // -------------------------------
 void SpiDacWrite(iface deviceType, uint32_t Address, uint32_t Data, uint32_t sel)
 {
-    DacWriteReg(deviceType, 0x1008, sel);      // Select DAC
-    DacWriteReg(deviceType, 0x100C, Address);  // Set Address
-    DacWriteReg(deviceType, 0x1010, Data);     // Set Data
-    DacWriteReg(deviceType, 0x1000, 0x1);      // Write Enable
-    DacWriteReg(deviceType, 0x1000, 0x0);      // Write Disable
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x08, sel);      // Select DAC
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x0C, Address);  // Set Address
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x10, Data);     // Set Data
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x00, 0x1);      // Write Enable
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x00, 0x0);      // Write Disable
 }
 
 // -------------------------------
@@ -429,10 +431,10 @@ void SpiDacWrite(iface deviceType, uint32_t Address, uint32_t Data, uint32_t sel
 // -------------------------------
 uint32_t SpiDacRead(iface deviceType, uint32_t Address, uint32_t sel)
 {
-    DacWriteReg(deviceType, 0x1008, sel);      // Select DAC
-    DacWriteReg(deviceType, 0x100C, Address);  // Set Address
-    DacWriteReg(deviceType, 0x1004, 0x1);      // Read Enable
-    DacWriteReg(deviceType, 0x1004, 0x0);      // Read Disable
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x08, sel);      // Select DAC
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x0C, Address);  // Set Address
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x1);      // Read Enable
+    DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x0);      // Read Disable
 
     uint32_t data = DacReadReg(deviceType, 0x101C);  // Read Data
     printf("Read data: 0x%08X\n", data);

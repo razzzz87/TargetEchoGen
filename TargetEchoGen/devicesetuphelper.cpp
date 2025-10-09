@@ -66,11 +66,13 @@ void LmkDefault120MhzSetting(iface deviceType)
     Utils::WriteSpiSynth(deviceType, 0x1D, 0x00000EA6);
     Utils::WriteSpiSynth(deviceType, 0x1E, 0x00000EA6);
 }
-void Dac2DefaultSetting(iface deviceType)
+void Dac3DefaultSetting(iface deviceType)
 {
+    Utils::DacWriteReg(deviceType, 0x2034, 0x5);
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF080,0x2); //# SPI 4 Wire Mode - Configuration
+
     Utils::SpiDacWrite(deviceType, 0x00, 0x019C,0x2);
     Utils::SpiDacWrite(deviceType, 0x01, 0x100E,0x2);
-    Utils::SpiDacWrite(deviceType, 0x02, 0xF080,0x2);
     Utils::SpiDacWrite(deviceType, 0x03, 0xF000,0x2);
     Utils::SpiDacWrite(deviceType, 0x04, 0xFDFD,0x2);
     Utils::SpiDacWrite(deviceType, 0x05, 0x3900,0x2);

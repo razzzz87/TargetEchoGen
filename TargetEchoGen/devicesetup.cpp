@@ -201,13 +201,14 @@ void DeviceSetup::on_PbDACInitDefault_clicked()
         return;
     }
 
-    const QString dac = ui->CbLMKInit->currentText().trimmed();
+    const QString dac = ui->CbDACInit->currentText().trimmed();
     if (dac == QLatin1String("DAC 1")) {
     }
     else if (dac == QLatin1String("DAC 2")) {
-        DeviceSetupHelper::Dac2DefaultSetting(deviceType);
+
     }
     else if (dac == QLatin1String("DAC 3")) {
+        DeviceSetupHelper::Dac2DefaultSetting(deviceType);
     }
     else {}
     LOG_INFO("DeviceSetup::on_PbDACInitDefault_clicked() <EXIT>\n");
