@@ -257,7 +257,6 @@ void MainWindow::on_PbDAC2TgrSetup_clicked()
     uint32_t pulseGap = 0;
     uint32_t pulseWidth= 0;
     uint32_t triggerEnable=1;
-    uint32_t triggerStart = 0;
 
     pulseWidth = ui->LeDAC2TgrPulseWidthSample->text().toUInt();
     pulseGap = ui->LeDAC2TgrPulseGapSample->text().toUInt();
