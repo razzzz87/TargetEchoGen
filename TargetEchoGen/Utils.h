@@ -79,8 +79,11 @@ void     Ddr3RwWriteReg (iface deviceType, uint32_t offset, uint32_t value);
 uint32_t Ddr3RwReadReg  (iface deviceType, uint32_t offset);
 
 // DAC Interface
-void     DacIfWriteReg  (iface deviceType, uint32_t offset, uint32_t value);
-uint32_t DacIfReadReg   (iface deviceType, uint32_t offset);
+void    DacWriteReg(iface deviceType, uint32_t uiAddr, uint32_t value);
+void    SpiDacWrite(iface deviceType, uint32_t Address, uint32_t Data, uint32_t sel);
+uint32_t DacReadReg(iface deviceType, uint32_t uiAddr);
+uint32_t SpiDacRead(iface deviceType, uint32_t Address, uint32_t sel);
+
 
 // DAC0 DDR3 Adapter
 void     Dac0AdaWriteReg(iface deviceType, uint32_t offset, uint32_t value);

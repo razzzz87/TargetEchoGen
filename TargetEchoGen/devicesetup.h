@@ -22,6 +22,7 @@ public:
     uint64_t ParseRegReadResponsePkt(char *rcvpkt, int pktLen);
     void readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
     void WriteRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
+    iface getSelectedDeviceType();
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
     TransferProgressDialog* progressDialog;
     FileTransferAgent  *setupTransferAgent;
@@ -34,6 +35,8 @@ private slots:
     void on_PbMemWriteFileBrowse_clicked();
     void on_PbMemWrite_clicked();
     void on_PbLMKInitDefault_clicked();
+
+    void on_PbDACInitDefault_clicked();
 
 private:
     Ui::DeviceSetup *ui;

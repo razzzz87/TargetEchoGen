@@ -56,6 +56,18 @@ DeviceSetup::~DeviceSetup()
 {
     delete ui;
 }
+
+iface DeviceSetup::getSelectedDeviceType()
+{
+    if (ui->RbPS1G->isChecked())       return eETHPS1G;
+    if (ui->RbPL1G->isChecked())       return eETHPL1G;
+    if (ui->RbPL10G->isChecked())      return eETH10G;
+    if (ui->RbPSSerial->isChecked())   return eSERIAL;
+    if (ui->RbPLSerial->isChecked())   return ePLSERIAL;
+
+    Log::showStatusMessage(this, "Device Setup", "Please select an interface");
+    return eNONE;
+}
 void DeviceSetup::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir)
 {
     LOG_INFO("DeviceSetup::FileReadWriteSetup()<ENTER>");
@@ -161,36 +173,14 @@ void DeviceSetup::on_PbMemWrite_clicked()
 
 void DeviceSetup::on_PbLMKInitDefault_clicked()
 {
-
-    // Map selected radio button to deviceType enum used by DeviceSetupHelper
-    iface deviceType = eNONE;
-    if (ui->RbPS1G->isChecked())
-    {
-        deviceType = eETHPS1G;
-    }
-    else if (ui->RbPL1G->isChecked())
-    {
-        deviceType = eETHPL1G;
-    }
-    else if (ui->RbPL10G->isChecked())
-    {
-        deviceType = eETH10G;
-    }
-    else if (ui->RbPSSerial->isChecked())
-    {
-         deviceType = eSERIAL;
-    }
-    else if(ui->RbPLSerial->isChecked())
-    {
-        deviceType = ePLSERIAL;
-    }
-    else {
-        Log::showStatusMessage(this,"Device Setup","Please selection interface");
+    LOG_INFO("DeviceSetup::on_PbLMKInitDefault_clicked() <ENTER>\n");
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE){
+        LOG_ERROR("Interface not selected %d",deviceType);
+        return;
     }
 
-    // Determine frequency selection
     const QString freq = ui->CbLMKInit->currentText().trimmed();
-    bool ok = false;
     if (freq == QLatin1String("60MHz")) {
         DeviceSetupHelper::LmkDefault60MhzSetting(deviceType);
     } else if (freq == QLatin1String("120MHz")) {
@@ -198,5 +188,28 @@ void DeviceSetup::on_PbLMKInitDefault_clicked()
     } else {
 
     }
+    LOG_INFO("DeviceSetup::on_PbLMKInitDefault_clicked() <EXIT>\n");
+}
+
+
+void DeviceSetup::on_PbDACInitDefault_clicked()
+{
+    LOG_INFO("DeviceSetup::on_PbDACInitDefault_clicked() <ENTER>\n");
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE){
+        LOG_ERROR("Interface not selected %d",deviceType);
+        return;
+    }
+
+    const QString dac = ui->CbLMKInit->currentText().trimmed();
+    if (dac == QLatin1String("DAC 1")) {
+    }
+    else if (dac == QLatin1String("DAC 2")) {
+        DeviceSetupHelper::Dac2DefaultSetting(deviceType);
+    }
+    else if (dac == QLatin1String("DAC 3")) {
+    }
+    else {}
+    LOG_INFO("DeviceSetup::on_PbDACInitDefault_clicked() <EXIT>\n");
 }
 
