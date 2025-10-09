@@ -1,5 +1,4 @@
 #include "Utils.h"
-#include "AvrRegAddrDef.h"
 
 namespace  DeviceSetupHelper{
 
@@ -120,5 +119,6 @@ void Dac3DefaultSetting(iface deviceType)
     Utils::SpiDacWrite(deviceType, 0x30, 0x0000,0x2);
     Utils::SpiDacWrite(deviceType, 0x7F, 0x540C,0x2);
 }
+
 
 }

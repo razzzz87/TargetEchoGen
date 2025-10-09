@@ -44,6 +44,14 @@ private slots:
     void onConnectionFailure(iface eInterface);
     void on_PbDAC1IQFileSend_clicked();
 
+    void on_PBdac2TStriggersetup_clicked();
+
+    void on_PbDAC2TgrSetup_clicked();
+
+    void on_PbDAC2TgrStart_clicked();
+
+    void on_PbDAC2TgrStop_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool transferCanceled = false;

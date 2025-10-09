@@ -28,6 +28,7 @@ SOURCES += \
     log.cpp \
     main.cpp \
     mainwindow.cpp \
+    mainwindowhelper.cpp \
     matfileprocessing.cpp \
     playbackhelper.cpp \
     proto.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     fileprocessinghelper.h \
     log.h \
     mainwindow.h \
+    mainwindowhelper.h \
     matfileprocessing.h \
     playbackhelper.h \
     proto.h \

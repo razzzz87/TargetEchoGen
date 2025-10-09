@@ -208,7 +208,7 @@ void DeviceSetup::on_PbDACInitDefault_clicked()
 
     }
     else if (dac == QLatin1String("DAC 3")) {
-        DeviceSetupHelper::Dac2DefaultSetting(deviceType);
+        DeviceSetupHelper::Dac3DefaultSetting(deviceType);
     }
     else {}
     LOG_INFO("DeviceSetup::on_PbDACInitDefault_clicked() <EXIT>\n");

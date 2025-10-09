@@ -4,6 +4,6 @@
 namespace DeviceSetupHelper {
 void LmkDefault60MhzSetting(iface deviceType);
 void LmkDefault120MhzSetting(iface deviceType);
-void Dac2DefaultSetting(iface deviceType);
+void Dac3DefaultSetting(iface deviceType);
 }
 #endif // DEVICESETUPHELPER_H

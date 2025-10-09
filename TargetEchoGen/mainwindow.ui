@@ -1369,7 +1369,7 @@
                 <item>
                  <layout class="QGridLayout" name="gridLayout_59">
                   <item row="4" column="3">
-                   <widget class="QPushButton" name="PBdac2TStriggersetup">
+                   <widget class="QPushButton" name="PbDAC2TgrSetup">
                     <property name="text">
                      <string>Trigger setup</string>
                     </property>
@@ -1383,31 +1383,31 @@
                    </widget>
                   </item>
                   <item row="1" column="0">
-                   <widget class="QLabel" name="LbIddc2TSSWLookBack">
+                   <widget class="QLabel" name="LbIDAC2TSSWLookBack">
                     <property name="text">
                      <string>SW Loop Back</string>
                     </property>
                    </widget>
                   </item>
                   <item row="1" column="3">
-                   <widget class="QCheckBox" name="CBdac2TSenable">
+                   <widget class="QCheckBox" name="ChkBoxDAC2TSSWLookBackEnable">
                     <property name="text">
                      <string>Enable</string>
                     </property>
                    </widget>
                   </item>
                   <item row="2" column="3">
-                   <widget class="QLineEdit" name="LEdac2TStriggepushwidth"/>
+                   <widget class="QLineEdit" name="LeDAC2TgrPulseWidthSample"/>
                   </item>
                   <item row="6" column="0">
-                   <widget class="QPushButton" name="PBdac2TSstart">
+                   <widget class="QPushButton" name="PbDAC2TgrStart">
                     <property name="text">
                      <string>Start</string>
                     </property>
                    </widget>
                   </item>
                   <item row="0" column="3">
-                   <widget class="QComboBox" name="CBdac2TSexternal">
+                   <widget class="QComboBox" name="CbLxDAC2TriggerSource">
                     <item>
                      <property name="text">
                       <string>External</string>
@@ -1421,28 +1421,28 @@
                    </widget>
                   </item>
                   <item row="6" column="3">
-                   <widget class="QPushButton" name="PBdac2TSstop">
+                   <widget class="QPushButton" name="PbDAC2TgrStop">
                     <property name="text">
                      <string>Stop</string>
                     </property>
                    </widget>
                   </item>
                   <item row="3" column="0">
-                   <widget class="QLabel" name="LbIddc2TStriggerpulsegap">
+                   <widget class="QLabel" name="LbIDAC2TgrPulseGapSample">
                     <property name="text">
                      <string>Trigger pulse gap (Sample)</string>
                     </property>
                    </widget>
                   </item>
                   <item row="2" column="0">
-                   <widget class="QLabel" name="LbIddc2TStriggerpulsewidth">
+                   <widget class="QLabel" name="LbIDAC2TgrPulseWidthSample">
                     <property name="text">
                      <string>Trigger pulse width (Sample)</string>
                     </property>
                    </widget>
                   </item>
                   <item row="3" column="3">
-                   <widget class="QLineEdit" name="LEdacT2Striggerpulsegap"/>
+                   <widget class="QLineEdit" name="LeDAC2TgrPulseGapSample"/>
                   </item>
                  </layout>
                 </item>

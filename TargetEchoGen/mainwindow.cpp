@@ -6,6 +6,7 @@
 #include "selftest.h"
 #include "spectrum.h"
 #include "ui_mainwindow.h"
+#include "mainwindowhelper.h"
 #include <QTableWidgetItem>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -240,5 +241,39 @@ void MainWindow::on_PbConnSettings_clicked()
 void MainWindow::on_PbDAC1IQFileSend_clicked()
 {
 
+}
+
+
+void MainWindow::on_PBdac2TStriggersetup_clicked()
+{
+
+}
+
+void MainWindow::on_PbDAC2TgrSetup_clicked()
+{
+    uint32_t trigSourceSelect = 0;
+    uint32_t pwSamples = 0;
+    uint32_t signalDelay= 0;
+    uint32_t pulseGap = 0;
+    uint32_t pulseWidth= 0;
+    uint32_t triggerEnable=1;
+    uint32_t triggerStart = 0;
+
+    pulseWidth = ui->LeDAC2TgrPulseWidthSample->text().toUInt();
+    pulseGap = ui->LeDAC2TgrPulseGapSample->text().toUInt();
+
+    MainWindowHelper::LxTriggerSetup(eETHPL1G,trigSourceSelect,pwSamples,signalDelay,pulseGap,pulseWidth,triggerEnable);
+}
+
+
+void MainWindow::on_PbDAC2TgrStart_clicked()
+{
+    MainWindowHelper::LxTriggerStart(eETHPL1G);
+}
+
+
+void MainWindow::on_PbDAC2TgrStop_clicked()
+{
+   MainWindowHelper::LxTriggerStop(eETHPL1G);
 }
 
