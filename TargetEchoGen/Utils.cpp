@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include "AvrRegAddrDef.h"
+#include "log.h"
 //#include "RegAccessWrappers.h"
 namespace Utils
 {
@@ -10,35 +11,35 @@ inline EthernetSocketPL1G* ethPl1G = nullptr;
 inline EthernetSocket10G* eth10G = nullptr;
 inline QDialog* progressDialog = nullptr;
 
-uint32_t setBit(uint32_t& value, int pos)
+uint32_t setBit(uint32_t& value, uint32_t pos)
 {
 
-    LOG_INFO("[BitUtils::setBit] Before: Val:0x08X, Pos:%d",value,pos);
+    LOG_INFO("[BitUtils::setBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value |= (1U << pos);
-    LOG_INFO("[BitUtils::setBit] After: 0x08X,",value);
+    LOG_INFO("[BitUtils::setBit] After: 0x%08X,",value);
     return value;
 }
 
 uint64_t setBit64(uint64_t& value, int pos) {
 
-    LOG_INFO("[BitUtils::setBit] Before: Val:0x08X, Pos:%d",value,pos);
+    LOG_INFO("[BitUtils::setBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value |= (1U << pos);
-    LOG_INFO("[BitUtils::setBit] After: 0x08X,",value);
+    LOG_INFO("[BitUtils::setBit] After: 0x%08X,",value);
     return value;
 }
 
 uint32_t clearBit(uint32_t& value, int pos) {
 
-    LOG_INFO("[BitUtils::clearBit] Before: Val:0x08X, Pos:%d",value,pos);
+    LOG_INFO("[BitUtils::clearBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value &= ~(1U << pos);
-    LOG_INFO("[BitUtils::clearBit] After: Val:0x08X, Pos:%d",value,pos);
+    LOG_INFO("[BitUtils::clearBit] After: Val:0x%08X, Pos:%d",value,pos);
     return value;
 }
 uint64_t clearBit64(uint64_t& value, int pos) {
 
-    LOG_INFO("[BitUtils::clearBit] Before: Val:0x08X, Pos:%d",value,pos);
+    LOG_INFO("[BitUtils::clearBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value &= ~(1U << pos);
-    LOG_INFO("[BitUtils::clearBit] After: Val:0x08X, Pos:%d",value,pos);
+    LOG_INFO("[BitUtils::clearBit] After: Val:0x%08X, Pos:%d",value,pos);
     return value;
 }
 
@@ -441,6 +442,7 @@ uint32_t SpiDacRead(iface deviceType, uint32_t Address, uint32_t sel)
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x1);      // Read Enable
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x0);      // Read Disable
     uint32_t data = DacReadReg(deviceType, 0x101C);  // Read Data
+    LOG_INFO("Utils::SpiDacRead() :data %d",data);
     return data;
 }
 }

@@ -48,7 +48,7 @@ enum class BitState : bool {
 namespace Utils
 {
 
-uint32_t setBit(uint32_t& value, int pos);
+uint32_t setBit(uint32_t& value, uint32_t pos);
 //uint64_t setBit64(uint64_t& value, int pos);
 
 uint32_t clearBit(uint32_t& value, int pos);

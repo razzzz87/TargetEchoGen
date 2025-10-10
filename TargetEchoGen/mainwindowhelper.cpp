@@ -1,5 +1,5 @@
 #include "mainwindowhelper.h"
-
+#include "log.h"
 namespace  MainWindowHelper
 {
 
