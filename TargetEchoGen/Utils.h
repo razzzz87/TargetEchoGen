@@ -45,27 +45,70 @@ enum class BitState : bool {
     Enable  = true
 };
 
+enum class ReadRegError : int {
+    SUCCESS = 0,
+    SERIAL_NULL = -1,
+    SERIAL_SEND_FAIL = -2,
+    SERIAL_RECV_FAIL = -3,
+    ETHPL1G_NULL = -4,
+    ETHPL1G_RECV_FAIL = -5,
+    ETH10G_NULL = -6,
+    ETH10G_SEND_FAIL = -7,
+    ETH10G_RECV_FAIL = -8,
+    INVALID_INTERFACE = -9,
+    UNKNOWN_ERROR = -20
+};
+enum class WriteRegError : int {
+    SUCCESS = 0,
+    SERIAL_NULL = -1,
+    SERIAL_SEND_FAIL = -2,
+    ETHPL1G_NULL = -3,
+    ETHPL1G_SEND_FAIL = -4,
+    ETH10G_NULL = -5,
+    ETH10G_SEND_FAIL = -6,
+    ETH10G_RECV_FAIL = -7,
+    INVALID_INTERFACE = -8
+};
+
+enum class GuiReadRegError : int {
+    SUCCESS = 0,
+    INVALID_ADDR_FORMAT = -1,
+    SERIAL_NULL = -2,
+    SERIAL_SEND_FAIL = -3,
+    SERIAL_RECV_FAIL = -4,
+    ETHPL1G_NULL = -5,
+    ETHPL1G_SEND_FAIL = -6,
+    ETHPL1G_RECV_FAIL = -7,
+    ETH10G_NULL = -8,
+    ETH10G_SEND_FAIL = -9,
+    ETH10G_RECV_FAIL = -10,
+    INVALID_INTERFACE = -11
+};
+
+struct ReadResult {
+    uint value;
+    ReadRegError status;
+};
+
 namespace Utils
 {
 
 uint32_t setBit(uint32_t& value, uint32_t pos);
-//uint64_t setBit64(uint64_t& value, int pos);
+uint64_t setBit64(uint64_t& value, int pos);
 
 uint32_t clearBit(uint32_t& value, int pos);
 uint64_t clearBit64(uint64_t& value, int pos);
 
 bool isBitSet(uint32_t value, int pos);
-//uint32_t setBits(uint32_t value, int start, int end);
-//uint32_t clearBits(uint32_t value, int start, int end);
 
 uint32_t setValueInBits19to12(uint32_t reg, uint8_t value);
 uint16_t extractBits15to0(uint32_t value);
 
 void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state);
-void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
+GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
 
-uint readRegisterValue(iface deviceType,uint addr);
-void RegisterWrite(iface deviceType, uint iaddr, uint ival);
+ReadResult readRegisterValue(iface deviceType, uint addr);
+WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival);
 
 // SPI Control Interface
 void SpiCtrlWriteReg(iface deviceType, uint32_t offset, uint32_t value);

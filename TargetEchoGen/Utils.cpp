@@ -14,32 +14,32 @@ inline QDialog* progressDialog = nullptr;
 uint32_t setBit(uint32_t& value, uint32_t pos)
 {
 
-    LOG_INFO("[BitUtils::setBit] Before: Val:0x%08X, Pos:%d",value,pos);
+    LOG_INFO("[Utils::setBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value |= (1U << pos);
-    LOG_INFO("[BitUtils::setBit] After: 0x%08X,",value);
+    LOG_INFO("[Utils::setBit] After: 0x%08X,",value);
     return value;
 }
 
 uint64_t setBit64(uint64_t& value, int pos) {
 
-    LOG_INFO("[BitUtils::setBit] Before: Val:0x%08X, Pos:%d",value,pos);
+    LOG_INFO("[Utils::setBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value |= (1U << pos);
-    LOG_INFO("[BitUtils::setBit] After: 0x%08X,",value);
+    LOG_INFO("[Utils::setBit] After: 0x%08X,",value);
     return value;
 }
 
 uint32_t clearBit(uint32_t& value, int pos) {
 
-    LOG_INFO("[BitUtils::clearBit] Before: Val:0x%08X, Pos:%d",value,pos);
+    LOG_INFO("[Utils::clearBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value &= ~(1U << pos);
-    LOG_INFO("[BitUtils::clearBit] After: Val:0x%08X, Pos:%d",value,pos);
+    LOG_INFO("[Utils::clearBit] After: Val:0x%08X, Pos:%d",value,pos);
     return value;
 }
 uint64_t clearBit64(uint64_t& value, int pos) {
 
-    LOG_INFO("[BitUtils::clearBit] Before: Val:0x%08X, Pos:%d",value,pos);
+    LOG_INFO("[Utils::clearBit] Before: Val:0x%08X, Pos:%d",value,pos);
     value &= ~(1U << pos);
-    LOG_INFO("[BitUtils::clearBit] After: Val:0x%08X, Pos:%d",value,pos);
+    LOG_INFO("[Utils::clearBit] After: Val:0x%08X, Pos:%d",value,pos);
     return value;
 }
 
@@ -70,110 +70,148 @@ inline void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state)
         reg_val &= ~(1 << pos);
 }
 
-void readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal)
+GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal)
 {
     bool ok;
+    uint addr = lineEditAddr->text().toUInt(&ok, 16);
+    LOG_INFO("[readRegisterValue] ENTER | Addr: 0x%08X", addr);
 
-    LOG_INFO("[Utils::readRegisterValue] <ENTER> Addr:0x%08X",lineEditAddr->text().toUInt(&ok, 16));
+    if (!ok) {
+        LOG_ERROR("[readRegisterValue] INVALID_ADDR_FORMAT | Raw: %s", lineEditAddr->text().toStdString().c_str());
+        LOG_INFO("[readRegisterValue] EXIT | Addr: 0x%08X | RegVal: <FAILED>", addr);
+        return GuiReadRegError::INVALID_ADDR_FORMAT;
+    }
+
+    char* byArrPkt = nullptr;
+    char ByteArr64BitPakt[64] = {0};
+    Proto protocolobj;
+    int reg_val = 0;
+    GuiReadRegError status = GuiReadRegError::SUCCESS;
+
+    int pktLen = protocolobj.mPktRegRead(addr, &byArrPkt);
+
+    switch (deviceType)
+    {
+    case iface::eSERIAL:
+        if (!serial) {
+            LOG_ERROR("[readRegisterValue] SERIAL_NULL");
+            status = GuiReadRegError::SERIAL_NULL;
+            break;
+        }
+        if (!serial->sendData(byArrPkt, pktLen)) {
+            LOG_ERROR("[readRegisterValue] SERIAL_SEND_FAIL");
+            status = GuiReadRegError::SERIAL_SEND_FAIL;
+            break;
+        }
+        if (!serial->receiveData(ByteArr64BitPakt, pktLen)) {
+            LOG_ERROR("[readRegisterValue] SERIAL_RECV_FAIL");
+            status = GuiReadRegError::SERIAL_RECV_FAIL;
+            break;
+        }
+        reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+        break;
+
+    case iface::eETHPL1G:
+        ethPl1G = EthernetSocketPL1G::getInstance();
+        if (!ethPl1G) {
+            LOG_ERROR("[readRegisterValue] ETHPL1G_NULL");
+            status = GuiReadRegError::ETHPL1G_NULL;
+            break;
+        }
+        if (!ethPl1G->sendData(byArrPkt, pktLen)) {
+            LOG_ERROR("[readRegisterValue] ETHPL1G_SEND_FAIL");
+            status = GuiReadRegError::ETHPL1G_SEND_FAIL;
+            break;
+        }
+        {
+            int RecvByte;
+            if (!ethPl1G->receiveData(ByteArr64BitPakt, pktLen, RecvByte)) {
+                LOG_ERROR("[readRegisterValue] ETHPL1G_RECV_FAIL");
+                status = GuiReadRegError::ETHPL1G_RECV_FAIL;
+                break;
+            }
+            reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+        }
+        break;
+
+    case iface::eETH10G:
+        if (!eth10G) {
+            LOG_ERROR("[readRegisterValue] ETH10G_NULL");
+            status = GuiReadRegError::ETH10G_NULL;
+            break;
+        }
+        if (!eth10G->sendData(byArrPkt, pktLen, eth10G->RemoteIP.toStdString(), eth10G->Port)) {
+            LOG_ERROR("[readRegisterValue] ETH10G_SEND_FAIL");
+            status = GuiReadRegError::ETH10G_SEND_FAIL;
+            break;
+        }
+        {
+            std::string senderIp;
+            uint16_t senderport;
+            if (!eth10G->receiveData(ByteArr64BitPakt, pktLen, senderIp, senderport)) {
+                LOG_ERROR("[readRegisterValue] ETH10G_RECV_FAIL");
+                status = GuiReadRegError::ETH10G_RECV_FAIL;
+                break;
+            }
+            reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+        }
+        break;
+
+    case iface::ePCIe:
+        LOG_INFO("[readRegisterValue] PCIe interface not implemented.");
+        status = GuiReadRegError::INVALID_INTERFACE;
+        break;
+
+    default:
+        LOG_ERROR("[readRegisterValue] INVALID_INTERFACE | Type: %d", static_cast<int>(deviceType));
+        status = GuiReadRegError::INVALID_INTERFACE;
+        break;
+    }
+
+    delete[] byArrPkt;
+
+    if (status == GuiReadRegError::SUCCESS) {
+        lineEditVal->setText(QString("%1").arg(reg_val, 8, 16, QChar('0')).toUpper());
+        LOG_INFO("[readRegisterValue] EXIT | Addr: 0x%08X | RegVal: 0x%08X", addr, reg_val);
+    } else {
+        LOG_INFO("[readRegisterValue] EXIT | Addr: 0x%08X | RegVal: <FAILED>", addr);
+    }
+
+    return status;
+}
+
+ReadResult readRegisterValue(iface deviceType, uint addr)
+{
+    LOG_INFO("[readRegisterValue] ENTER | Addr: 0x%08X | Interface: %d", addr, static_cast<int>(deviceType));
+
+    ReadResult result = {0, ReadRegError::UNKNOWN_ERROR};
     char* byArrPkt = nullptr;
     char ByteArr64BitPakt[64] = {0};
     Proto protocolobj;
 
-    uint addr = lineEditAddr->text().toUInt(&ok, 16);
-    if (!ok) {
-        LOG_ERROR("Invalid address format.");
-        return;
-    }
-
     int pktLen = protocolobj.mPktRegRead(addr, &byArrPkt);
 
-    switch (deviceType)
-    {
-    case iface::eSERIAL:
-        if (!serial) {
-            LOG_ERROR("ERROR: Serial pointer is null.");
-            return;
-        }
-        if (serial->sendData(byArrPkt, pktLen) &&
-            serial->receiveData(ByteArr64BitPakt, pktLen))
-        {
-            int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-            lineEditVal->setText(QString("%1").arg(reg_val, 8, 16, QChar('0')).toUpper());
-            LOG_INFO("REG_VAL:0x%08X", reg_val);
-        }
-        break;
-
-    case iface::eETHPL1G:
-        ethPl1G = EthernetSocketPL1G::getInstance();
-        if (!ethPl1G) {
-            LOG_ERROR("Ethernet pointer is null.");
-            return;
-        }
-        if (ethPl1G->sendData(byArrPkt, pktLen)) {
-            int RecvByte;
-            if (ethPl1G->receiveData(ByteArr64BitPakt, pktLen, RecvByte)) {
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                lineEditVal->setText(QString("%1").arg(reg_val, 8, 16, QChar('0')).toUpper());
-                LOG_TO_FILE("REG_VAL:0x%08X", reg_val);
-            }
-        }
-        break;
-
-    case iface::eETH10G:
-        if (!eth10G) {
-            LOG_ERROR("Ethernet pointer is null.");
-            return;
-        }
-        if (eth10G->sendData(byArrPkt, pktLen, eth10G->RemoteIP.toStdString(), eth10G->Port)) {
-            std::string senderIp;
-            uint16_t senderport;
-            if (eth10G->receiveData(ByteArr64BitPakt, pktLen, senderIp, senderport)) {
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                lineEditVal->setText(QString("%1").arg(reg_val, 8, 16, QChar('0')).toUpper());
-                LOG_INFO("REG_VAL:0x%08X", reg_val);
-            }
-        }
-        break;
-
-    case iface::ePCIe:
-        LOG_TO_FILE("PCIe interface not implemented.");
-        break;
-
-    default:
-        LOG_TO_FILE("No valid interface selection");
-    }
-    delete[] byArrPkt;
-    LOG_TO_FILE("[Utils::readRegisterValue] <EXIT>");
-}
-uint readRegisterValue(iface deviceType,uint addr)
-{
-    LOG_INFO("[Utils::readRegisterValue] <ENTER> Addr:0x%08X",addr);
-    char* byArrPkt = nullptr;
-    uint reg_val = -20;
-    char ByteArr64BitPakt[64];
-    Proto protocolobj;
-    int pktLen = protocolobj.mPktRegRead(addr, &byArrPkt);
     switch (deviceType)
     {
     case iface::eSERIAL:
     {
         serial = UartSerial::getInstance();
-        if (!serial)
-        {
-            LOG_ERROR("ERROR: Serial pointer is null.");
-            return -1;
+        if (!serial) {
+            LOG_ERROR("[readRegisterValue] SERIAL_NULL | Addr: 0x%08X", addr);
+            result.status = ReadRegError::SERIAL_NULL;
+            break;
         }
-        if(!serial->sendData(byArrPkt, pktLen))
-        {
-            LOG_ERROR("Sent filed!!!<Serial>");
+        if (!serial->sendData(byArrPkt, pktLen)) {
+            LOG_ERROR("[readRegisterValue] SERIAL_SEND_FAIL | Addr: 0x%08X", addr);
+            result.status = ReadRegError::SERIAL_SEND_FAIL;
+            break;
         }
-        else
-        {
-            serial->sendData(byArrPkt, pktLen);
-            if(serial->receiveData(ByteArr64BitPakt, pktLen)){
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_INFO("REG_VAL:0x%08X",reg_val);
-            }
+        if (serial->receiveData(ByteArr64BitPakt, pktLen)) {
+            result.value = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+            result.status = ReadRegError::SUCCESS;
+        } else {
+            LOG_ERROR("[readRegisterValue] SERIAL_RECV_FAIL | Addr: 0x%08X", addr);
+            result.status = ReadRegError::SERIAL_RECV_FAIL;
         }
         break;
     }
@@ -181,210 +219,405 @@ uint readRegisterValue(iface deviceType,uint addr)
     {
         ethPl1G = EthernetSocketPL1G::getInstance();
         if (!ethPl1G) {
-            LOG_ERROR("Ethernet pointer is null.");
-            return -1;
+            LOG_ERROR("[readRegisterValue] ETHPL1G_NULL | Addr: 0x%08X", addr);
+            result.status = ReadRegError::ETHPL1G_NULL;
+            break;
         }
         if (ethPl1G->sendData(byArrPkt, pktLen)) {
             int RecvByte;
             if (ethPl1G->receiveData(ByteArr64BitPakt, pktLen, RecvByte)) {
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("REG_VAL:0x%08X", reg_val);
+                result.value = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+                result.status = ReadRegError::SUCCESS;
+            } else {
+                LOG_ERROR("[readRegisterValue] ETHPL1G_RECV_FAIL | Addr: 0x%08X", addr);
+                result.status = ReadRegError::ETHPL1G_RECV_FAIL;
             }
         }
         break;
     }
-    break;
     case iface::ePCIe:
+    {
+        LOG_INFO("[readRegisterValue] INVALID_INTERFACE (PCIe) | Addr: 0x%08X", addr);
+        result.status = ReadRegError::INVALID_INTERFACE;
         break;
+    }
+
     case iface::eETH10G:
     {
         eth10G = EthernetSocket10G::getInstance();
         if (!eth10G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
-            return -1;
+            LOG_ERROR("[readRegisterValue] ETH10G_NULL | Addr: 0x%08X", addr);
+            result.status = ReadRegError::ETH10G_NULL;
+            break;
         }
-        if(!eth10G->sendData(byArrPkt,pktLen,eth10G->RemoteIP.toStdString(),eth10G->Port)){
-            LOG_TO_FILE("Sent filed!!!<eth10G>");
+        if (!eth10G->sendData(byArrPkt, pktLen, eth10G->RemoteIP.toStdString(), eth10G->Port)) {
+            LOG_ERROR("[readRegisterValue] ETH10G_SEND_FAIL | Addr: 0x%08X", addr);
+            result.status = ReadRegError::ETH10G_SEND_FAIL;
+            break;
         }
-        {
-            char ByteArr64BitPakt[64]={0};
-            std::string senderIp;
-            uint16_t senderport;
-            if(eth10G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
-            {
-                reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("REG_VAL:0x%08X",reg_val);
-            }else{
-                LOG_TO_FILE("Receive filed!!!<eth10G>");
-            }
+        std::string senderIp;
+        uint16_t senderport;
+        if (eth10G->receiveData(ByteArr64BitPakt, pktLen, senderIp, senderport)) {
+            result.value = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+            result.status = ReadRegError::SUCCESS;
+        } else {
+            LOG_ERROR("[readRegisterValue] ETH10G_RECV_FAIL | Addr: 0x%08X", addr);
+            result.status = ReadRegError::ETH10G_RECV_FAIL;
         }
+        break;
     }
-    break;
-    default:
-        LOG_TO_FILE("No valid interface selection");
-    }
-    delete byArrPkt;
-    LOG_INFO("[Utils::readRegisterValue] <EXIT> Addr:0x%08X RegVal:%X",addr,reg_val);
-    return reg_val;
-}
-void RegisterWrite(iface deviceType, uint iaddr, uint ival)
-{
-    LOG_INFO("[Utils::RegisterWrite] <ENTER> Addr:0x%08X Val:0x%08X",iaddr,ival);
-    char* byArrPkt = nullptr;
 
+    default:
+        LOG_INFO("[readRegisterValue] INVALID_INTERFACE | Addr: 0x%08X", addr);
+        result.status = ReadRegError::INVALID_INTERFACE;
+        break;
+    }
+
+    delete[] byArrPkt;
+    LOG_INFO("[readRegisterValue] EXIT | Addr: 0x%08X | RegVal: 0x%08X | Status: %d",addr,result.value, static_cast<int>(result.status));
+
+    return result;
+}
+
+WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival)
+{
+    LOG_INFO("[RegisterWrite] ENTER | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
+    char* byArrPkt = nullptr;
     Proto protocolobj;
     int pktLen = protocolobj.mPktRegWrite(iaddr, ival, &byArrPkt);
+
     switch (deviceType)
     {
     case iface::eSERIAL:
     {
         serial = UartSerial::getInstance();
         if (!serial) {
-            LOG_ERROR("ERROR: Serial pointer is null.");
-            return;
+            LOG_ERROR("[RegisterWrite] SERIAL_NULL");
+            return WriteRegError::SERIAL_NULL;
         }
-        if(!serial->sendData(byArrPkt, pktLen)){
-            LOG_ERROR("Sent filed!!!<Serial>");
+        if (!serial->sendData(byArrPkt, pktLen)) {
+            LOG_ERROR("[RegisterWrite] SERIAL_SEND_FAIL");
+            return WriteRegError::SERIAL_SEND_FAIL;
         }
         break;
     }
-
     case iface::eETHPL1G:
     {
         ethPl1G = EthernetSocketPL1G::getInstance();
         if (!ethPl1G) {
-            LOG_ERROR("Ethernet pointer is null.");
-            return;
+            LOG_ERROR("[RegisterWrite] ETHPL1G_NULL");
+            return WriteRegError::ETHPL1G_NULL;
         }
-        if(!ethPl1G->sendData(byArrPkt,pktLen)){
-            LOG_ERROR("Sent filed!!!<eth1G>");
+        if (!ethPl1G->sendData(byArrPkt, pktLen)) {
+            LOG_ERROR("[RegisterWrite] ETHPL1G_SEND_FAIL");
+            return WriteRegError::ETHPL1G_SEND_FAIL;
         }
-        {
-            char ByteArr64BitPakt[64]={0};
-            int RecvByte;
-            if (ethPl1G->receiveData(ByteArr64BitPakt, pktLen, RecvByte)) {
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_INFO("REG_VAL:0x%08X", reg_val);
-            }
+        char ByteArr64BitPakt[64] = {0};
+        int RecvByte;
+        if (ethPl1G->receiveData(ByteArr64BitPakt, pktLen, RecvByte)) {
+            protocolobj.mParseResponsePkt(ByteArr64BitPakt);
         }
         break;
     }
-    case eETH10G:
+    case iface::eETH10G:
+    {
         eth10G = EthernetSocket10G::getInstance();
         if (!eth10G) {
-            LOG_ERROR("Ethernet pointer is null.");
-            return;
+            LOG_ERROR("[RegisterWrite] ETH10G_NULL");
+            return WriteRegError::ETH10G_NULL;
         }
-        if(!eth10G->sendData(byArrPkt,pktLen,eth10G->RemoteIP.toStdString(),eth10G->Port)){
-            LOG_ERROR("Sent filed!!!<eth1G>");
+        if (!eth10G->sendData(byArrPkt, pktLen, eth10G->RemoteIP.toStdString(), eth10G->Port)) {
+            LOG_ERROR("[RegisterWrite] ETH10G_SEND_FAIL");
+            return WriteRegError::ETH10G_SEND_FAIL;
         }
-        {
-            char ByteArr64BitPakt[64]={0};
-            std::string senderIp;
-            uint16_t senderport;
-            //Read and discard the packet
-            if(eth10G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
-            {
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_INFO("RegVal:0x%08X",reg_val);
-
-            }else{
-                LOG_ERROR("Receive filed!!!<eth10G>");
-            }
+        char ByteArr64BitPakt[64] = {0};
+        std::string senderIp;
+        uint16_t senderport;
+        if (eth10G->receiveData(ByteArr64BitPakt, pktLen, senderIp, senderport)) {
+            protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+        } else {
+            LOG_ERROR("[RegisterWrite] ETH10G_RECV_FAIL");
+            return WriteRegError::ETH10G_RECV_FAIL;
         }
-        break;
-    case ePCIe:
-        break;
-    case eNONE:
-        break;
-    case eETHPS1G:
-        break;
-    case ePLSERIAL:
         break;
     }
-    LOG_INFO("[Utils::RegisterWrite] <EXIT>");
+    case iface::ePCIe:
+    case iface::eNONE:
+    case iface::eETHPS1G:
+    case iface::ePLSERIAL:
+        LOG_ERROR("[RegisterWrite] INVALID_INTERFACE");
+        return WriteRegError::INVALID_INTERFACE;
+    }
+    delete[] byArrPkt;
+    LOG_INFO("[RegisterWrite] EXIT | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
+    return WriteRegError::SUCCESS;
 }
 
-void SpiCtrlWriteReg(iface deviceType, uint32_t uiAddr, uint32_t v) {
-    RegisterWrite(deviceType,uiAddr, v);
-}
-uint32_t SpiCtrlReadReg(iface deviceType, uint32_t uiAddr) {
-    return readRegisterValue(deviceType, uiAddr);
-}
-
-void Ddr3TdgWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_DDR3_TDG_BASE_ADDR + off, v);
-}
-uint32_t Ddr3TdgReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_DDR3_TDG_BASE_ADDR + off);
+void SpiCtrlWriteReg(iface deviceType, uint32_t uiAddr, uint32_t v)
+{
+    WriteRegError status = RegisterWrite(deviceType, uiAddr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[SpiCtrlWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", uiAddr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[SpiCtrlWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", uiAddr, v);
+    }
 }
 
-void Ddr3RwWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_DDR3_RW_ADAPTER_BASE_ADDR + off, v);
-}
-uint32_t Ddr3RwReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_DDR3_RW_ADAPTER_BASE_ADDR + off);
+uint32_t SpiCtrlReadReg(iface deviceType, uint32_t uiAddr)
+{
+    ReadResult result = readRegisterValue(deviceType, uiAddr);
+
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[SpiCtrlReadReg] Failed | Addr: 0x%08X | Status: %d", uiAddr, static_cast<int>(result.status));
+        // Optionally: return a sentinel value or handle error
+    } else {
+        LOG_INFO("[SpiCtrlReadReg] Success | Addr: 0x%08X | Value: 0x%08X", uiAddr, result.value);
+    }
+
+    return result.value;
 }
 
-void DacWriteReg(iface deviceType, uint32_t uiAddr, uint32_t v) {
-    RegisterWrite(deviceType,uiAddr, v);
+void Ddr3TdgWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_DDR3_TDG_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[Ddr3TdgWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[Ddr3TdgWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
 }
+
+void Ddr3RwWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_DDR3_RW_ADAPTER_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[Ddr3RwWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[Ddr3RwWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+void DacWriteReg(iface deviceType, uint32_t uiAddr, uint32_t v)
+{
+    WriteRegError status = RegisterWrite(deviceType, uiAddr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[DacWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", uiAddr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[DacWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", uiAddr, v);
+    }
+}
+
+void Dac0AdaWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_DAC0_DDR3_ADAPTER_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[Dac0AdaWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[Dac0AdaWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+void Dac1AdaWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_DAC1_DDR3_ADAPTER_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[Dac1AdaWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[Dac1AdaWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+void LvdsIfWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_LVDS_INTERFACE_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[LvdsIfWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[LvdsIfWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+void SpiFlashWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_SPI_FLASH_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[SpiFlashWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[SpiFlashWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+void I2cSlvWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_I2C_SLAVE_CTRL_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[I2cSlvWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[I2cSlvWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+void IfCommonWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_INTERFACE_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[IfCommonWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[IfCommonWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+void ClkRstWriteReg(iface deviceType, uint32_t off, uint32_t v)
+{
+    uint32_t addr = AVR_CLK_RST_CTRL_BASE_ADDR + off;
+    WriteRegError status = RegisterWrite(deviceType, addr, v);
+    if (status != WriteRegError::SUCCESS) {
+        LOG_ERROR("[ClkRstWriteReg] Failed | Addr: 0x%08X | Val: 0x%08X | Status: %d", addr, v, static_cast<int>(status));
+    } else {
+        LOG_INFO("[ClkRstWriteReg] Success | Addr: 0x%08X | Val: 0x%08X", addr, v);
+    }
+}
+
+
+uint32_t Ddr3TdgReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_DDR3_TDG_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[Ddr3TdgReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[Ddr3TdgReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
+}
+
+uint32_t Ddr3RwReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_DDR3_RW_ADAPTER_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[Ddr3RwReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[Ddr3RwReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
+}
+
 uint32_t DacReadReg(iface deviceType, uint32_t uiAddr) {
-    return readRegisterValue(deviceType,AVR_SPI_CTRL_BASE_ADDR+uiAddr);
+    uint32_t addr = AVR_SPI_CTRL_BASE_ADDR + uiAddr;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[DacReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[DacReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
 }
 
-void Dac0AdaWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_DAC0_DDR3_ADAPTER_BASE_ADDR + off, v);
-}
-uint32_t Dac0AdaReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_DAC0_DDR3_ADAPTER_BASE_ADDR + off);
-}
-
-void Dac1AdaWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_DAC1_DDR3_ADAPTER_BASE_ADDR + off, v);
-}
-uint32_t Dac1AdaReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_DAC1_DDR3_ADAPTER_BASE_ADDR + off);
+uint32_t Dac0AdaReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_DAC0_DDR3_ADAPTER_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[Dac0AdaReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[Dac0AdaReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
 }
 
-void LvdsIfWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_LVDS_INTERFACE_BASE_ADDR + off, v);
-}
-uint32_t LvdsIfReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_LVDS_INTERFACE_BASE_ADDR + off);
-}
-
-void SpiFlashWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_SPI_FLASH_BASE_ADDR + off, v);
-}
-uint32_t SpiFlashReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_SPI_FLASH_BASE_ADDR + off);
+uint32_t Dac1AdaReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_DAC1_DDR3_ADAPTER_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[Dac1AdaReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[Dac1AdaReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
 }
 
-uint32_t ManufReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_MANUF_CTRL_STATUS_BASE_ADDR + off);
+uint32_t LvdsIfReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_LVDS_INTERFACE_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[LvdsIfReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[LvdsIfReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
 }
 
-void I2cSlvWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_I2C_SLAVE_CTRL_BASE_ADDR + off, v);
-}
-uint32_t I2cSlvReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_I2C_SLAVE_CTRL_BASE_ADDR + off);
-}
-
-void IfCommonWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_INTERFACE_BASE_ADDR + off, v);
-}
-uint32_t IfCommonReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_INTERFACE_BASE_ADDR + off);
+uint32_t SpiFlashReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_SPI_FLASH_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[SpiFlashReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[SpiFlashReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
 }
 
-void ClkRstWriteReg(iface deviceType, uint32_t off, uint32_t v) {
-    RegisterWrite(deviceType, AVR_CLK_RST_CTRL_BASE_ADDR + off, v);
+uint32_t ManufReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_MANUF_CTRL_STATUS_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[ManufReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[ManufReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
 }
-uint32_t ClkRstReadReg(iface deviceType, uint32_t off) {
-    return readRegisterValue(deviceType, AVR_CLK_RST_CTRL_BASE_ADDR + off);
+
+uint32_t I2cSlvReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_I2C_SLAVE_CTRL_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[I2cSlvReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[I2cSlvReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
 }
+
+uint32_t IfCommonReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_INTERFACE_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[IfCommonReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[IfCommonReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
+}
+
+uint32_t ClkRstReadReg(iface deviceType, uint32_t off)
+{
+    uint32_t addr = AVR_CLK_RST_CTRL_BASE_ADDR + off;
+    ReadResult result = readRegisterValue(deviceType, addr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[ClkRstReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[ClkRstReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+    }
+    return result.value;
+}
+
 void WriteSpiSynth(iface deviceType, uint32_t address, uint32_t data)
 {
     // write  0x3C  address
@@ -407,15 +640,11 @@ void WriteSpiSynth(iface deviceType, uint32_t address, uint32_t data)
 uint32_t ReadSpiSynth(iface deviceType,uint32_t uiAddr)
 {
     uint32_t iRegVal = 0;
-    // write  0x3C  address
+
     Utils::SpiCtrlWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x3C, uiAddr);
-    // if address <= 5 write 0x54 0x0 else write 0x54 0x103
     Utils::SpiCtrlWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR + 0x54, 0x0);
-    // write  0x34  0x1
     Utils::SpiCtrlWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR + 0x38, 0x1);
-    // write  0x34  0x0
     Utils::SpiCtrlWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR + 0x38, 0x0);
-    // read  0x50 -> outData (read data)
     iRegVal = Utils::SpiCtrlReadReg(deviceType, AVR_SPI_CTRL_BASE_ADDR + 0x50);
     return iRegVal;
 }
@@ -442,8 +671,9 @@ uint32_t SpiDacRead(iface deviceType, uint32_t Address, uint32_t sel)
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x1);      // Read Enable
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x0);      // Read Disable
     uint32_t data = DacReadReg(deviceType, 0x101C);  // Read Data
-    LOG_INFO("Utils::SpiDacRead() :data %d",data);
+    LOG_INFO("[SpiDacRead] Value: 0x%08X", data);
     return data;
 }
+
 }
 

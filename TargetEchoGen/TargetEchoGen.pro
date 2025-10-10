@@ -40,9 +40,7 @@ SOURCES += \
     spectrum.cpp \
     transferprogressdialog.cpp \
     uartserial.cpp \
-    udpcon.cpp \
-    udppl1gcon.cpp \
-    udppl_10gcon.cpp
+    udpcon.cpp
 
 HEADERS += \
     AvrRegAddrDef.h \
@@ -73,9 +71,7 @@ HEADERS += \
     spectrum.h \
     transferprogressdialog.h \
     uartserial.h \
-    udpcon.h \
-    udppl1gcon.h \
-    udppl_10gcon.h
+    udpcon.h
 
 FORMS += \
     connectiontype.ui \

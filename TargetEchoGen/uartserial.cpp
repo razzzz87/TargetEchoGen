@@ -1,10 +1,7 @@
-#include "uartserial.h"
-
 #include "UartSerial.h"
-#include "log.h"
+#include "log.h"        // Must provide LOG_INFO and LOG_ERROR macros
+
 #ifdef _WIN32
-#include <windows.h>
-#include <winioctl.h>
 #include <windows.h>
 #include <winioctl.h>
 #include <winbase.h>
@@ -15,52 +12,50 @@
 #include <errno.h>
 #include <cstring>
 #endif
+
 #ifndef SERIAL_EV_TXEMPTY
 #define SERIAL_EV_TXEMPTY 0x0004
 #endif
 #ifndef SERIAL_EV_RXCHAR
-#define SERIAL_EV_RXCHAR   0x0001
+#define SERIAL_EV_RXCHAR 0x0001
 #endif
-
-#ifndef SERIAL_EV_TXEMPTY
-#define SERIAL_EV_TXEMPTY  0x0004
-#endif
-
 #ifndef SERIAL_EV_BREAK
-#define SERIAL_EV_BREAK    0x0008
+#define SERIAL_EV_BREAK 0x0008
+#endif
+#ifndef SERIAL_EV_ERR
+#define SERIAL_EV_ERR 0x0080
 #endif
 
-#ifndef SERIAL_EV_ERR
-#define SERIAL_EV_ERR      0x0080
-#endif
-UartSerial* UartSerial::instance = nullptr;  // Definition
-UartSerial::UartSerial() : handle(INVALID_HANDLE_VALUE)
+UartSerial* UartSerial::instance = nullptr;
+
+UartSerial::UartSerial()
 #ifdef _WIN32
-    , isSerial(false)
+    : handle(INVALID_HANDLE_VALUE), isSerial(false)
 #else
-    , fd(-1)
+    : fd(-1), isSerial(false)
 #endif
 {
-    instance = nullptr;
+    LOG_INFO("[UartSerial] Constructor");
 }
 
 UartSerial::~UartSerial() {
+    LOG_INFO("[UartSerial] Destructor");
     closePort();
 }
 
+#ifdef _WIN32
 bool UartSerial::configureUartWithDCB(HANDLE hSerial, int baudRate)
 {
-    DCB dcb;
-    memset(&dcb, 0, sizeof(DCB));
+    LOG_INFO("[configureUartWithDCB] Enter | Baud: %d", baudRate);
+    DCB dcb = {0};
     dcb.DCBlength = sizeof(DCB);
 
     if (!GetCommState(hSerial, &dcb)) {
-        LOG_TO_FILE("GetCommState failed. Error: %lu", GetLastError());
+        LOG_ERROR("[configureUartWithDCB] GetCommState failed. Error: %lu", GetLastError());
         return false;
     }
 
-    // Apply desired settings
-    dcb.BaudRate = baudRate;
+    dcb.BaudRate = static_cast<DWORD>(baudRate);
     dcb.ByteSize = 8;
     dcb.Parity   = NOPARITY;
     dcb.StopBits = ONESTOPBIT;
@@ -81,12 +76,11 @@ bool UartSerial::configureUartWithDCB(HANDLE hSerial, int baudRate)
     dcb.EvtChar = '\n';
 
     if (!SetCommState(hSerial, &dcb)) {
-        LOG_TO_FILE("SetCommState failed. Error: %lu", GetLastError());
+        LOG_ERROR("[configureUartWithDCB] SetCommState failed. Error: %lu", GetLastError());
         return false;
     }
 
-    COMMTIMEOUTS timeouts;
-    memset(&timeouts, 0, sizeof(timeouts));
+    COMMTIMEOUTS timeouts = {0};
     timeouts.ReadIntervalTimeout = 100;
     timeouts.ReadTotalTimeoutConstant = 100;
     timeouts.ReadTotalTimeoutMultiplier = 20;
@@ -94,259 +88,255 @@ bool UartSerial::configureUartWithDCB(HANDLE hSerial, int baudRate)
     timeouts.WriteTotalTimeoutMultiplier = 10;
 
     if (!SetCommTimeouts(hSerial, &timeouts)) {
-        LOG_TO_FILE("SetCommTimeouts failed. Error: %lu", GetLastError());
+        LOG_ERROR("[configureUartWithDCB] SetCommTimeouts failed. Error: %lu", GetLastError());
         return false;
     }
 
     DWORD eventMask = EV_RXCHAR | EV_TXEMPTY | EV_BREAK | EV_ERR;
     if (!SetCommMask(hSerial, eventMask)) {
-        LOG_TO_FILE("SetCommMask failed. Error: %lu", GetLastError());
+        LOG_ERROR("[configureUartWithDCB] SetCommMask failed. Error: %lu", GetLastError());
         return false;
     }
 
-    // ✅ Final snapshot for diagnostics
-    LOG_TO_FILE("UART configuration applied:");
-    LOG_TO_FILE("  BaudRate: %lu", dcb.BaudRate);
-    LOG_TO_FILE("  ByteSize: %u", dcb.ByteSize);
-    LOG_TO_FILE("  Parity: %u", dcb.Parity);
-    LOG_TO_FILE("  StopBits: %u", dcb.StopBits);
-    LOG_TO_FILE("  DTR: %u, RTS: %u", dcb.fDtrControl, dcb.fRtsControl);
-    LOG_TO_FILE("  FlowControl: CTS=%u, DSR=%u, XON/XOFF=%u/%u", dcb.fOutxCtsFlow, dcb.fOutxDsrFlow, dcb.fOutX, dcb.fInX);
-    LOG_TO_FILE("  SpecialChars: XON=0x%02X, XOFF=0x%02X, ERR='%c', EOF=0x%02X, EVT='%c'",
-                dcb.XonChar, dcb.XoffChar, dcb.ErrorChar, dcb.EofChar, dcb.EvtChar);
-
-    LOG_TO_FILE("Timeouts:");
-    LOG_TO_FILE("  ReadInterval: %lu", timeouts.ReadIntervalTimeout);
-    LOG_TO_FILE("  ReadTotalConstant: %lu", timeouts.ReadTotalTimeoutConstant);
-    LOG_TO_FILE("  ReadTotalMultiplier: %lu", timeouts.ReadTotalTimeoutMultiplier);
-    LOG_TO_FILE("  WriteTotalConstant: %lu", timeouts.WriteTotalTimeoutConstant);
-    LOG_TO_FILE("  WriteTotalMultiplier: %lu", timeouts.WriteTotalTimeoutMultiplier);
-
-    LOG_TO_FILE("EventMask: 0x%08lX", eventMask);
-
+    LOG_INFO("[configureUartWithDCB] Config applied: Baud=%lu ByteSize=%u Parity=%u StopBits=%u",
+             dcb.BaudRate, dcb.ByteSize, dcb.Parity, dcb.StopBits);
     return true;
 }
-
-bool UartSerial::openPort(const std::string& portName, int baudRate) {
-    LOG_TO_FILE("UartSerial::openPort() <ENTER>");
-#ifdef _WIN32
-
-    handle = CreateFileA(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (handle == INVALID_HANDLE_VALUE) {
-        LOG_TO_FILE("Failed to open serial port:  %s [CreateFileA]",portName.c_str());
-        return false;
-    }
-      if (!SetupComm(handle, 4096, 4096)) {
-        LOG_TO_FILE("SetupComm failed for port: %s. Error: %lu", portName.c_str(), GetLastError());
-        CloseHandle(handle);
-        return false;
-    }
-    LOG_TO_FILE("SetupComm succeeded: InQueue=4096, OutQueue=4096");
-    if (!PurgeComm(handle, PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR)) {
-        LOG_TO_FILE("PurgeComm failed for port: %s. Error: %lu", portName.c_str(), GetLastError());
-        CloseHandle(handle);
-        return false;
-    }
-    LOG_TO_FILE("PurgeComm succeeded: RX/TX buffers cleared");
-    if(configureUartWithDCB(handle,baudRate)){
-        LOG_TO_FILE("Configuration UART configuration\n");
-    }
-    isSerial = true;
-    LOG_TO_FILE("Serial port opened successfully: %s",portName.c_str());
-    return true;
-
 #else
-    fd = ::open(portName.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
-    if (fd < 0) {
-        LOG_TO_FILE("Failed to open serial port: " + portName + " [open()]");
-        return false;
-    }
-
+bool UartSerial::configureUartLinux(int baudRate)
+{
+    LOG_INFO("[configureUartLinux] Enter | Baud: %d", baudRate);
     termios tty{};
     if (tcgetattr(fd, &tty) != 0) {
-        LOG_TO_FILE("Failed to get terminal attributes for port: " + portName + " [tcgetattr]");
-        ::close(fd);
+        LOG_ERROR("[configureUartLinux] tcgetattr failed: %s", strerror(errno));
         return false;
     }
 
-    cfsetospeed(&tty, baudRate);
-    cfsetispeed(&tty, baudRate);
+    // Note: caller should pass platform-specific B* constant or helper to map integer baud
+    if (cfsetospeed(&tty, static_cast<speed_t>(baudRate)) != 0 ||
+        cfsetispeed(&tty, static_cast<speed_t>(baudRate)) != 0) {
+        // Many systems expect B9600 etc. If mapping required, implement mapping helper.
+        LOG_ERROR("[configureUartLinux] cfsetospeed/cfsetispeed failed or unsupported baud value");
+        // Continue attempting to set attributes anyway
+    }
 
     tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;
+    tty.c_cflag |= (CLOCAL | CREAD);
     tty.c_iflag &= ~IGNBRK;
     tty.c_lflag = 0;
     tty.c_oflag = 0;
     tty.c_cc[VMIN]  = 1;
     tty.c_cc[VTIME] = 1;
     tty.c_iflag &= ~(IXON | IXOFF | IXANY);
-    tty.c_cflag |= (CLOCAL | CREAD);
     tty.c_cflag &= ~(PARENB | PARODD);
     tty.c_cflag &= ~CSTOPB;
     tty.c_cflag &= ~CRTSCTS;
 
     if (tcsetattr(fd, TCSANOW, &tty) != 0) {
-        LOG_TO_FILE("Failed to set terminal attributes for port: " + portName + " [tcsetattr]");
-        ::close(fd);
+        LOG_ERROR("[configureUartLinux] tcsetattr failed: %s", strerror(errno));
         return false;
     }
 
-    open = true;
-    LOG_TO_FILE("Serial port opened successfully: " + portName);
+    LOG_INFO("[configureUartLinux] Config applied.");
     return true;
+}
 #endif
+
+bool UartSerial::openPort(const std::string& portName, int baudRate)
+{
+    LOG_INFO("[openPort] Enter | Port: %s Baud: %d", portName.c_str(), baudRate);
+
+#ifdef _WIN32
+    handle = CreateFileA(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (handle == INVALID_HANDLE_VALUE) {
+        LOG_ERROR("[openPort] CreateFileA failed for %s | Error: %lu", portName.c_str(), GetLastError());
+        return false;
+    }
+
+    if (!SetupComm(handle, 4096, 4096)) {
+        LOG_ERROR("[openPort] SetupComm failed. Error: %lu", GetLastError());
+        CloseHandle(handle);
+        return false;
+    }
+
+    if (!PurgeComm(handle, PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR)) {
+        LOG_ERROR("[openPort] PurgeComm failed. Error: %lu", GetLastError());
+        CloseHandle(handle);
+        return false;
+    }
+
+    if (!configureUartWithDCB(handle, baudRate)) {
+        LOG_ERROR("[openPort] configureUartWithDCB failed");
+        CloseHandle(handle);
+        return false;
+    }
+
+    LOG_INFO("[openPort] Port opened (Windows): %s", portName.c_str());
+#else
+    fd = ::open(portName.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    if (fd < 0) {
+        LOG_ERROR("[openPort] open() failed for %s | errno=%d (%s)", portName.c_str(), errno, strerror(errno));
+        return false;
+    }
+
+    if (!configureUartLinux(baudRate)) {
+        LOG_ERROR("[openPort] configureUartLinux failed for %s", portName.c_str());
+        ::close(fd);
+        fd = -1;
+        return false;
+    }
+
+    LOG_INFO("[openPort] Port opened (Linux): %s", portName.c_str());
+#endif
+
+    isSerial = true;
+    LOG_INFO("[openPort] Exit | Port ready");
+    return true;
 }
 
-void UartSerial::closePort() {
-    LOG_TO_FILE("UartSerial::closePort() <ENTER>");
+void UartSerial::closePort()
+{
+    LOG_INFO("[closePort] Enter");
 #ifdef _WIN32
     if (handle != INVALID_HANDLE_VALUE) {
+        if (!PurgeComm(handle, PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR)) {
+            LOG_ERROR("[closePort] PurgeComm failed. Error: %lu", GetLastError());
+        }
         CloseHandle(handle);
         handle = INVALID_HANDLE_VALUE;
+        LOG_INFO("[closePort] Handle closed (Windows)");
+    } else {
+        LOG_INFO("[closePort] Handle already invalid");
     }
 #else
     if (fd >= 0) {
-        ::close(fd);
+        if (::close(fd) != 0) {
+            LOG_ERROR("[closePort] close() failed | errno=%d (%s)", errno, strerror(errno));
+        } else {
+            LOG_INFO("[closePort] fd closed (Linux)");
+        }
         fd = -1;
+    } else {
+        LOG_INFO("[closePort] fd already closed");
     }
 #endif
     isSerial = false;
-    LOG_TO_FILE("UartSerial::closePort() <EXIT>");
+    LOG_INFO("[closePort] Exit");
 }
 
 bool UartSerial::sendData(const char* data, int len)
 {
-    LOG_TO_FILE("UartSerial::sendData() <ENTER>");
+    LOG_INFO("[sendData] Enter | Len: %d", len);
     if (!isSerial) {
-        LOG_TO_FILE("Error: Serial port not open.");
+        LOG_ERROR("[sendData] Serial port not open");
         return false;
     }
-    LOG_TO_FILE("UartSerial::sendData() <ENTER>1 ");
     if (!data || len <= 0) {
-        LOG_TO_FILE("Error: Invalid data pointer or length.");
+        LOG_ERROR("[sendData] Invalid buffer or length");
         return false;
     }
-
-    bool success = false;
 
 #ifdef _WIN32
     DWORD written = 0;
-    LOG_TO_FILE("UartSerial::sendData() <ENTER>1 ");
-    if (!WriteFile(handle, data, len, &written, nullptr)) {
-        DWORD errCode = GetLastError();
-        LOG_TO_FILE("WriteFile failed. Error code: %lu", errCode);
-    } else if (written != static_cast<DWORD>(len)) {
-        LOG_TO_FILE("Partial write: Expected %d bytes, wrote %lu bytes", len, written);
-    } else {
-
-        success = true;
+    if (!WriteFile(handle, data, static_cast<DWORD>(len), &written, nullptr)) {
+        DWORD err = GetLastError();
+        LOG_ERROR("[sendData] WriteFile failed | Error: %lu", err);
+        return false;
     }
-    LOG_TO_FILE("UartSerial::sendData() <ENTER>2 ");
+    if (written != static_cast<DWORD>(len)) {
+        LOG_ERROR("[sendData] Partial write | Expected: %d Written: %lu", len, written);
+        return false;
+    }
 #else
-    ssize_t sent = write(fd, data, len);
+    ssize_t sent = ::write(fd, data, static_cast<size_t>(len));
     if (sent < 0) {
-        LOG_TO_FILE("write() failed: %s", strerror(errno));
-    } else if (sent != static_cast<ssize_t>(len)) {
-        LOG_TO_FILE("Partial write: Expected %d bytes, wrote %zd bytes", len, sent);
-    } else {
-        success = true;
+        LOG_ERROR("[sendData] write() failed | errno=%d (%s)", errno, strerror(errno));
+        return false;
+    }
+    if (sent != static_cast<ssize_t>(len)) {
+        LOG_ERROR("[sendData] Partial write | Expected: %d Written: %zd", len, sent);
+        return false;
     }
 #endif
 
-    LOG_TO_FILE("UartSerial::sendData() <EXIT> Status: %s", success ? "Success" : "Failure");
-    return success;
+    LOG_INFO("[sendData] Exit | Sent %d bytes successfully", len);
+    return true;
 }
 
-bool UartSerial::receiveData(std::vector<uint8_t>& buffer, int maxLen) {
-    if (!isSerial || maxLen <= 0) return false;
-    buffer.resize(maxLen);
+bool UartSerial::receiveData(std::vector<uint8_t>& buffer, int maxLen)
+{
+    LOG_INFO("[receiveData(vector)] Enter | MaxLen: %d", maxLen);
+    if (!isSerial) {
+        LOG_ERROR("[receiveData(vector)] Serial port not open");
+        return false;
+    }
+    if (maxLen <= 0) {
+        LOG_ERROR("[receiveData(vector)] Invalid maxLen: %d", maxLen);
+        return false;
+    }
+
+    buffer.resize(static_cast<size_t>(maxLen));
+
 #ifdef _WIN32
-    DWORD read;
-    if (!ReadFile(handle, buffer.data(), maxLen, &read, nullptr)) return false;
-    buffer.resize(read);
-    return read > 0;
+    DWORD bytesRead = 0;
+    if (!ReadFile(handle, buffer.data(), static_cast<DWORD>(maxLen), &bytesRead, nullptr)) {
+        LOG_ERROR("[receiveData(vector)] ReadFile failed | Error: %lu", GetLastError());
+        return false;
+    }
+    buffer.resize(static_cast<size_t>(bytesRead));
+    LOG_INFO("[receiveData(vector)] Exit | Received %lu bytes", bytesRead);
+    return bytesRead > 0;
 #else
-    ssize_t received = read(fd, buffer.data(), maxLen);
-    if (received <= 0) return false;
-    buffer.resize(received);
+    ssize_t received = ::read(fd, buffer.data(), static_cast<size_t>(maxLen));
+    if (received < 0) {
+        LOG_ERROR("[receiveData(vector)] read() failed | errno=%d (%s)", errno, strerror(errno));
+        return false;
+    }
+    if (received == 0) {
+        LOG_ERROR("[receiveData(vector)] read() returned 0 (no data)");
+        return false;
+    }
+    buffer.resize(static_cast<size_t>(received));
+    LOG_INFO("[receiveData(vector)] Exit | Received %zd bytes", received);
     return true;
 #endif
 }
 
 bool UartSerial::receiveData(char* buffer, int maxLen)
 {
-    LOG_TO_FILE("UartSerial::receiveData() <ENTER>");
-
-    if (!isSerial || buffer == nullptr || maxLen <= 0) {
-        LOG_TO_FILE("UART receive failed: invalid state or arguments.");
+    LOG_INFO("[receiveData(char*)] Enter | MaxLen: %d", maxLen);
+    if (!isSerial) {
+        LOG_ERROR("[receiveData(char*)] Serial port not open");
+        return false;
+    }
+    if (!buffer || maxLen <= 0) {
+        LOG_ERROR("[receiveData(char*)] Invalid arguments");
         return false;
     }
 
 #ifdef _WIN32
-    if (handle == INVALID_HANDLE_VALUE) {
-        LOG_TO_FILE("UART receive failed: invalid handle.");
-        return false;
-    }
-
-    OVERLAPPED ov = {};
-    ov.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
-    if (!ov.hEvent) {
-        LOG_TO_FILE("Failed to create OVERLAPPED event.");
-        return false;
-    }
-
     DWORD bytesRead = 0;
-    DWORD dwEvent;
-    BOOL result=false;
-    WaitCommEvent(handle, &dwEvent, nullptr);
-    if (dwEvent & EV_RXCHAR) {
-        result = ReadFile(handle, buffer, 16, &bytesRead, nullptr);
+    if (!ReadFile(handle, buffer, static_cast<DWORD>(maxLen), &bytesRead, nullptr)) {
+        LOG_ERROR("[receiveData(char*)] ReadFile failed | Error: %lu", GetLastError());
+        return false;
     }
-    if (!result) {
-        DWORD err = GetLastError();
-        if (err == ERROR_IO_PENDING) {
-            DWORD waitResult = WaitForSingleObject(ov.hEvent, 500); // 500ms timeout
-            if (waitResult == WAIT_OBJECT_0) {
-                if (!GetOverlappedResult(handle, &ov, &bytesRead, FALSE)) {
-                    LOG_TO_FILE("GetOverlappedResult failed | Error: %lu", GetLastError());
-                    CloseHandle(ov.hEvent);
-                    return false;
-                }
-            } else {
-                LOG_TO_FILE("WaitForSingleObject timeout or failure | Code: %lu", waitResult);
-                CancelIo(handle);
-                CloseHandle(ov.hEvent);
-                return false;
-            }
-        } else {
-            LOG_TO_FILE("ReadFile failed | Error: %lu", err);
-            CloseHandle(ov.hEvent);
-            return false;
-        }
-    }
-
-    CloseHandle(ov.hEvent);
-
     if (bytesRead == 0) {
-        LOG_TO_FILE("UART receive failed: no data read.");
+        LOG_ERROR("[receiveData(char*)] No data read");
         return false;
     }
-
-    LOG_TO_FILE("UART received %lu bytes.", bytesRead);
+    LOG_INFO("[receiveData(char*)] Exit | Received %lu bytes", bytesRead);
     return true;
-
 #else
-    if (fd < 0) {
-        LOG_TO_FILE("UART receive failed: invalid file descriptor.");
+    ssize_t received = ::read(fd, buffer, static_cast<size_t>(maxLen));
+    if (received < 0) {
+        LOG_ERROR("[receiveData(char*)] read() failed | errno=%d (%s)", errno, strerror(errno));
         return false;
     }
-
-    ssize_t received = ::read(fd, buffer, maxLen);
-    if (received <= 0) {
-        LOG_TO_FILE("read() failed or returned zero | errno: %d (%s)", errno, strerror(errno));
+    if (received == 0) {
+        LOG_ERROR("[receiveData(char*)] read() returned 0 (no data)");
         return false;
     }
-
-    LOG_TO_FILE("UART received %zd bytes.", received);
+    LOG_INFO("[receiveData(char*)] Exit | Received %zd bytes", received);
     return true;
 #endif
 }
@@ -355,32 +345,32 @@ bool UartSerial::isOpen() const {
     return isSerial;
 }
 
-
-
 UartSerial* UartSerial::getInstance() {
-    if (instance) {
-        LOG_TO_FILE("UartSerial::getInstance() <ENTER>");
+    LOG_INFO("[getInstance] Enter");
+    if (!instance) {
+        LOG_INFO("[getInstance] instance is null");
     } else {
-        LOG_TO_FILE("UartSerial::getInstance() instance null");
+        LOG_INFO("[getInstance] instance exists");
     }
     return instance;
 }
 
 UartSerial* UartSerial::create(const std::string& portName, int baudRate)
 {
-    LOG_TO_FILE("UartSerial::create() <ENTER>");
-    if (instance == nullptr)
-    {
-        LOG_TO_FILE("UartSerial::create() <ALLOCATING>");
+    LOG_INFO("[create] Enter | Port: %s Baud: %d", portName.c_str(), baudRate);
+    if (instance == nullptr) {
+        LOG_INFO("[create] Allocating instance");
         instance = new UartSerial();
         if (!instance->openPort(portName, baudRate)) {
-            LOG_TO_FILE("UartSerial::create() <FAILED TO OPEN PORT>");
+            LOG_ERROR("[create] openPort failed for %s", portName.c_str());
             delete instance;
             instance = nullptr;
-            LOG_TO_FILE("UartSerial::create() <CLEANUP DONE>");
+            LOG_INFO("[create] Cleanup done");
             return nullptr;
         }
-        LOG_TO_FILE("UartSerial::create() <PORT OPENED SUCCESSFULLY>");
+        LOG_INFO("[create] Port opened and instance created");
+    } else {
+        LOG_INFO("[create] Returning existing instance");
     }
     return instance;
 }

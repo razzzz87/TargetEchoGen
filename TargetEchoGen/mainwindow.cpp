@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label_device_temp_ana_val->setText(tr("%1 °C").arg(100));
     load_files();
 
+    ui->SbDAC1AMPLFixedLevel->setRange(-27,0);
 
     // // 🔄 Initialize QProgressDialog for percentage-based progress tracking
     // transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);

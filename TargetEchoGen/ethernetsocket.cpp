@@ -1,206 +1,322 @@
 #include "ethernetsocket.h"
 #include "log.h"
+
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "Ws2_32.lib")
 #else
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <cstring>
 #endif
 
-#include <iostream>
-#include <cstring>
+#include <string>
+#include <vector>
 
-EthernetSocket *EthernetSocket::instance = nullptr;
+#ifdef _WIN32
+using sock_err_t = int;
+#else
+using sock_err_t = int;
+#endif
 
-EthernetSocket::EthernetSocket() : sockFd(-1) {
+EthernetSocket* EthernetSocket::instance = nullptr;
+
+EthernetSocket::EthernetSocket()
+    : sockFd(INVALID_SOCK), IsConnected(false)
+{
 #ifdef _WIN32
     WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
+    int rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (rc != 0) {
+        LOG_ERROR("[EthernetSocket] WSAStartup failed: %d", rc);
+    } else {
+        LOG_INFO("[EthernetSocket] WSAStartup succeeded");
+    }
+#else
+    LOG_INFO("[EthernetSocket] Constructor (Linux)");
 #endif
-    IsConnected = false;
 }
 
-EthernetSocket::~EthernetSocket() {
+EthernetSocket::~EthernetSocket()
+{
+    LOG_INFO("[EthernetSocket] Destructor");
     closeSocket();
 #ifdef _WIN32
     WSACleanup();
+    LOG_INFO("[EthernetSocket] WSACleanup done");
 #endif
 }
 
-bool EthernetSocket::bindSocket(const std::string& localIp, uint16_t localPort) {
+bool EthernetSocket::bindSocket(const std::string& localIp, uint16_t localPort)
+{
+    LOG_INFO("[bindSocket] Enter | IP: %s Port: %u", localIp.c_str(), localPort);
 
-    LOG_TO_FILE("EthernetSocket::bindSocket() <ENTER>");
-    sockFd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockFd < 0) {
-        std::cerr << "Failed to create socket\n";
-        return false;
-    }
-
-    sockaddr_in localAddr{};
-    localAddr.sin_family = AF_INET;
-    localAddr.sin_port = htons(localPort);
-    localAddr.sin_addr.s_addr = inet_addr(localIp.c_str());
-    LOG_TO_FILE("IP:%s PORT:%d",localIp.c_str(),localPort);
-    if (bind(sockFd, reinterpret_cast<sockaddr*>(&localAddr), sizeof(localAddr)) < 0) {
-
-        LOG_TO_FILE("Failed to bind socket to IP:%s PORT:%d",localIp.c_str(),localPort);
+// create UDP socket
 #ifdef _WIN32
-        int errorCode = WSAGetLastError();
-        LOG_TO_FILE("Failed to bind socket to IP:%s PORT:%d | Error Code: %d", localIp.c_str(), localPort, errorCode);
-#else
-        int errorCode = errno;
-        LOG_TO_FILE("Failed to bind socket to IP:%s PORT:%d | Error Code: %d (%s)", localIp.c_str(), localPort, errorCode, strerror(errorCode));
-#endif
-        closeSocket();
+    sockFd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sockFd == INVALID_SOCKET) {
+        LOG_ERROR("[bindSocket] socket() failed: %d", WSAGetLastError());
         return false;
     }
-    LOG_TO_FILE("EthernetSocket::bindSocket() <EXIT>");
+#else
+    sockFd = ::socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockFd < 0) {
+        LOG_ERROR("[bindSocket] socket() failed: %s", strerror(errno));
+        return false;
+    }
+#endif
+
+    sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(localPort);
+
+    if (localIp.empty()) {
+        addr.sin_addr.s_addr = INADDR_ANY;
+    } else {
+        int pton_rc = inet_pton(AF_INET, localIp.c_str(), &addr.sin_addr);
+        if (pton_rc != 1) {
+#ifdef _WIN32
+            LOG_ERROR("[bindSocket] inet_pton failed for %s | Error: %d", localIp.c_str(), WSAGetLastError());
+            closesocket(sockFd);
+            sockFd = INVALID_SOCKET;
+#else
+            LOG_ERROR("[bindSocket] inet_pton failed for %s | Error: %s", localIp.c_str(), strerror(errno));
+            ::close(sockFd);
+            sockFd = -1;
+#endif
+            return false;
+        }
+    }
+
+    if (bind(sockFd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) {
+#ifdef _WIN32
+        int err = WSAGetLastError();
+        LOG_ERROR("[bindSocket] bind() failed | Error: %d", err);
+        closesocket(sockFd);
+        sockFd = INVALID_SOCKET;
+#else
+        int err = errno;
+        LOG_ERROR("[bindSocket] bind() failed | Error: %d (%s)", err, strerror(err));
+        ::close(sockFd);
+        sockFd = -1;
+#endif
+        return false;
+    }
+
+    localAddr = addr;
     IsConnected = true;
-    return IsConnected;
+    LOG_INFO("[bindSocket] Bound successfully to %s:%u", localIp.empty() ? "*" : localIp.c_str(), localPort);
+    return true;
 }
 
-bool EthernetSocket::sendData(const std::vector<uint8_t>& data,
-                                     const std::string& destIp, uint16_t destPort) {
-    LOG_TO_FILE("EthernetSocket::sendData <ENTER>");
-    if (sockFd < 0) return false;
+bool EthernetSocket::sendData(const std::vector<uint8_t>& data, const std::string& destIp, uint16_t destPort)
+{
+    LOG_INFO("[sendData(vector)] Enter | Len: %zu Dest: %s:%u", data.size(), destIp.c_str(), destPort);
+    if (sockFd == INVALID_SOCK) {
+        LOG_ERROR("[sendData] invalid socket");
+        return false;
+    }
 
-    sockaddr_in destAddr{};
-    destAddr.sin_family = AF_INET;
-    destAddr.sin_port = htons(destPort);
-    destAddr.sin_addr.s_addr = inet_addr(destIp.c_str());
+    sockaddr_in dest{};
+    dest.sin_family = AF_INET;
+    dest.sin_port = htons(destPort);
 
-    ssize_t sent = sendto(sockFd, reinterpret_cast<const char*>(data.data()), data.size(), 0,
-                          reinterpret_cast<sockaddr*>(&destAddr), sizeof(destAddr));
-    LOG_TO_FILE("EthernetSocket::sendData <EXIT>");
-    return sent == static_cast<ssize_t>(data.size());
+    if (inet_pton(AF_INET, destIp.c_str(), &dest.sin_addr) != 1) {
+#ifdef _WIN32
+        LOG_ERROR("[sendData] inet_pton failed for %s | Error: %d", destIp.c_str(), WSAGetLastError());
+#else
+        LOG_ERROR("[sendData] inet_pton failed for %s | Error: %s", destIp.c_str(), strerror(errno));
+#endif
+        return false;
+    }
+
+#ifdef _WIN32
+    int sent = sendto(sockFd,
+                      reinterpret_cast<const char*>(data.data()),
+                      static_cast<int>(data.size()),
+                      0,
+                      reinterpret_cast<sockaddr*>(&dest),
+                      static_cast<int>(sizeof(dest)));
+    if (sent == SOCKET_ERROR) {
+        LOG_ERROR("[sendData] sendto failed | Error: %d", WSAGetLastError());
+        return false;
+    }
+#else
+    ssize_t sent = sendto(sockFd,
+                          reinterpret_cast<const char*>(data.data()),
+                          data.size(),
+                          0,
+                          reinterpret_cast<sockaddr*>(&dest),
+                          sizeof(dest));
+    if (sent < 0) {
+        LOG_ERROR("[sendData] sendto failed | Error: %s", strerror(errno));
+        return false;
+    }
+#endif
+
+    LOG_INFO("[sendData] Sent %d bytes", static_cast<int>(sent));
+    return static_cast<size_t>(sent) == data.size();
 }
 
 bool EthernetSocket::sendData(const char* data, int datalen, const std::string& destIp, uint16_t destPort)
 {
-    LOG_TO_FILE("EthernetSocket::sendData() <ENTER>");
-
-    if (sockFd < 0 || data == nullptr || datalen <= 0) {
-        LOG_TO_FILE("Invalid socket or data parameters. sockFd=%d, datalen=%d", sockFd, datalen);
+    LOG_INFO("[sendData(char*)] Enter | Len: %d Dest: %s:%u", datalen, destIp.c_str(), destPort);
+    if (sockFd == INVALID_SOCK || data == nullptr || datalen <= 0) {
+        LOG_ERROR("[sendData(char*)] invalid params sockFd=%d datalen=%d", static_cast<int>(sockFd), datalen);
         return false;
     }
 
-    sockaddr_in destAddr{};
-    destAddr.sin_family = AF_INET;
-    destAddr.sin_port = htons(destPort);
-
-    LOG_TO_FILE("Preparing to send to IP: %s, Port: %d, DataLen: %d", destIp.c_str(), destPort, datalen);
-
-    if (inet_pton(AF_INET, destIp.c_str(), &destAddr.sin_addr) <= 0) {
+    sockaddr_in dest{};
+    dest.sin_family = AF_INET;
+    dest.sin_port = htons(destPort);
+    if (inet_pton(AF_INET, destIp.c_str(), &dest.sin_addr) != 1) {
 #ifdef _WIN32
-        int errorCode = WSAGetLastError();
-        LOG_TO_FILE("Invalid destination IP address: %s | Error Code: %d", destIp.c_str(), errorCode);
+        LOG_ERROR("[sendData(char*)] inet_pton failed for %s | Error: %d", destIp.c_str(), WSAGetLastError());
 #else
-        int errorCode = errno;
-        LOG_TO_FILE("Invalid destination IP address: %s | Error Code: %d (%s)", destIp.c_str(), errorCode, strerror(errorCode));
+        LOG_ERROR("[sendData(char*)] inet_pton failed for %s | Error: %s", destIp.c_str(), strerror(errno));
 #endif
         return false;
     }
 
-    ssize_t sent = sendto(sockFd, data, datalen, 0, reinterpret_cast<sockaddr*>(&destAddr), sizeof(destAddr));
-
+#ifdef _WIN32
+    int sent = sendto(sockFd, data, datalen, 0, reinterpret_cast<sockaddr*>(&dest), static_cast<int>(sizeof(dest)));
+    if (sent == SOCKET_ERROR) {
+        LOG_ERROR("[sendData(char*)] sendto failed | Error: %d", WSAGetLastError());
+        return false;
+    }
+#else
+    ssize_t sent = sendto(sockFd, data, static_cast<size_t>(datalen), 0, reinterpret_cast<sockaddr*>(&dest), sizeof(dest));
     if (sent < 0) {
-#ifdef _WIN32
-        int errorCode = WSAGetLastError();
-        LOG_TO_FILE("sendto() failed | Error Code: %d", errorCode);
-#else
-        int errorCode = errno;
-        LOG_TO_FILE("sendto() failed | Error Code: %d (%s)", errorCode, strerror(errorCode));
-#endif
+        LOG_ERROR("[sendData(char*)] sendto failed | Error: %s", strerror(errno));
         return false;
     }
+#endif
 
-    LOG_TO_FILE("Sent %zd bytes to %s:%d", sent, destIp.c_str(), destPort);
-    LOG_TO_FILE("EthernetSocket::sendData() <EXIT>");
-    return sent == datalen;
+    LOG_INFO("[sendData(char*)] Sent %d bytes", static_cast<int>(sent));
+    return static_cast<int>(sent) == datalen;
 }
 
-bool EthernetSocket::receiveData(std::vector<uint8_t>& buffer,
-                                        std::string& senderIp, uint16_t& senderPort) {
-    LOG_TO_FILE("EthernetSocket::receiveData() <ENTER>");
-    if (sockFd < 0) return false;
+bool EthernetSocket::receiveData(std::vector<uint8_t>& buffer, std::string& senderIp, uint16_t& senderPort)
+{
+    LOG_INFO("[receiveData(vector)] Enter");
+    if (sockFd == INVALID_SOCK) {
+        LOG_ERROR("[receiveData] invalid socket");
+        return false;
+    }
 
-    buffer.resize(2048); // Max UDP size
-    sockaddr_in senderAddr{};
-    socklen_t addrLen = sizeof(senderAddr);
+    buffer.resize(2048);
+    sockaddr_in sender{};
+    socklen_t addrLen = sizeof(sender);
 
-    ssize_t received = recvfrom(sockFd, reinterpret_cast<char*>(buffer.data()), buffer.size(), 0, reinterpret_cast<sockaddr*>(&senderAddr), &addrLen);
-    if (received <= 0){
 #ifdef _WIN32
-        int errorCode = WSAGetLastError();
-        LOG_TO_FILE("Recived failed Error Code: %d ",errorCode);
+    int recvd = recvfrom(sockFd, reinterpret_cast<char*>(buffer.data()), static_cast<int>(buffer.size()), 0,
+                         reinterpret_cast<sockaddr*>(&sender), &addrLen);
+    if (recvd == SOCKET_ERROR || recvd == 0) {
+        LOG_ERROR("[receiveData] recvfrom failed | Error: %d", WSAGetLastError());
+        return false;
+    }
+    buffer.resize(static_cast<size_t>(recvd));
 #else
-        int errorCode = errno;
-        LOG_TO_FILE("Failed to bind socket to IP:%s PORT:%d | Error Code: %d (%s)", localIp.c_str(), localPort, errorCode, strerror(errorCode));
+    ssize_t recvd = recvfrom(sockFd, reinterpret_cast<char*>(buffer.data()), buffer.size(), 0,
+                             reinterpret_cast<sockaddr*>(&sender), &addrLen);
+    if (recvd < 0) {
+        LOG_ERROR("[receiveData] recvfrom failed | Error: %s", strerror(errno));
+        return false;
+    }
+    if (recvd == 0) {
+        LOG_ERROR("[receiveData] recvfrom returned 0");
+        return false;
+    }
+    buffer.resize(static_cast<size_t>(recvd));
+#endif
+
+    char ipStr[INET_ADDRSTRLEN] = {0};
+    if (inet_ntop(AF_INET, &sender.sin_addr, ipStr, sizeof(ipStr)) == nullptr) {
+#ifdef _WIN32
+        LOG_ERROR("[receiveData] inet_ntop failed | Error: %d", WSAGetLastError());
+#else
+        LOG_ERROR("[receiveData] inet_ntop failed | Error: %s", strerror(errno));
 #endif
         return false;
     }
-    buffer.resize(received);
-    char ipStr[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &senderAddr.sin_addr, ipStr, sizeof(ipStr));
     senderIp = ipStr;
-    senderPort = ntohs(senderAddr.sin_port);
-    LOG_TO_FILE("EthernetSocket::receiveData() <EXIT>");
+    senderPort = ntohs(sender.sin_port);
+
+    LOG_INFO("[receiveData(vector)] Received %zu bytes from %s:%u", buffer.size(), senderIp.c_str(), senderPort);
     return true;
 }
 
 bool EthernetSocket::receiveData(char* buffer, int len, std::string& senderIp, uint16_t& senderPort)
 {
-    LOG_TO_FILE("Char* EthernetSocket::receiveData() <ENTER>");
-    if (sockFd < 0 || buffer == nullptr || len <= 0) {
-        std::cerr << "Invalid socket or buffer parameters.\n";
+    LOG_INFO("[receiveData(char*)] Enter | MaxLen: %d", len);
+    if (sockFd == INVALID_SOCK || buffer == nullptr || len <= 0) {
+        LOG_ERROR("[receiveData(char*)] invalid params");
         return false;
     }
 
-    sockaddr_in senderAddr{};
-    socklen_t addrLen = sizeof(senderAddr);
-    LOG_TO_FILE("LEN:%d",len);
-    ssize_t received = recvfrom(sockFd,buffer,len,0,reinterpret_cast<sockaddr*>(&senderAddr),&addrLen);
-    LOG_TO_FILE("received:%d",received);
-    if (received <= 0)
-    {
+    sockaddr_in sender{};
+    socklen_t addrLen = sizeof(sender);
+
 #ifdef _WIN32
-        int errorCode = WSAGetLastError();
-        LOG_TO_FILE("Recived failed Error Code: %d ",errorCode);
+    int recvd = recvfrom(sockFd, buffer, len, 0, reinterpret_cast<sockaddr*>(&sender), &addrLen);
+    if (recvd == SOCKET_ERROR || recvd == 0) {
+        LOG_ERROR("[receiveData(char*)] recvfrom failed | Error: %d", WSAGetLastError());
+        return false;
+    }
 #else
-        int errorCode = errno;
-        LOG_TO_FILE("Failed to bind socket to IP:%s PORT:%d | Error Code: %d (%s)", localIp.c_str(), localPort, errorCode, strerror(errorCode));
+    ssize_t recvd = recvfrom(sockFd, buffer, static_cast<size_t>(len), 0, reinterpret_cast<sockaddr*>(&sender), &addrLen);
+    if (recvd < 0) {
+        LOG_ERROR("[receiveData(char*)] recvfrom failed | Error: %s", strerror(errno));
+        return false;
+    }
+    if (recvd == 0) {
+        LOG_ERROR("[receiveData(char*)] recvfrom returned 0");
+        return false;
+    }
+#endif
+
+    char ipStr[INET_ADDRSTRLEN] = {0};
+    if (inet_ntop(AF_INET, &sender.sin_addr, ipStr, sizeof(ipStr)) == nullptr) {
+#ifdef _WIN32
+        LOG_ERROR("[receiveData(char*)] inet_ntop failed | Error: %d", WSAGetLastError());
+#else
+        LOG_ERROR("[receiveData(char*)] inet_ntop failed | Error: %s", strerror(errno));
 #endif
         return false;
     }
 
-    char ipStr[INET_ADDRSTRLEN] = {};
-    if (inet_ntop(AF_INET, &senderAddr.sin_addr, ipStr, sizeof(ipStr)) == nullptr)
-    {
-        LOG_TO_FILE("Recived IP Conversion failed %s",ipStr);
-        return false;
-    }
     senderIp = ipStr;
-    senderPort = ntohs(senderAddr.sin_port);
-    LOG_TO_FILE("Char* EthernetSocket::receiveData() <EXIT>");
+    senderPort = ntohs(sender.sin_port);
+
+    LOG_INFO("[receiveData(char*)] Received %d bytes from %s:%u", static_cast<int>(recvd), senderIp.c_str(), senderPort);
     return true;
 }
-bool EthernetSocket::getConnStatus(){
+
+bool EthernetSocket::getConnStatus() const
+{
     return IsConnected;
 }
+
 bool EthernetSocket::closeSocket()
 {
-    if (sockFd >= 0) {
+    LOG_INFO("[closeSocket] Enter");
+    if (sockFd != INVALID_SOCK) {
 #ifdef _WIN32
         closesocket(sockFd);
+        sockFd = INVALID_SOCKET;
 #else
-        close(sockFd);
-#endif
+        ::close(sockFd);
         sockFd = -1;
+#endif
+        IsConnected = false;
+        LOG_INFO("[closeSocket] Socket closed");
+        return true;
     }
-    IsConnected = false;
+    LOG_INFO("[closeSocket] Socket already closed");
     return true;
 }
 
@@ -212,41 +328,56 @@ void EthernetSocket::setInterfaceLabel(const std::string& label) {
     interfaceLabel = label;
 }
 
-EthernetSocket *EthernetSocket::getInstance()
+EthernetSocket* EthernetSocket::getInstance()
 {
     if (instance) {
-        LOG_TO_FILE("EthernetSocket::getInstance() <ENTER>");
+        LOG_INFO("[getInstance] returning existing instance");
     } else {
-        LOG_TO_FILE("EthernetSocket::getInstance() instance null");
+        LOG_INFO("[getInstance] instance is null");
     }
     return instance;
-
 }
-EthernetSocket *EthernetSocket::Create(const std::string& localIp,uint16_t localPort,QString RemoteIP,quint16 Port)
+
+EthernetSocket* EthernetSocket::Create(const std::string& localIp, uint16_t localPort, const QString& RemoteIP, quint16 Port)
 {
-    LOG_TO_FILE("UartSerial::create() <ENTER>");
+    LOG_INFO("[Create] Enter | localIp=%s localPort=%u RemoteIP=%s RemotePort=%u",
+             localIp.c_str(), localPort, RemoteIP.toStdString().c_str(), static_cast<unsigned>(Port));
+
     if (instance == nullptr)
     {
-        LOG_TO_FILE("UartSerial::create() <ALLOCATING> IP:%s PORT:%d LPORT:%d",localIp.c_str(),Port,localPort);
+        LOG_INFO("[Create] Allocating instance");
         instance = new EthernetSocket();
         instance->setInterfaceLabel("ETH1G");
         instance->RemoteIP = RemoteIP;
         instance->Port = Port;
-        if(!instance->bindSocket(localIp,Port))
+        instance->LocalIP = QString::fromStdString(localIp);
+
+        // FIX: pass localPort to bind, not remote Port
+        if (!instance->bindSocket(localIp, localPort))
         {
+            LOG_ERROR("[Create] bindSocket failed for %s:%u", localIp.c_str(), localPort);
             delete instance;
             instance = nullptr;
-             LOG_TO_FILE("EthernetSocket::Create() <FAILED TO OPEN PORT>");
             return nullptr;
         }
-        LOG_TO_FILE("UartSerial::create() <PORT OPENED SUCCESSFULLY>");
+        LOG_INFO("[Create] Instance created and bound to %s:%u", localIp.c_str(), localPort);
+    } else {
+        LOG_INFO("[Create] Returning existing instance");
     }
-    LOG_TO_FILE("UartSerial::create() <EXIT>");
+
+    LOG_INFO("[Create] Exit");
     return instance;
 }
+
 void EthernetSocket::destroyInstance()
 {
-    instance->closeSocket();
-    delete instance;
-    instance = nullptr;
+    LOG_INFO("[destroyInstance] Enter");
+    if (instance) {
+        instance->closeSocket();
+        delete instance;
+        instance = nullptr;
+        LOG_INFO("[destroyInstance] Instance destroyed");
+    } else {
+        LOG_INFO("[destroyInstance] No instance to destroy");
+    }
 }
