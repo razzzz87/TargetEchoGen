@@ -276,3 +276,22 @@ void MainWindow::on_PbDAC2TgrStop_clicked()
    MainWindowHelper::LxTriggerStop(eETHPL1G);
 }
 
+
+void MainWindow::on_PbDAC1AMPLFixedLevelSet_clicked()
+{
+    if(ui->RbDAC1AMPLFixedLevel->isChecked())
+    {
+        uint32_t dbm = ui->SbDAC1AMPLFixedLevel->value();
+        MainWindowHelper::FixAmplSetting(eETHPL1G,dbm);
+    }
+}
+
+void MainWindow::on_ChkBoxDAC1NOCEnable_checkStateChanged(const Qt::CheckState &arg1)
+{
+    if(arg1 == Qt::Checked){
+        MainWindowHelper::Enable_nco(eETHPL1G);
+    }else{
+        MainWindowHelper::Disable_nco(eETHPL1G);
+    }
+}
+

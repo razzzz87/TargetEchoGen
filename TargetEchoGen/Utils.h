@@ -44,17 +44,19 @@ enum class BitState : bool {
     Disable = false,
     Enable  = true
 };
-namespace Utils {
+
+namespace Utils
+{
 
 uint32_t setBit(uint32_t& value, int pos);
-uint64_t setBit64(uint64_t& value, int pos);
+//uint64_t setBit64(uint64_t& value, int pos);
 
 uint32_t clearBit(uint32_t& value, int pos);
 uint64_t clearBit64(uint64_t& value, int pos);
 
 bool isBitSet(uint32_t value, int pos);
-uint32_t setBits(uint32_t value, int start, int end);
-uint32_t clearBits(uint32_t value, int start, int end);
+//uint32_t setBits(uint32_t value, int start, int end);
+//uint32_t clearBits(uint32_t value, int start, int end);
 
 uint32_t setValueInBits19to12(uint32_t reg, uint8_t value);
 uint16_t extractBits15to0(uint32_t value);

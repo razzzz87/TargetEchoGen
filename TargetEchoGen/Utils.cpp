@@ -1,7 +1,8 @@
 #include "Utils.h"
 #include "AvrRegAddrDef.h"
 //#include "RegAccessWrappers.h"
-namespace Utils{
+namespace Utils
+{
 
 inline UartSerial* serial = nullptr;
 inline EthernetSocket* eth1G = nullptr;
@@ -9,7 +10,8 @@ inline EthernetSocketPL1G* ethPl1G = nullptr;
 inline EthernetSocket10G* eth10G = nullptr;
 inline QDialog* progressDialog = nullptr;
 
-inline uint32_t setBit(uint32_t& value, int pos) {
+uint32_t setBit(uint32_t& value, int pos)
+{
 
     LOG_INFO("[BitUtils::setBit] Before: Val:0x08X, Pos:%d",value,pos);
     value |= (1U << pos);
@@ -17,7 +19,7 @@ inline uint32_t setBit(uint32_t& value, int pos) {
     return value;
 }
 
-inline uint64_t setBit64(uint64_t& value, int pos) {
+uint64_t setBit64(uint64_t& value, int pos) {
 
     LOG_INFO("[BitUtils::setBit] Before: Val:0x08X, Pos:%d",value,pos);
     value |= (1U << pos);
@@ -25,14 +27,14 @@ inline uint64_t setBit64(uint64_t& value, int pos) {
     return value;
 }
 
-inline uint32_t clearBit(uint32_t& value, int pos) {
+uint32_t clearBit(uint32_t& value, int pos) {
 
     LOG_INFO("[BitUtils::clearBit] Before: Val:0x08X, Pos:%d",value,pos);
     value &= ~(1U << pos);
     LOG_INFO("[BitUtils::clearBit] After: Val:0x08X, Pos:%d",value,pos);
     return value;
 }
-inline uint64_t clearBit64(uint64_t& value, int pos) {
+uint64_t clearBit64(uint64_t& value, int pos) {
 
     LOG_INFO("[BitUtils::clearBit] Before: Val:0x08X, Pos:%d",value,pos);
     value &= ~(1U << pos);
@@ -40,11 +42,13 @@ inline uint64_t clearBit64(uint64_t& value, int pos) {
     return value;
 }
 
-inline uint32_t setBits(uint32_t value, int start, int end) {
+uint32_t setBits(uint32_t value, int start, int end)
+{
     uint32_t mask = ((1U << (end - start + 1)) - 1) << start;
     return value | mask;
 }
-inline uint32_t clearBits(uint32_t value, int start, int end) {
+
+uint32_t clearBits(uint32_t value, int start, int end) {
     uint32_t mask = ~(((1U << (end - start + 1)) - 1) << start);
     return value & mask;
 }
@@ -56,7 +60,8 @@ inline uint32_t setValueInBits19to12(uint32_t reg, uint8_t value) {
 inline uint16_t extractBits15to0(uint32_t value) {
     return static_cast<uint16_t>(value & 0xFFFF);
 }
-inline void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state) {
+inline void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state)
+{
     uint8_t pos = static_cast<uint8_t>(bit);
     if (state == BitState::Enable)
         reg_val |= (1 << pos);
@@ -435,9 +440,7 @@ uint32_t SpiDacRead(iface deviceType, uint32_t Address, uint32_t sel)
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x0C, Address);  // Set Address
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x1);      // Read Enable
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x0);      // Read Disable
-
     uint32_t data = DacReadReg(deviceType, 0x101C);  // Read Data
-    printf("Read data: 0x%08X\n", data);
     return data;
 }
 }

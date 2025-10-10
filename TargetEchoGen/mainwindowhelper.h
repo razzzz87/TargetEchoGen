@@ -14,5 +14,8 @@ void LxTriggerSetup(iface deviceType,
 void LxTriggerStart(iface deviceType);
 void LxTriggerStop(iface deviceType);
 
+void FixAmplSetting(iface deviceType, int dbm);
+void Disable_nco(iface deviceType);
+void Enable_nco(iface deviceType);
 }
 #endif // MAINWINDOWHELPER_H
