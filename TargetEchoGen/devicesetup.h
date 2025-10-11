@@ -22,6 +22,8 @@ public:
     uint64_t ParseRegReadResponsePkt(char *rcvpkt, int pktLen);
     void readRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
     void WriteRegisterValue(QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
+    void ReadRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal, const QString &devLabel, uint8_t dacPage = 0x00);
+    void WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal);
     iface getSelectedDeviceType();
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
     TransferProgressDialog* progressDialog;
@@ -37,6 +39,18 @@ private slots:
     void on_PbLMKInitDefault_clicked();
 
     void on_PbDACInitDefault_clicked();
+
+    void on_PbRegRead2_clicked();
+
+    void on_PbRegRead3_clicked();
+
+    void on_PbRegRead4_clicked();
+
+    void on_PbRegWrite2_clicked();
+
+    void on_PbRegWrite3_clicked();
+
+    void on_PbRegWrite4_clicked();
 
 private:
     Ui::DeviceSetup *ui;

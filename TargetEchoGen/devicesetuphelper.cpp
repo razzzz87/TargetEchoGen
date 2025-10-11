@@ -1,6 +1,25 @@
 #include "Utils.h"
+#include "devicesetuphelper.h"
+namespace  DeviceSetupHelper
+{
 
-namespace  DeviceSetupHelper{
+QString DeviceTypeToQStringDirect(DeviceType d)
+{
+    switch (d)
+    {
+        case DeviceType::LMX:   return QStringLiteral("LMX");
+        case DeviceType::LMK:   return QStringLiteral("LMK");
+        case DeviceType::FPGA:  return QStringLiteral("FPGA");
+        case DeviceType::DAC1:  return QStringLiteral("DAC1");
+        case DeviceType::DAC2:  return QStringLiteral("DAC2");
+        case DeviceType::DAC3:  return QStringLiteral("DAC3");
+        case DeviceType::ATTN1: return QStringLiteral("ATTN1");
+        case DeviceType::ATTN2: return QStringLiteral("ATTN2");
+        case DeviceType::ATTN3: return QStringLiteral("ATTN3");
+        case DeviceType::ATTN4: return QStringLiteral("ATTN4");
+        default:                return QStringLiteral("UNKNOWN");
+    }
+}
 
 void LmkDefault60MhzSetting(iface deviceType)
 {

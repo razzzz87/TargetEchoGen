@@ -56,6 +56,16 @@ private slots:
 
     void on_ChkBoxDAC1NOCEnable_checkStateChanged(const Qt::CheckState &arg1);
 
+    void on_PbDAC1TriggerSetup_clicked();
+
+    void on_PBdac1TSstart_clicked();
+
+    void on_PBdac1TSstop_clicked();
+
+    void on_CbDAC2AMPLFixedLevelSet_clicked();
+
+    void on_PbDAC2AMPLFixedLevelSet_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool transferCanceled = false;

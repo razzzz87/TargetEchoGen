@@ -6,7 +6,7 @@
 #include "selftest.h"
 #include "spectrum.h"
 #include "ui_mainwindow.h"
-#include "mainwindowhelper.h"
+#include "dachelper.h"
 #include <QTableWidgetItem>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     load_files();
 
     ui->SbDAC1AMPLFixedLevel->setRange(-27,0);
+    ui->SbDAC2AMPLFixedLevel->setRange(-27,0);
 
     // // 🔄 Initialize QProgressDialog for percentage-based progress tracking
     // transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
@@ -262,19 +263,19 @@ void MainWindow::on_PbDAC2TgrSetup_clicked()
     pulseWidth = ui->LeDAC2TgrPulseWidthSample->text().toUInt();
     pulseGap = ui->LeDAC2TgrPulseGapSample->text().toUInt();
 
-    MainWindowHelper::LxTriggerSetup(eETHPL1G,trigSourceSelect,pwSamples,signalDelay,pulseGap,pulseWidth,triggerEnable);
+    DacHelper::LxTriggerSetup(eETHPL1G,trigSourceSelect,pwSamples,signalDelay,pulseGap,pulseWidth,triggerEnable);
 }
 
 
 void MainWindow::on_PbDAC2TgrStart_clicked()
 {
-    MainWindowHelper::LxTriggerStart(eETHPL1G);
+    DacHelper::LxTriggerStart(eETHPL1G);
 }
 
 
 void MainWindow::on_PbDAC2TgrStop_clicked()
 {
-   MainWindowHelper::LxTriggerStop(eETHPL1G);
+   DacHelper::LxTriggerStop(eETHPL1G);
 }
 
 
@@ -283,16 +284,54 @@ void MainWindow::on_PbDAC1AMPLFixedLevelSet_clicked()
     if(ui->RbDAC1AMPLFixedLevel->isChecked())
     {
         uint32_t dbm = ui->SbDAC1AMPLFixedLevel->value();
-        MainWindowHelper::FixAmplSetting(eETHPL1G,dbm);
+        DacHelper::FixAmplSetting(eETHPL1G,dbm);
     }
 }
 
 void MainWindow::on_ChkBoxDAC1NOCEnable_checkStateChanged(const Qt::CheckState &arg1)
 {
     if(arg1 == Qt::Checked){
-        MainWindowHelper::Enable_nco(eETHPL1G);
+        DacHelper::Enable_nco(eETHPL1G);
     }else{
-        MainWindowHelper::Disable_nco(eETHPL1G);
+        DacHelper::Disable_nco(eETHPL1G);
     }
+}
+
+
+void MainWindow::on_PbDAC1TriggerSetup_clicked()
+{
+    uint32_t trigSourceSelect = 0;
+    uint32_t pwSamples = 0;
+    uint32_t signalDelay= 0;
+    uint32_t pulseGap = 0;
+    uint32_t pulseWidth= 0;
+    uint32_t triggerEnable=1;
+
+    pulseWidth = ui->LeDAC1TgrPulseWidthSample->text().toUInt();
+    pulseGap = ui->LeDAC1TgrPulseGapSample->text().toUInt();
+
+    DacHelper::LxTriggerSetup(eETHPL1G,trigSourceSelect,pwSamples,signalDelay,pulseGap,pulseWidth,triggerEnable);
+}
+
+void MainWindow::on_PBdac1TSstart_clicked()
+{
+    DacHelper::LxTriggerStart(eETHPL1G);
+}
+
+void MainWindow::on_PBdac1TSstop_clicked()
+{
+    DacHelper::LxTriggerStop(eETHPL1G);
+}
+
+
+void MainWindow::on_CbDAC2AMPLFixedLevelSet_clicked()
+{
+
+}
+
+
+void MainWindow::on_PbDAC2AMPLFixedLevelSet_clicked()
+{
+
 }
 

@@ -148,132 +148,10 @@
     <string>DAC 2 Default</string>
    </property>
   </widget>
-  <widget class="QGroupBox" name="GbRFDAC3TriggerSetup">
-   <property name="geometry">
-    <rect>
-     <x>440</x>
-     <y>150</y>
-     <width>385</width>
-     <height>300</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Triggre Setup</string>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_17">
-    <property name="spacing">
-     <number>4</number>
-    </property>
-    <property name="topMargin">
-     <number>4</number>
-    </property>
-    <property name="bottomMargin">
-     <number>4</number>
-    </property>
-    <item>
-     <widget class="QFrame" name="FrameDAC3TriggerSetup">
-      <property name="frameShape">
-       <enum>QFrame::Shape::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Shadow::Raised</enum>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_12">
-       <property name="topMargin">
-        <number>4</number>
-       </property>
-       <property name="bottomMargin">
-        <number>4</number>
-       </property>
-       <item>
-        <layout class="QGridLayout" name="GLayoutTriggerSetup">
-         <item row="4" column="3">
-          <widget class="QPushButton" name="PbDAC3TriggerSetup">
-           <property name="text">
-            <string>Trigger setup</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="LblDAC3TriggerSource">
-           <property name="text">
-            <string>Trigger source</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="LblDAC3SWLoopBack">
-           <property name="text">
-            <string>SW Loop Back</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QCheckBox" name="ChkBoxDAC3SWLoopBack">
-           <property name="text">
-            <string>Enable</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <widget class="QLineEdit" name="LeDAC3TriggerPulseWidthSample"/>
-         </item>
-         <item row="6" column="0">
-          <widget class="QPushButton" name="PbDAC3TriggerStart">
-           <property name="text">
-            <string>Start</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3">
-          <widget class="QComboBox" name="CbDAC3TriggerSource">
-           <item>
-            <property name="text">
-             <string>External</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Internal</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="6" column="3">
-          <widget class="QPushButton" name="PbDAC3TriggerStop">
-           <property name="text">
-            <string>Stop</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="LblDAC3TriggerPulseGapSample">
-           <property name="text">
-            <string>Trigger pulse gap (Sample)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="LblDAC3TriggerPulseWidthSample">
-           <property name="text">
-            <string>Trigger pulse width (Sample)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="3">
-          <widget class="QLineEdit" name="LeDAC3TriggerPulseGapSample"/>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </item>
-   </layout>
-  </widget>
   <widget class="QGroupBox" name="GbRFDAC3FIFOStatus">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>443</x>
      <y>40</y>
      <width>385</width>
      <height>100</height>
@@ -693,6 +571,128 @@
        </widget>
       </item>
      </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_ddr_status_13">
+   <property name="geometry">
+    <rect>
+     <x>443</x>
+     <y>150</y>
+     <width>385</width>
+     <height>300</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Triggre Setup</string>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_65">
+    <property name="spacing">
+     <number>4</number>
+    </property>
+    <property name="topMargin">
+     <number>4</number>
+    </property>
+    <property name="bottomMargin">
+     <number>4</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="frame_33">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_39">
+       <property name="topMargin">
+        <number>4</number>
+       </property>
+       <property name="bottomMargin">
+        <number>4</number>
+       </property>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_59">
+         <item row="4" column="3">
+          <widget class="QPushButton" name="PbDAC3TgrSetup">
+           <property name="text">
+            <string>Trigger setup</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="LblLxDAC3TriggerSource">
+           <property name="text">
+            <string>Trigger source</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="LbIDAC3SWLoopBack">
+           <property name="text">
+            <string>SW Loop Back</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QCheckBox" name="ChkBoxDAC3SWLookBackEnable">
+           <property name="text">
+            <string>Enable</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QLineEdit" name="LeDAC3TgrPulseWidthSample"/>
+         </item>
+         <item row="6" column="0">
+          <widget class="QPushButton" name="PbDAC3TgrStart">
+           <property name="text">
+            <string>Start</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QComboBox" name="CbLxDAC3TriggerSource">
+           <item>
+            <property name="text">
+             <string>External</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Internal</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="6" column="3">
+          <widget class="QPushButton" name="PbDAC3TgrStop">
+           <property name="text">
+            <string>Stop</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="LbIDAC3TgrPulseGapSample">
+           <property name="text">
+            <string>Trigger pulse gap (Sample)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="LbIDAC3TgrPulseWidthSample">
+           <property name="text">
+            <string>Trigger pulse width (Sample)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QLineEdit" name="LeDAC3TgrPulseGapSample"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>

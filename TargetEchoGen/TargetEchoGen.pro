@@ -16,7 +16,7 @@ QMAKE_CXXFLAGS += -Wa,-mbig-obj
 SOURCES += \
     Utils.cpp \
     connectiontype.cpp \
-    ddriflfRf.cpp \
+    dachelper.cpp \
     devicesetup.cpp \
     devicesetuphelper.cpp \
     ethernetsocket.cpp \
@@ -28,7 +28,6 @@ SOURCES += \
     log.cpp \
     main.cpp \
     mainwindow.cpp \
-    mainwindowhelper.cpp \
     matfileprocessing.cpp \
     playbackhelper.cpp \
     proto.cpp \
@@ -48,7 +47,7 @@ HEADERS += \
     RegDef.h \
     Utils.h \
     connectiontype.h \
-    ddriflfRf.h \
+    dachelper.h \
     devicesetup.h \
     devicesetuphelper.h \
     ethernetsocket.h \
@@ -59,7 +58,6 @@ HEADERS += \
     fileprocessinghelper.h \
     log.h \
     mainwindow.h \
-    mainwindowhelper.h \
     matfileprocessing.h \
     playbackhelper.h \
     proto.h \

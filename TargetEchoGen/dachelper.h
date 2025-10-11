@@ -1,7 +1,7 @@
-#ifndef MAINWINDOWHELPER_H
-#define MAINWINDOWHELPER_H
+#ifndef DACHELPER_H
+#define DACHELPER_H
 #include "Utils.h"
-namespace MainWindowHelper
+namespace DacHelper
 {
 void LxTriggerSetup(iface deviceType,
                   uint32_t trigSourceSelect,
@@ -18,4 +18,4 @@ void FixAmplSetting(iface deviceType, int dbm);
 void Disable_nco(iface deviceType);
 void Enable_nco(iface deviceType);
 }
-#endif // MAINWINDOWHELPER_H
+#endif // DACHELPER_H

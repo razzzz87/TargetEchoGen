@@ -113,6 +113,7 @@ WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival);
 // SPI Control Interface
 void SpiCtrlWriteReg(iface deviceType, uint32_t offset, uint32_t value);
 void WriteSpiSynth(iface deviceType, uint32_t address, uint32_t data);
+uint32_t ReadSpiSynth(iface deviceType,uint32_t uiAddr);
 uint32_t SpiCtrlReadReg (iface deviceType, uint32_t uiAddr);
 
 // DDR3 Test Data Generator/Checker

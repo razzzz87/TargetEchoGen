@@ -740,58 +740,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="CbDevType">
-          <item>
-           <property name="text">
-            <string>FPGA</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>LMK</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>LMX</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>DAC 1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>DAC 2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>DAC 3</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>ATTN1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>ATTN2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>ATTN3</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>ATTN4</string>
-           </property>
-          </item>
-         </widget>
+         <widget class="QComboBox" name="CbDevType"/>
         </item>
         <item>
          <widget class="QRadioButton" name="RbPS1G">
