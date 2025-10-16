@@ -180,7 +180,7 @@ GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLi
     return status;
 }
 
-ReadResult readRegisterValue(iface deviceType, uint addr)
+ReadResult readRegisterValue(iface deviceType, uint32_t addr)
 {
     LOG_INFO("[readRegisterValue] ENTER | Addr: 0x%08X | Interface: %d", addr, static_cast<int>(deviceType));
 
@@ -279,6 +279,16 @@ ReadResult readRegisterValue(iface deviceType, uint addr)
     return result;
 }
 
+uint32_t RegRead(iface deviceType, uint uiAddr){
+
+    ReadResult result = readRegisterValue(deviceType, uiAddr);
+    if (result.status != ReadRegError::SUCCESS) {
+        LOG_ERROR("[DacReadReg] Failed | Addr: 0x%08X | Status: %d", uiAddr, static_cast<int>(result.status));
+    } else {
+        LOG_INFO("[DacReadReg] Success | Addr: 0x%08X | Value: 0x%08X", uiAddr, result.value);
+    }
+    return result.value;
+}
 WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival)
 {
     LOG_INFO("[RegisterWrite] ENTER | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);

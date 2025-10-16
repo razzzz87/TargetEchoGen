@@ -107,7 +107,8 @@ uint16_t extractBits15to0(uint32_t value);
 void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state);
 GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal);
 
-ReadResult readRegisterValue(iface deviceType, uint addr);
+ReadResult readRegisterValue(iface deviceType, uint32_t addr);
+uint32_t RegRead(iface deviceType, uint uiAddr);
 WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival);
 
 // SPI Control Interface
