@@ -25,7 +25,7 @@ void LmkDefault60MhzSetting(iface deviceType)
 {
     // WR1 register write (as your WR1 example)
     //Utils::SpiCtrlWriteReg(deviceType,0x5014, 0x00010000);
-    Utils::SpiCtrlWriteReg(deviceType, 0x51c, 0x1);
+    Utils::SpiCtrlWriteReg(deviceType, 0x530, 0x1); // old reg addr 51C
 
     // SPI synth register writes
     Utils::WriteSpiSynth(deviceType, 0x00, 0x0000010);
@@ -57,7 +57,7 @@ void LmkDefault120MhzSetting(iface deviceType)
 {
     // WR1 register write
     //Utils::SpiCtrlWriteReg(deviceType,0x5014, 0x00010000);
-    Utils::SpiCtrlWriteReg(deviceType, 0x51c, 0x0);
+    Utils::SpiCtrlWriteReg(deviceType, 0x530, 0x0); // old reg addr 51C
 
     // SPI synth register writes (explicit and ordered for traceability)
     Utils::WriteSpiSynth(deviceType, 0x00, 0x0000010);
