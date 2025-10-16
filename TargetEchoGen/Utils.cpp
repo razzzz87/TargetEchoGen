@@ -512,12 +512,12 @@ uint32_t Ddr3RwReadReg(iface deviceType, uint32_t off)
 }
 
 uint32_t DacReadReg(iface deviceType, uint32_t uiAddr) {
-    uint32_t addr = AVR_SPI_CTRL_BASE_ADDR + uiAddr;
-    ReadResult result = readRegisterValue(deviceType, addr);
+
+    ReadResult result = readRegisterValue(deviceType, uiAddr);
     if (result.status != ReadRegError::SUCCESS) {
-        LOG_ERROR("[DacReadReg] Failed | Addr: 0x%08X | Status: %d", addr, static_cast<int>(result.status));
+        LOG_ERROR("[DacReadReg] Failed | Addr: 0x%08X | Status: %d", uiAddr, static_cast<int>(result.status));
     } else {
-        LOG_INFO("[DacReadReg] Success | Addr: 0x%08X | Value: 0x%08X", addr, result.value);
+        LOG_INFO("[DacReadReg] Success | Addr: 0x%08X | Value: 0x%08X", uiAddr, result.value);
     }
     return result.value;
 }
@@ -666,11 +666,12 @@ void SpiDacWrite(iface deviceType, uint32_t Address, uint32_t Data, uint32_t sel
 // -------------------------------
 uint32_t SpiDacRead(iface deviceType, uint32_t Address, uint32_t sel)
 {
+    LOG_INFO("[SpiDacRead] Addr: 0x%08X", Address);
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x08, sel);      // Select DAC
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x0C, Address);  // Set Address
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x1);      // Read Enable
     DacWriteReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x04, 0x0);      // Read Disable
-    uint32_t data = DacReadReg(deviceType, 0x101C);  // Read Data
+    uint32_t data = DacReadReg(deviceType, AVR_SPI_CTRL_BASE_ADDR+0x1C);  // Read Data
     LOG_INFO("[SpiDacRead] Value: 0x%08X", data);
     return data;
 }

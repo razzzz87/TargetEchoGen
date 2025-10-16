@@ -252,7 +252,7 @@ void DeviceSetup::ReadRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal, const
     }
 
     bool ok = false;
-    uint32_t uiAddr = leAddr->text().toUInt(&ok);
+    uint32_t uiAddr = leAddr->text().toUInt(&ok,16);
     if (!ok) {
         LOG_ERROR("[ReadRegister] Invalid address: %s", leAddr->text().toStdString().c_str());
         return;
