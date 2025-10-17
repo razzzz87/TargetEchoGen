@@ -66,6 +66,12 @@ private slots:
 
     void on_PbDAC2AMPLFixedLevelSet_clicked();
 
+    void on_PbDAC1AMPLBaseValueIncr_clicked();
+
+    void on_PbDAC1AMPLBaseValueDecr_clicked();
+
+    void on_PbDAC2AMPLBaseValueIncr_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool transferCanceled = false;

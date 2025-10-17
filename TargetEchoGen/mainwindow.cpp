@@ -38,8 +38,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label_device_temp_ana_val->setText(tr("%1 °C").arg(100));
     load_files();
 
+
     ui->SbDAC1AMPLFixedLevel->setRange(-27,0);
     ui->SbDAC2AMPLFixedLevel->setRange(-27,0);
+    ui->SbDAC1AMPLBaseValue->setRange(-27,0);
+    ui->SbDAC2AMPLBaseValue->setRange(-27,0);
 
     // // 🔄 Initialize QProgressDialog for percentage-based progress tracking
     // transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
@@ -333,5 +336,32 @@ void MainWindow::on_CbDAC2AMPLFixedLevelSet_clicked()
 void MainWindow::on_PbDAC2AMPLFixedLevelSet_clicked()
 {
 
+}
+
+
+void MainWindow::on_PbDAC1AMPLBaseValueIncr_clicked()
+{
+    int dbmval = ui->SbDAC1AMPLBaseValue->value();
+    dbmval += 1;
+    ui->SbDAC1AMPLBaseValue->setValue(dbmval);
+    //DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+}
+
+
+void MainWindow::on_PbDAC1AMPLBaseValueDecr_clicked()
+{
+    int dbmval = ui->SbDAC1AMPLBaseValue->value();
+    dbmval -= 1;
+    ui->SbDAC1AMPLBaseValue->setValue(dbmval);
+     //DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+}
+
+
+void MainWindow::on_PbDAC2AMPLBaseValueIncr_clicked()
+{
+    int dbmval = ui->SbDAC2AMPLBaseValue->value();
+    dbmval += 1;
+    ui->SbDAC2AMPLBaseValue->setValue(dbmval);
+    //DacHelper::FixAmplSetting(eETHPL1G,dbmval);
 }
 
