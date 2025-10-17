@@ -170,5 +170,47 @@ void LxTriggerStop(iface deviceType)
     LOG_INFO("[LxTriggerStop] <EXIT>: deviceType=%d", static_cast<int>(deviceType));
 }
 
+void WrIterpolation(iface deviceType,int interpoval)
+{
+    switch(interpoval)
+    {
+    case 2:
+        Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x01);
+        break;
+    case 4:
+        Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x02);
+        break;
+    case 8:
+        Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x03);
+        break;
+    default:
+        Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x00);
+    }
+    Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x34,0x01);
+    Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x34,0x00);
 
+}
+void WrNCOFrq(iface deviceType,QString sNCOFrq)
+{
+    if(sNCOFrq == "70MHz"){
+        //Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x01);
+    }
+    else if(sNCOFrq == "180MHz"){
+        //Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x01);
+    }else{
+        //Utils::RegisterWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x01);
+    }
+}
+void IQSwap(iface deviceType,QString sSwapIQ)
+{
+    if(sSwapIQ == "Normal"){
+        Utils::RegisterWrite(deviceType,AVR_DAC3_BASE_ADDR+0x4C,0);
+    }
+    else if(sSwapIQ == "Swap"){
+        Utils::RegisterWrite(deviceType,AVR_DAC3_BASE_ADDR+0x4C,1);
+    }else{
+        Utils::RegisterWrite(deviceType,AVR_DAC3_BASE_ADDR+0x4C,0);
+    }
+
+}
 }

@@ -72,6 +72,12 @@ private slots:
 
     void on_PbDAC2AMPLBaseValueIncr_clicked();
 
+    void on_PbDAC2AMPLBaseValueDncr_clicked();
+
+    void on_PbDAC1Apply_clicked();
+
+    void on_PbDAC1SUMRefresh_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool transferCanceled = false;

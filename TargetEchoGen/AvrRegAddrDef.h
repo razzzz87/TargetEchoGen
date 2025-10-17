@@ -20,8 +20,6 @@
 // DAC1 DDR3 Adapter Block
 #define AVR_DAC1_DDR3_ADAPTER_BASE_ADDR    0x80002140UL
 
-#define AVR_DAC2_BASE_ADDR    0x00002000UL
-
 // LVDS Interface
 #define AVR_LVDS_INTERFACE_BASE_ADDR       0x80002200UL
 
@@ -40,6 +38,13 @@
 
 // Clock & Reset Control
 #define AVR_CLK_RST_CTRL_BASE_ADDR         0x80005000UL
+
+//DAC1
+#define AVR_TEG_REG_BASE 0x0000500
+
+//DAC3
+#define AVR_DAC3_BASE_ADDR  0x00002000UL
+
 
 // SPI Control Interface Register Offsets
 typedef enum {

@@ -341,27 +341,71 @@ void MainWindow::on_PbDAC2AMPLFixedLevelSet_clicked()
 
 void MainWindow::on_PbDAC1AMPLBaseValueIncr_clicked()
 {
-    int dbmval = ui->SbDAC1AMPLBaseValue->value();
-    dbmval += 1;
-    ui->SbDAC1AMPLBaseValue->setValue(dbmval);
-    //DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+    if(ui->RbDAC1AMPLBaseValue->isChecked())
+    {
+        int dbmval = ui->SbDAC1AMPLBaseValue->value();
+        dbmval += 1;
+        ui->SbDAC1AMPLBaseValue->setValue(dbmval);
+        //DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+    }
 }
 
 
 void MainWindow::on_PbDAC1AMPLBaseValueDecr_clicked()
 {
-    int dbmval = ui->SbDAC1AMPLBaseValue->value();
-    dbmval -= 1;
-    ui->SbDAC1AMPLBaseValue->setValue(dbmval);
-     //DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+    if(ui->RbDAC1AMPLBaseValue->isChecked())
+    {
+        int dbmval = ui->SbDAC1AMPLBaseValue->value();
+        dbmval -= 1;
+        ui->SbDAC1AMPLBaseValue->setValue(dbmval);
+        DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+    }
 }
 
 
 void MainWindow::on_PbDAC2AMPLBaseValueIncr_clicked()
 {
-    int dbmval = ui->SbDAC2AMPLBaseValue->value();
-    dbmval += 1;
-    ui->SbDAC2AMPLBaseValue->setValue(dbmval);
-    //DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+    if(ui->RbDAC2AMPLBaseValue->isChecked())
+    {
+        int dbmval = ui->SbDAC2AMPLBaseValue->value();
+        dbmval += 1;
+        ui->SbDAC2AMPLBaseValue->setValue(dbmval);
+        DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+    }
+}
+
+
+void MainWindow::on_PbDAC2AMPLBaseValueDncr_clicked()
+{
+    if(ui->RbDAC2AMPLBaseValue->isChecked())
+    {
+        int dbmval = ui->SbDAC2AMPLBaseValue->value();
+        dbmval -= 1;
+        ui->SbDAC2AMPLBaseValue->setValue(dbmval);
+        DacHelper::FixAmplSetting(eETHPL1G,dbmval);
+    }
+}
+
+
+void MainWindow::on_PbDAC1Apply_clicked()
+{
+    int iPwSample = ui->SbDAC1PWSamples->value();
+    int iSignalDelay  = ui->SbDAC1SignalDelay->value();
+    int iDoplerShiftHz = ui->SbDAC1DopplerShiftHz->value();
+
+    DacHelper::WrIterpolation(eETHPL1G, ui->CbIDAC1InterpSelect->currentText().toInt());
+    DacHelper::WrNCOFrq(eETHPL1G,ui->CbDAC1NOCFrequency->currentText());
+    Utils::RegisterWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x08,iPwSample);
+    Utils::RegisterWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x6C,iSignalDelay);
+    Utils::RegisterWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x40,iDoplerShiftHz);
+
+}
+
+
+void MainWindow::on_PbDAC1SUMRefresh_clicked()
+{
+
+    uint32_t val   = Utils::RegRead(eETHPL1G,AVR_DAC3_BASE_ADDR+0x74);
+    ui->LbIDAC1SUMNumOfTriggersVal->setText(QString::number(val));
 }
 

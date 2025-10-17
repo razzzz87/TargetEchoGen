@@ -33,23 +33,23 @@ Spectrum::Spectrum(QWidget *parent)
     N = NUM_POINT;
     frq = FRQ;
 
-    ui->DDC_DataradioButton->setStyleSheet("rgb(255,255,255)");
-    ui->IQInterleved_radioButton->setStyleSheet("rgb(255,255,255)");
-    ui->IOnly_radioButton->setStyleSheet("rgb(255,255,255)");
-    ui->LblChannel->setStyleSheet("rgb(255,255,255)");
-    ui->LblDataSize->setStyleSheet("rgb(255,255,255)");
-    ui->LblFs->setStyleSheet("rgb(255,255,255)");
-    ui->LblWindowSize->setStyleSheet("rgb(255,255,255)");
-    ui->enableWeight_checkBox->setStyleSheet("rgb(255,255,255)");
-    ui->ChkBoxFFtShift->setStyleSheet("rgb(255,255,255)");
-    ui->m_CBMaxHold->setStyleSheet("rgb(255,255,255)");
-    ui->LblRefreshRate->setStyleSheet("rgb(255,255,255)");
-    ui->strmnStrt_radioButton->setStyleSheet("rgb(255,255,255)");
-    ui->strmnStop_radioButton->setStyleSheet("rgb(255,255,255)");
-    ui->autoRefreshOn_radioButton->setStyleSheet("rgb(255,255,255)");
-    ui->autoRefreshOff_radioButton->setStyleSheet("rgb(255,255,255)");
-    ui->byteReverse_checkBox->setStyleSheet("rgb(255,255,255)");
-    ui->m_CBSpectrumdata->setStyleSheet("rgb(255,255,255)");
+    //ui->DDC_DataradioButton->setStyleSheet("rgb(255,255,255)");
+    //ui->IQInterleved_radioButton->setStyleSheet("rgb(255,255,255)");
+    //ui->IOnly_radioButton->setStyleSheet("rgb(255,255,255)");
+    //ui->LblChannel->setStyleSheet("rgb(255,255,255)");
+   // ui->LblDataSize->setStyleSheet("rgb(255,255,255)");
+    //ui->LblFs->setStyleSheet("rgb(255,255,255)");
+    //ui->LblWindowSize->setStyleSheet("rgb(255,255,255)");
+    //ui->enableWeight_checkBox->setStyleSheet("rgb(255,255,255)");
+    //ui->ChkBoxFFtShift->setStyleSheet("rgb(255,255,255)");
+    //ui->m_CBMaxHold->setStyleSheet("rgb(255,255,255)");
+    //ui->LblRefreshRate->setStyleSheet("rgb(255,255,255)");
+    //ui->strmnStrt_radioButton->setStyleSheet("rgb(255,255,255)");
+    //ui->strmnStop_radioButton->setStyleSheet("rgb(255,255,255)");
+    //ui->autoRefreshOn_radioButton->setStyleSheet("rgb(255,255,255)");
+    //ui->autoRefreshOff_radioButton->setStyleSheet("rgb(255,255,255)");
+    //ui->byteReverse_checkBox->setStyleSheet("rgb(255,255,255)");
+    //ui->m_CBSpectrumdata->setStyleSheet("rgb(255,255,255)");
 
 
 

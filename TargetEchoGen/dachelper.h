@@ -17,5 +17,9 @@ void LxTriggerStop(iface deviceType);
 void FixAmplSetting(iface deviceType, int dbm);
 void Disable_nco(iface deviceType);
 void Enable_nco(iface deviceType);
+
+void WrIterpolation(iface deviceType, int interpoval);
+void WrNCOFrq(iface deviceType,QString sNCOFrq);
+
 }
 #endif // DACHELPER_H
