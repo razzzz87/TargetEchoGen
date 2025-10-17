@@ -33,7 +33,7 @@ QPushButton {
 }
 
 QPushButton:hover {
-    background-color: #00aa00;
+    background-color: #0056B3;
     border: 1px solid #ffffff;
 }
 
@@ -56,7 +56,7 @@ QProgressBar {
 }
 
 QProgressBar::chunk {
-    background-color: #00ff00;
+    background-color: #0056B3;
     margin: 1px;
 }
 QGroupBox {
@@ -151,17 +151,12 @@ QSpinBox {
     min-height: 30px;
 }
 
-QSpinBox::up-button, QSpinBox::down-button {
+/*QSpinBox::up-button, QSpinBox::down-button {
     width: 16px;
     height: 16px;
     background-color: #00ff00;
     border: none;
-}
-
-QSpinBox::up-arrow, QSpinBox::down-arrow {
-    image: none;
-}
-
+}*/
 /*-----QCheckBox-----*/
 QCheckBox {
     color: white;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1920</width>
-    <height>1050</height>
+    <width>1938</width>
+    <height>1098</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -35,20 +35,38 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>1900</width>
-        <height>1020</height>
+        <width>1920</width>
+        <height>1080</height>
        </size>
       </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::Box</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
+      </property>
       <property name="widgetResizable">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <widget class="QWidget" name="scrollAreaWidgetContents">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1920</width>
-         <height>1025</height>
+         <width>1902</width>
+         <height>1076</height>
         </rect>
        </property>
        <widget class="QGroupBox" name="grp_box_status">
@@ -650,8 +668,8 @@
          <rect>
           <x>3</x>
           <y>195</y>
-          <width>1893</width>
-          <height>763</height>
+          <width>1897</width>
+          <height>764</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -888,6 +906,11 @@
                      <widget class="QComboBox" name="CbIDAC1InterpSelect">
                       <item>
                        <property name="text">
+                        <string>0</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
                         <string>2</string>
                        </property>
                       </item>
@@ -1105,7 +1128,13 @@
              <property name="spacing">
               <number>4</number>
              </property>
+             <property name="leftMargin">
+              <number>4</number>
+             </property>
              <property name="topMargin">
+              <number>4</number>
+             </property>
+             <property name="rightMargin">
               <number>4</number>
              </property>
              <property name="bottomMargin">
@@ -1214,7 +1243,7 @@
            <widget class="QPushButton" name="Pbdac1default">
             <property name="geometry">
              <rect>
-              <x>680</x>
+              <x>674</x>
               <y>5</y>
               <width>150</width>
               <height>30</height>
@@ -2072,7 +2101,7 @@
               </widget>
              </item>
              <item row="0" column="0">
-              <widget class="QLabel" name="LbIDAC2SUMFileName">
+              <widget class="QLabel" name="LbIDAC1SUMFileName">
                <property name="text">
                 <string>File Name</string>
                </property>

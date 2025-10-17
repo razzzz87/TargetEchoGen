@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     conn = new ConnectionType(this);
-    DeviceSetup *deviceSetup = new DeviceSetup();
+    DeviceSetup *deviceSetup = new DeviceSetup(this);
 
     ui->tabWidgetMainTab->addTab(new FileProcessing(),"File processing");
     ui->tabWidgetMainTab->addTab(deviceSetup,"Device setup");
@@ -248,12 +248,6 @@ void MainWindow::on_PbDAC1IQFileSend_clicked()
 
 }
 
-
-void MainWindow::on_PBdac2TStriggersetup_clicked()
-{
-
-}
-
 void MainWindow::on_PbDAC2TgrSetup_clicked()
 {
     uint32_t trigSourceSelect = 0;
@@ -325,13 +319,6 @@ void MainWindow::on_PBdac1TSstop_clicked()
 {
     DacHelper::LxTriggerStop(eETHPL1G);
 }
-
-
-void MainWindow::on_CbDAC2AMPLFixedLevelSet_clicked()
-{
-
-}
-
 
 void MainWindow::on_PbDAC2AMPLFixedLevelSet_clicked()
 {

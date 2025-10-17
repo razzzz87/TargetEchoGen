@@ -44,8 +44,6 @@ private slots:
     void onConnectionFailure(iface eInterface);
     void on_PbDAC1IQFileSend_clicked();
 
-    void on_PBdac2TStriggersetup_clicked();
-
     void on_PbDAC2TgrSetup_clicked();
 
     void on_PbDAC2TgrStart_clicked();
@@ -61,8 +59,6 @@ private slots:
     void on_PBdac1TSstart_clicked();
 
     void on_PBdac1TSstop_clicked();
-
-    void on_CbDAC2AMPLFixedLevelSet_clicked();
 
     void on_PbDAC2AMPLFixedLevelSet_clicked();
 

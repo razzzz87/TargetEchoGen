@@ -91,6 +91,7 @@ RESOURCES += \
 QTPLUGIN += qled
 
 DISTFILES += \
+    CMakeLists.txt \
     dark_mode_style_sheet.qss
 
 
