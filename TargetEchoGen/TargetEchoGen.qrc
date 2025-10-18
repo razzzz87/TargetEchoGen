@@ -18,5 +18,7 @@
         <file>images/icons8-chevron-up-26.png</file>
         <file>images/icons8-chevron-down-26.png</file>
         <file>images/icons8-dropdown-26.png</file>
+        <file>images/angle-left.png</file>
+        <file>images/angle-right.png</file>
     </qresource>
 </RCC>
