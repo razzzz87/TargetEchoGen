@@ -396,3 +396,52 @@ void MainWindow::on_PbDAC1SUMRefresh_clicked()
     ui->LbIDAC1SUMNumOfTriggersVal->setText(QString::number(val));
 }
 
+
+void MainWindow::on_ChkBoxNBADCDDSEnable_checkStateChanged(const Qt::CheckState &arg1)
+{
+    if(arg1 == Qt::Checked)
+    {
+        Utils::RegisterWrite(iface::eETH10G,0x508,1);
+    }
+    else{
+        Utils::RegisterWrite(iface::eETH10G,0x508,0);
+    }
+}
+
+uint64_t MainWindow::ComputeDDSFCW(uint32_t fcw, uint32_t fs)
+{
+    // Log input values
+    LOG_INFO("ComputeDDSFCW <ENTER> fcw: %u, fs: %u", fcw, fs);
+
+    if (fs == 0) {
+        LOG_ERROR("Sampling frequency cannot be zero");
+        return 0;
+    }
+
+    // Compute ratio with floating-point precision
+    double ratio = static_cast<double>(fcw) / static_cast<double>(fs);
+    double scaled = ratio * 4294967296.0;  // 2^32
+
+    // Log intermediate values
+    LOG_INFO("Ratio: %.10f, Scaled: %.2f", ratio, scaled);
+
+    uint64_t tuningWord = static_cast<uint64_t>(scaled);
+
+    // Log final result
+    LOG_INFO("ComputeDDSFCW <EXIT> Tuning Word: %llu", tuningWord);
+    return tuningWord;
+}
+
+
+void MainWindow::on_PbNB_ADC_DDSFCWSet_clicked()
+{
+    uint fcw = ui->LineEditNBADCFcwVal->text().toUInt();
+    uint fs = ui->lineEditNBADCDDSFs_val->text().toUInt();
+    //ui->lineEditWBCICInputFs->setText(ui->lineEditWBDDSFs_val->text());
+
+    uint64_t totalval = ComputeDDSFCW(fcw,fs);
+    Utils::RegisterWrite(iface::eETH10G,0x504,totalval);
+    Utils::RegisterWrite(iface::eETH10G,0x508,3);
+    Utils::RegisterWrite(iface::eETH10G,0x508,1);
+}
+

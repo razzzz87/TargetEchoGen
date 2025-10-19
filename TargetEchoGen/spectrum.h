@@ -52,6 +52,7 @@ public:
     void handleRegisterWrite(iface deviceType, uint iaddr, uint ival);
     uint readRegisterValue(iface deviceType,uint addr);
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
+    iface getSelectedDeviceType();
     QwtPlot* X_graphPlot;
     QwtPlotCurve *curve_Y ;
     QwtPlotPicker *picker;
@@ -62,6 +63,7 @@ public:
     QTimer *playBack_Timer;
 
     EthernetSocket10G *eth10G;
+    EthernetSocketPL1G *ethPL01G;
     EthernetSocket *eth1G;
     UartSerial *serial;
     //singeltonConnectionMode *pObjConnectionModes;

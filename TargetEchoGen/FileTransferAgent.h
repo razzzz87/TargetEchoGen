@@ -67,6 +67,7 @@ private:
 
     EthernetSocket *eth0;
     EthernetSocket10G *eth10G;
+    EthernetSocketPL1G *ethPL01G;
     iface _eInterFace;
     TransferMode TransferMode;
     eXferDir _Dir;

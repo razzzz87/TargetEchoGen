@@ -33,30 +33,10 @@ Spectrum::Spectrum(QWidget *parent)
     N = NUM_POINT;
     frq = FRQ;
 
-    //ui->DDC_DataradioButton->setStyleSheet("rgb(255,255,255)");
-    //ui->IQInterleved_radioButton->setStyleSheet("rgb(255,255,255)");
-    //ui->IOnly_radioButton->setStyleSheet("rgb(255,255,255)");
-    //ui->LblChannel->setStyleSheet("rgb(255,255,255)");
-   // ui->LblDataSize->setStyleSheet("rgb(255,255,255)");
-    //ui->LblFs->setStyleSheet("rgb(255,255,255)");
-    //ui->LblWindowSize->setStyleSheet("rgb(255,255,255)");
-    //ui->enableWeight_checkBox->setStyleSheet("rgb(255,255,255)");
-    //ui->ChkBoxFFtShift->setStyleSheet("rgb(255,255,255)");
-    //ui->m_CBMaxHold->setStyleSheet("rgb(255,255,255)");
-    //ui->LblRefreshRate->setStyleSheet("rgb(255,255,255)");
-    //ui->strmnStrt_radioButton->setStyleSheet("rgb(255,255,255)");
-    //ui->strmnStop_radioButton->setStyleSheet("rgb(255,255,255)");
-    //ui->autoRefreshOn_radioButton->setStyleSheet("rgb(255,255,255)");
-    //ui->autoRefreshOff_radioButton->setStyleSheet("rgb(255,255,255)");
-    //ui->byteReverse_checkBox->setStyleSheet("rgb(255,255,255)");
-    //ui->m_CBSpectrumdata->setStyleSheet("rgb(255,255,255)");
-
-
-
-    ui->frequency_label->setStyleSheet("color: rgb(235, 13, 43); font: 24pt \"MS UI Gothic\";");
-    ui->frequency_label_db->setStyleSheet("color: rgb(235, 13, 43); font: 24pt \"MS UI Gothic\";");
-    ui->label_mhz->setStyleSheet("color: rgb(255, 170, 0);\nfont: 28pt \"MS UI Gothic\";");
-    ui->label_db->setStyleSheet("color: rgb(255, 170, 0);\nfont: 28pt \"MS UI Gothic\";");
+    ui->frequency_label->setStyleSheet("color: rgb(235, 13, 43); font: 20pt \"MS UI Gothic\";");
+    ui->frequency_label_db->setStyleSheet("color: rgb(235, 13, 43); font: 20pt \"MS UI Gothic\";");
+    ui->label_mhz->setStyleSheet("color: rgb(255, 170, 0);\nfont: 20pt \"MS UI Gothic\";");
+    ui->label_db->setStyleSheet("color: rgb(255, 170, 0);\nfont: 20pt \"MS UI Gothic\";");
 
     X_graphPlot = new QwtPlot(ui->spectrum_plot_frame);
     X_graphPlot->setStyleSheet("background-color: rgb(0, 0, 0);color: rgb(255, 170, 0);border:none");
@@ -69,15 +49,14 @@ Spectrum::Spectrum(QWidget *parent)
     picker->setRubberBandPen( QColor( Qt::red ) );
     picker->setTrackerPen( QColor( Qt::red ) );
 
-    QHBoxLayout *obj= new QHBoxLayout(this);
-    ui->spectrum_plot_frame->setLayout(obj);
-    obj->addWidget(X_graphPlot);
-    obj->addWidget(ui->frame_plot_control);
+     QHBoxLayout *obj= new QHBoxLayout(this);
+     ui->spectrum_plot_frame->setLayout(obj);
+     obj->addWidget(X_graphPlot);
 
     QFont font;
     font.setBold(true);
     font.setFamily("TimesNewRoman");
-    font.setPointSizeF(16);
+    font.setPointSizeF(12);
     picker->setTrackerFont(font);
 
     pickerMachine = new QwtPickerDragPointMachine();
@@ -114,11 +93,11 @@ Spectrum::Spectrum(QWidget *parent)
     sample_count=0;
     maxHold= false;
     windowSize=2048;
-    ui->DataSize_comboBox->setCurrentIndex(1);
+    //ui->DataSize_comboBox->setCurrentIndex(0);
     ui->DDC_DataradioButton->setChecked(true);
     ui->IQInterleved_radioButton->setChecked(true);
     ui->frame_plot_control->hide();
-    ui->pb_hide_show_menu->setText("Show Menu");
+    //ui->pb_hide_show_menu->setText("Show Menu");
     m_vMaxHoldBuffer=NULL;
 
     // Disable auto-exclusive behavior
@@ -147,6 +126,13 @@ void Spectrum::chunkReadCompleted()
     LOG_INFO("Transfer completed");
 }
 
+iface Spectrum::getSelectedDeviceType()
+{
+    LOG_INFO("Spectrum::getSelectedDeviceType()<ENTER>");
+    if (ui->RbSpectrumEthPL10G->isChecked())       return eETHPL1G;
+    if (ui->RbSpectrumEthPL10G->isChecked())      return eETH10G;
+    return eNONE;
+}
 void Spectrum::resizeEvent(QResizeEvent *)
 {
 
@@ -291,93 +277,122 @@ void Spectrum::on_pb_hide_show_menu_clicked()
 
 void Spectrum::on_pb_play_snap_shot_clicked()
 {
-    LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked() <ENTER>");
-    eth10G = EthernetSocket10G::getInstance();
-    if (eth10G != nullptr)
-    {
-        unsigned int numByWrDone = 0;
-        //memset(adcData_Point, '\0', 0x100000);
+    LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked ENTER");
 
-        if (ui->DDC_DataradioButton->isChecked())
-        {
-            unsigned int fifo_level = 0;
-
-            if (ui->IOnly_radioButton->isChecked())
-            {
-                unsigned int byteToRd = 0;
-                int dataWidth = ui->DataSize_comboBox->currentIndex();
-                LOG_DEBUG("Data width index: %d", dataWidth);
-
-                switch (dataWidth) {
-                case 0: byteToRd = windowSize * 2; break;
-                case 1: byteToRd = windowSize * 4; break;
-                case 2: byteToRd = windowSize * 8; break;
-                default: LOG_DEBUG("Unknown data width index: %d", dataWidth); break;
-                }
-
-                LOG_DEBUG("Bytes to read: %u", byteToRd);
-                fifo_level = readRegisterValue(iface::eETH10G,0x2fc);
-                fifo_level = BitUtils::extractBits15to0(fifo_level);
-                LOG_DEBUG("Read Data Available: %ld", fifo_level);
-                if (fifo_level >= byteToRd)
-                {
-                    QString filename = "StreamingData";
-                    filename.append(QString::number(fifo_level));
-                    filename.append(".bin");
-                    FileReadWriteSetup(iface::eETH10G,byteToRd,"StreamingData.bin",eStream);
-                    LOG_INFO("Sufficient FIFO level. Proceeding with MemoryReadFileInternal.");
-                }
-                else
-                {
-                    LOG_INFO("FIFO too low. Refresh rate may be too fast.");
-                    ui->warning_label->setText("FIFO Empty Slow the Refresh Rate");
-                }
-            }
-            if (ui->IQInterleved_radioButton->isChecked())
-            {
-                LOG_INFO("IQ Interleaved mode selected");
-                unsigned int byteToRd = 0;
-                int dataWidth = ui->DataSize_comboBox->currentIndex();
-                LOG_INFO("Data width index: %d", dataWidth);
-
-                switch (dataWidth) {
-                case 0: byteToRd = windowSize * 4; break;
-                case 1: byteToRd = windowSize * 8; break;
-                case 2: byteToRd = windowSize * 16; break;
-                default: LOG_INFO("Unknown data width index: %d", dataWidth); break;
-                }
-
-                LOG_DEBUG("Bytes to read: %u", byteToRd);
-                fifo_level = readRegisterValue(iface::eETH10G,0x2fc);
-                fifo_level = BitUtils::extractBits15to0(fifo_level);
-                LOG_DEBUG("Read Data Available: %ld", fifo_level);
-                if (fifo_level >= byteToRd)
-                {
-                    QString filename = "StreamingData";
-                    filename.append(QString::number(fifo_level));
-                    filename.append(".bin");
-                    FileReadWriteSetup(iface::eETH10G,byteToRd,"StreamingData.bin",eStream);
-                    LOG_INFO("Sufficient FIFO level. Proceeding with MemoryReadFileInternal.");
-                }
-                else
-                {
-                    LOG_INFO("FIFO too low. Refresh rate may be too fast.");
-                    ui->warning_label->setText("FIFO Empty Slow the Refresh Rate");
-                }
-            }
-        }
-        ui->pb_plot->setEnabled(true);
-        LOG_INFO("Plot button enabled");
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("Interface not selected");
+        return;
     }
-    else
-    {
-        LOG_INFO("No connection with FPGA 1G. Aborting snapshot.");
+
+    if (!eth10G) {
+        LOG_ERROR("No connection with FPGA 1G. Aborting snapshot.");
         QMessageBox::critical(this, "warning", "No Connection with FPGA 1G", QMessageBox::Ok);
         ui->pb_plot->setEnabled(false);
-        plotTimer->stop();
+        if (plotTimer && plotTimer->isActive()) {
+            plotTimer->stop();
+            LOG_INFO("plotTimer stopped due to missing connection");
+        }
+        LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT (no connection)");
+        return;
     }
 
-    LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked() <EXIT>");
+    LOG_INFO("Connection present and device selected. DeviceType: %d", static_cast<int>(deviceType));
+
+    // Only handle DDC Data mode path here
+    if (!ui->DDC_DataradioButton->isChecked()) {
+        LOG_DEBUG("DDC Data radio button not checked; no streaming action taken");
+        ui->pb_plot->setEnabled(true);
+        LOG_INFO("Plot button enabled");
+        LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT");
+        return;
+    }
+
+    LOG_INFO("DDC Data mode selected");
+
+    // Determine which sub-mode and compute bytes to read
+    if (ui->IOnly_radioButton->isChecked()) {
+        LOG_INFO("I-only mode selected");
+        unsigned int byteToRd = 0;
+        int dataWidth = ui->DataSize_comboBox->currentIndex();
+        LOG_DEBUG("Data width index: %d", dataWidth);
+
+        switch (dataWidth) {
+        case 0: byteToRd = windowSize * 2; break;
+        case 1: byteToRd = windowSize * 4; break;
+        case 2: byteToRd = windowSize * 8; break;
+        default:
+            LOG_ERROR("Unknown data width index: %d", dataWidth);
+            ui->warning_label->setText("Invalid data width selection");
+            ui->pb_plot->setEnabled(false);
+            LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT (invalid data width)");
+            return;
+        }
+
+        LOG_DEBUG("Bytes to read: %u", byteToRd);
+        unsigned int fifo_level = readRegisterValue(deviceType, 0x52FC);
+        fifo_level = BitUtils::extractBits15to0(fifo_level);
+        LOG_DEBUG("Read Data Available: %u", fifo_level);
+
+        if (fifo_level >= byteToRd) {
+            QString filename = QStringLiteral("StreamingData%1.bin").arg(fifo_level);
+            LOG_INFO("Sufficient FIFO level (%u >= %u). Starting FileReadWriteSetup with file: %s",
+                     fifo_level, byteToRd, filename.toStdString().c_str());
+            FileReadWriteSetup(deviceType, byteToRd, filename.toStdString().c_str(), eStream);
+        } else {
+            LOG_INFO("FIFO too low (%u < %u). Refresh rate may be too fast.", fifo_level, byteToRd);
+            ui->warning_label->setText("FIFO Empty. Slow the Refresh Rate");
+            ui->pb_plot->setEnabled(false);
+            LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT (fifo low)");
+            return;
+        }
+    }
+    else if (ui->IQInterleved_radioButton->isChecked()) {
+        LOG_INFO("IQ Interleaved mode selected");
+        unsigned int byteToRd = 0;
+        int dataWidth = ui->DataSize_comboBox->currentIndex();
+        LOG_DEBUG("Data width index: %d", dataWidth);
+
+        switch (dataWidth) {
+        case 0: byteToRd = windowSize * 4; break;
+        case 1: byteToRd = windowSize * 8; break;
+        case 2: byteToRd = windowSize * 16; break;
+        default:
+            LOG_ERROR("Unknown data width index (IQ): %d", dataWidth);
+            ui->warning_label->setText("Invalid data width selection");
+            ui->pb_plot->setEnabled(false);
+            LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT (invalid data width)");
+            return;
+        }
+
+        LOG_DEBUG("Bytes to read: %u", byteToRd);
+        unsigned int fifo_level = readRegisterValue(deviceType, 0x52FC);
+        fifo_level = BitUtils::extractBits15to0(fifo_level);
+        LOG_DEBUG("Read Data Available: %u", fifo_level);
+
+        if (fifo_level >= byteToRd) {
+            QString filename = QStringLiteral("StreamingData%1.bin").arg(fifo_level);
+            LOG_INFO("Sufficient FIFO level (%u >= %u). Starting FileReadWriteSetup with file: %s",
+                     fifo_level, byteToRd, filename.toStdString().c_str());
+            FileReadWriteSetup(deviceType, byteToRd, filename.toStdString().c_str(), eStream);
+        } else {
+            LOG_INFO("FIFO too low (%u < %u). Refresh rate may be too fast.", fifo_level, byteToRd);
+            ui->warning_label->setText("FIFO Empty. Slow the Refresh Rate");
+            ui->pb_plot->setEnabled(false);
+            LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT (fifo low)");
+            return;
+        }
+    }
+    else {
+        LOG_DEBUG("No DDC data sub-mode selected");
+        ui->pb_plot->setEnabled(false);
+        LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT (no sub-mode)");
+        return;
+    }
+
+    ui->pb_plot->setEnabled(true);
+    LOG_INFO("Plot button enabled");
+    LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT");
 }
 
 void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outBuffer)
@@ -552,223 +567,235 @@ void Spectrum::FFT_Plot(int windowSize, double* sample, fftw_complex* outBuffer)
 
 void Spectrum::on_pb_plot_with_file_clicked()
 {
-    if(ui->strmnStrt_radioButton->isChecked()==false)
-    {
-        QMessageBox::critical(this,"Not A Valid Setting","Please select Start Option",QMessageBox::Ok);
+    LOG_INFO("Spectrum::on_pb_plot_with_file_clicked ENTER");
+
+    if (ui->strmnStrt_radioButton->isChecked() == false) {
+        LOG_ERROR("Start option not selected");
+        QMessageBox::critical(this, "Not A Valid Setting", "Please select Start Option", QMessageBox::Ok);
+        LOG_INFO("Spectrum::on_pb_plot_with_file_clicked EXIT (no start option)");
         return;
     }
+
     QString filter = "File Description (*.bin)";
-    QString file_Name = QFileDialog::getOpenFileName(this, "Select a file...",QDir::currentPath(), filter);
-    if(file_Name.isEmpty())
-        return;
-    FILE *fp ;
-    if(!(fp= fopen(file_Name.toStdString().c_str(),"rb")))//StreamingData.bin","rb")))
-    {
+    QString file_Name = QFileDialog::getOpenFileName(this, "Select a file...", QDir::currentPath(), filter);
+    if (file_Name.isEmpty()) {
+        LOG_INFO("No file selected by user");
+        LOG_INFO("Spectrum::on_pb_plot_with_file_clicked EXIT (no file)");
         return;
     }
+
+    FILE *fp = nullptr;
+    fp = fopen(file_Name.toStdString().c_str(), "rb");
+    if (!fp) {
+        LOG_ERROR("Failed to open file: %s", file_Name.toStdString().c_str());
+        LOG_INFO("Spectrum::on_pb_plot_with_file_clicked EXIT (file open failed)");
+        return;
+    }
+    LOG_INFO("Opened file: %s", file_Name.toStdString().c_str());
+
+    // determine file size
     fseek(fp, 0, SEEK_END);
     dwFileSize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    char *read = new char[dwFileSize];
-    fftw_complex *signal= new fftw_complex[windowSize];
-    fftw_complex *outBuffer = new fftw_complex[windowSize];
-    fread(read,1,dwFileSize,fp);
+    LOG_INFO("File size: %lld bytes", (long long)dwFileSize);
+
+    // allocate buffers
+    char *read = nullptr;
+    fftw_complex *signal = nullptr;
+    fftw_complex *outBuffer = nullptr;
+
+    try {
+        read = new char[dwFileSize];
+        signal = new fftw_complex[windowSize];
+        outBuffer = new fftw_complex[windowSize];
+    } catch (const std::bad_alloc &e) {
+        LOG_ERROR("Memory allocation failed: %s", e.what());
+        if (fp) fclose(fp);
+        delete[] read;
+        delete[] signal;
+        delete[] outBuffer;
+        LOG_INFO("Spectrum::on_pb_plot_with_file_clicked EXIT (alloc fail)");
+        return;
+    }
+
+    size_t readCount = fread(read, 1, dwFileSize, fp);
     fclose(fp);
+    LOG_INFO("Read %zu bytes from file", readCount);
+
     ofstream fc_debug_I;
-    fc_debug_I.open("I_Data.txt",std::ios_base::out | std::ofstream::trunc);//("adc_data.txt", std::ios_base::out | std::ofstream::trunc);
-
     ofstream fc_debug_Q;
-    fc_debug_Q.open("Q_Data.txt",std::ios_base::out | std::ofstream::trunc);//("adc_data.txt", std::ios_base::out | std::ofstream::trunc);
+    fc_debug_I.open("I_Data.txt", std::ios_base::out | std::ofstream::trunc);
+    fc_debug_Q.open("Q_Data.txt", std::ios_base::out | std::ofstream::trunc);
+    if (!fc_debug_I.is_open() || !fc_debug_Q.is_open()) {
+        LOG_ERROR("Failed to open debug output files");
+        // continue — not fatal for plotting
+    } else {
+        LOG_INFO("Debug output files opened");
+    }
 
-    if(ui->strmnStrt_radioButton->isChecked())
-    {
-        if(ui->DDC_DataradioButton->isChecked())
-        {
-            qDebug()<<"DDC select";
-            qDebug()<<"Window Size"<<windowSize;
-            qDebug()<<"Fs "<<Fs;
-            if(ui->IQInterleved_radioButton->isChecked())
-            {
-                /// IQ 16
-                if(ui->DataSize_comboBox->currentIndex()==0)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
-                        short temp;
-                        short temp2;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        temp=((unsigned char)read[4*i+0]<<8)&0xFF00;
-                        temp |= (unsigned char)read[4*i+1];
-                        temp2=((unsigned char)read[4*i+2]<<8)&0xFF00;
-                        temp2 |= (unsigned char)read[4*i+3];
-                        // signal[i][0] = (double)temp2*multiplier;
-                        // signal[i][1] = (double)temp*multiplier;
+    if (ui->strmnStrt_radioButton->isChecked()) {
+        if (ui->DDC_DataradioButton->isChecked()) {
+            LOG_INFO("DDC Data mode selected. WindowSize=%d, Fs=%f", windowSize, Fs);
 
-                        signal[i][1] = (double)temp2*multiplier;
-                        signal[i][0] = (double)temp*multiplier;
+            if (ui->IQInterleved_radioButton->isChecked()) {
+                LOG_INFO("IQ Interleaved mode selected");
+                // IQ 16
+                if (ui->DataSize_comboBox->currentIndex() == 0) {
+                    LOG_INFO("IQ data size: 16-bit");
+                    for (int i = 0; i < windowSize; ++i) {
+                        short temp, temp2;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1))); // Hanning Window
+                        temp  = ((unsigned char)read[4 * i + 0] << 8) & 0xFF00;
+                        temp |= (unsigned char)read[4 * i + 1];
+                        temp2 = ((unsigned char)read[4 * i + 2] << 8) & 0xFF00;
+                        temp2 |= (unsigned char)read[4 * i + 3];
 
-                        fc_debug_I<<std::hex << temp2<<endl;
-                        fc_debug_Q<<std::hex << temp <<endl;
+                        signal[i][1] = (double)temp2 * multiplier;
+                        signal[i][0] = (double)temp * multiplier;
 
+                        fc_debug_I << std::hex << temp2 << std::endl;
+                        fc_debug_Q << std::hex << temp << std::endl;
                     }
                 }
-                /// IQ 32
-                if(ui->DataSize_comboBox->currentIndex()==1)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
-                        long int temp;
-                        long int temp2;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        temp  =((unsigned char)read[8*i+0]<<24)&0xFF000000;
-                        temp |=((unsigned char)read[8*i+1]<<16)&0xFF0000;
-                        temp |=((unsigned char)read[8*i+2]<<8)&0xFF00;
-                        temp |=((unsigned char)read[8*i+3])&0xFF;
 
-                        temp2  =((unsigned char)read[8*i+4]<<24)&0xFF000000;
-                        temp2 |=((unsigned char)read[8*i+5]<<16)&0xFF0000;
-                        temp2 |=((unsigned char)read[8*i+6]<<8)&0xFF00;
-                        temp2 |=((unsigned char)read[8*i+7])&0xFF;
+                // IQ 32
+                if (ui->DataSize_comboBox->currentIndex() == 1) {
+                    LOG_INFO("IQ data size: 32-bit");
+                    for (int i = 0; i < windowSize; ++i) {
+                        long int temp = 0;
+                        long int temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp  = ((unsigned char)read[8 * i + 0] << 24) & 0xFF000000;
+                        temp |= ((unsigned char)read[8 * i + 1] << 16) & 0xFF0000;
+                        temp |= ((unsigned char)read[8 * i + 2] << 8) & 0xFF00;
+                        temp |= ((unsigned char)read[8 * i + 3]) & 0xFF;
 
+                        temp2  = ((unsigned char)read[8 * i + 4] << 24) & 0xFF000000;
+                        temp2 |= ((unsigned char)read[8 * i + 5] << 16) & 0xFF0000;
+                        temp2 |= ((unsigned char)read[8 * i + 6] << 8) & 0xFF00;
+                        temp2 |= ((unsigned char)read[8 * i + 7]) & 0xFF;
 
-                        signal[i][0] = (double)temp2*multiplier;
-                        signal[i][1] = (double)temp*multiplier;
-                        qDebug()<<"Temp ="<<temp;
-                        qDebug()<<"Temp ="<<temp2;
-                        fc_debug_Q<<temp<<endl;
-                        fc_debug_I<<temp2<<endl;
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
 
+                        fc_debug_Q << temp << std::endl;
+                        fc_debug_I << temp2 << std::endl;
                     }
                 }
-                /// IQ 64
-                if(ui->DataSize_comboBox->currentIndex()==2)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
-                        long long temp;
-                        long long temp2;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        temp  =((unsigned char)read[16*i]<<56)&0xFF00000000000000;
-                        temp |=((unsigned char)read[16*i+1]<<48)&0xFF000000000000;
-                        temp |=((unsigned char)read[16*i+2]<<40)&0xFF0000000000;
-                        temp |=((unsigned char)read[16*i+3]<<32)&0xFF00000000;
-                        temp |=((unsigned char)read[16*i+4]<<24)&0xFF000000;
-                        temp |=((unsigned char)read[16*i+5]<<16)&0xFF0000;
-                        temp |=((unsigned char)read[16*i+6]<<8)&0xFF00;
-                        temp |=((unsigned char)read[16*i+7]);
 
-                        temp2  =((unsigned char)read[16*i+8]<<56)&0xFF00000000000000;
-                        temp2 |=((unsigned char)read[16*i+9]<<48)&0xFF000000000000;
-                        temp2 |=((unsigned char)read[16*i+10]<<40)&0xFF0000000000;
-                        temp2 |=((unsigned char)read[16*i+11]<<32)&0xFF00000000;
-                        temp2 |=((unsigned char)read[16*i+12]<<24)&0xFF000000;
-                        temp2 |=((unsigned char)read[16*i+13]<<16)&0xFF0000;
-                        temp2 |=((unsigned char)read[16*i+14]<<8)&0xFF00;
-                        temp2 |=((unsigned char)read[16*i+15]);
+                // IQ 64
+                if (ui->DataSize_comboBox->currentIndex() == 2) {
+                    LOG_INFO("IQ data size: 64-bit");
+                    for (int i = 0; i < windowSize; ++i) {
+                        long long temp = 0;
+                        long long temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp  = ((unsigned long long)(unsigned char)read[16 * i] << 56) & 0xFF00000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 1] << 48) & 0xFF000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 2] << 40) & 0xFF0000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 3] << 32) & 0xFF00000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 4] << 24) & 0xFF000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 5] << 16) & 0xFF0000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 6] << 8) & 0xFF00ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 7]);
 
+                        temp2  = ((unsigned long long)(unsigned char)read[16 * i + 8] << 56) & 0xFF00000000000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 9] << 48) & 0xFF000000000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 10] << 40) & 0xFF0000000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 11] << 32) & 0xFF00000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 12] << 24) & 0xFF000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 13] << 16) & 0xFF0000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 14] << 8) & 0xFF00ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 15]);
 
-                        signal[i][0] = (double)temp2*multiplier;
-                        signal[i][1] = (double)temp*multiplier;
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
 
-                        fc_debug_I<<temp<<endl;
-                        fc_debug_Q<<temp2<<endl;
-
+                        fc_debug_I << temp << std::endl;
+                        fc_debug_Q << temp2 << std::endl;
                     }
                 }
             }
 
-            if(ui->IOnly_radioButton->isChecked())
-            {
-                qDebug()<<"I Only ";
-                /// IQ 16
-                if(ui->DataSize_comboBox->currentIndex()==0)
-                {
-                    qDebug()<<"I Only data size 16";
-                    for(int i=0;i<windowSize;i++)
-                    {
+            if (ui->IOnly_radioButton->isChecked()) {
+                LOG_INFO("I-only mode selected");
+
+                // I-only 16
+                if (ui->DataSize_comboBox->currentIndex() == 0) {
+                    LOG_INFO("I-only data size: 16-bit");
+                    for (int i = 0; i < windowSize; ++i) {
                         short temp;
-                        short temp2=0;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        temp=((unsigned char)read[2*i+1]<<8)&0xFF00;
-                        temp |= (unsigned char)read[2*i];
-                        //                        temp2=((unsigned char)read[2*i+2]<<8)&0xFF00;
-                        //                        temp2 |= (unsigned char)read[2*i+3];
-                        signal[i][0] = (double)temp2*multiplier;
-                        signal[i][1] = (double)temp*multiplier;
+                        short temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp = ((unsigned char)read[2 * i + 1] << 8) & 0xFF00;
+                        temp |= (unsigned char)read[2 * i];
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
 
-                        fc_debug_I<<temp<<endl;
-                        fc_debug_Q<<temp2<<endl;
-
+                        fc_debug_I << temp << std::endl;
+                        fc_debug_Q << temp2 << std::endl;
                     }
                 }
-                /// IQ 32
-                if(ui->DataSize_comboBox->currentIndex()==1)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
+
+                // I-only 32
+                if (ui->DataSize_comboBox->currentIndex() == 1) {
+                    LOG_INFO("I-only data size: 32-bit");
+                    for (int i = 0; i < windowSize; ++i) {
                         qint32 temp;
-                        qint32 temp2=0;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        temp  =((unsigned char)read[4*i+0]<<24)&0xFF000000;
-                        temp |=((unsigned char)read[4*i+1]<<16)&0xFF0000;
-                        temp |=((unsigned char)read[4*i+2]<<8)&0xFF00;
-                        temp |=((unsigned char)read[4*i+3]);
+                        qint32 temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp  = ((unsigned char)read[4 * i + 0] << 24) & 0xFF000000;
+                        temp |= ((unsigned char)read[4 * i + 1] << 16) & 0xFF0000;
+                        temp |= ((unsigned char)read[4 * i + 2] << 8) & 0xFF00;
+                        temp |= ((unsigned char)read[4 * i + 3]);
 
-                        //                        temp2  =((unsigned char)read[8*i+4]<<24)&0xFF000000;
-                        //                        temp2 |=((unsigned char)read[8*i+5]<<16)&0xFF0000;
-                        //                        temp2 |=((unsigned char)read[8*i+6]<<8)&0xFF00;
-                        //                        temp2 |=((unsigned char)read[8*i+7]);
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
 
-                        signal[i][0] = (double)temp2*multiplier;
-                        signal[i][1] = (double)temp*multiplier;
-                        fc_debug_I<<temp<<endl;
-                        fc_debug_Q<<temp2<<endl;
-
+                        fc_debug_I << temp << std::endl;
+                        fc_debug_Q << temp2 << std::endl;
                     }
                 }
-                /// IQ 64
-                if(ui->DataSize_comboBox->currentIndex()==2)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
+
+                // I-only 64
+                if (ui->DataSize_comboBox->currentIndex() == 2) {
+                    LOG_INFO("I-only data size: 64-bit");
+                    for (int i = 0; i < windowSize; ++i) {
                         long long temp;
-                        long long temp2=0;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        temp  =((unsigned char)read[8*i]<<56)&0xFF00000000000000;
-                        temp |=((unsigned char)read[8*i+1]<<48)&0xFF000000000000;
-                        temp |=((unsigned char)read[8*i+2]<<40)&0xFF0000000000;
-                        temp |=((unsigned char)read[8*i+3]<<32)&0xFF00000000;
-                        temp |=((unsigned char)read[8*i+4]<<24)&0xFF000000;
-                        temp |=((unsigned char)read[8*i+5]<<16)&0xFF0000;
-                        temp |=((unsigned char)read[8*i+6]<<8)&0xFF00;
-                        temp |=((unsigned char)read[8*i+7]);
+                        long long temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp  = ((unsigned long long)(unsigned char)read[8 * i] << 56) & 0xFF00000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 1] << 48) & 0xFF000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 2] << 40) & 0xFF0000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 3] << 32) & 0xFF00000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 4] << 24) & 0xFF000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 5] << 16) & 0xFF0000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 6] << 8) & 0xFF00ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 7]);
 
-                        //                        temp2  =((unsigned char)read[16*i+8]<<56)&0xFF00000000000000;
-                        //                        temp2 |=((unsigned char)read[16*i+9]<<48)&0xFF000000000000;
-                        //                        temp2 |=((unsigned char)read[16*i+10]<<40)&0xFF0000000000;
-                        //                        temp2 |=((unsigned char)read[16*i+11]<<32)&0xFF00000000;
-                        //                        temp2 |=((unsigned char)read[16*i+12]<<24)&0xFF000000;
-                        //                        temp2 |=((unsigned char)read[16*i+13]<<16)&0xFF0000;
-                        //                        temp2 |=((unsigned char)read[16*i+14]<<8)&0xFF00;
-                        //                        temp2 |=((unsigned char)read[16*i+15]);
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
 
-
-                        signal[i][0] = (double)temp2*multiplier;
-                        signal[i][1] = (double)temp*multiplier;
-                        fc_debug_I<<temp<<endl;
-                        fc_debug_Q<<temp2<<endl;
-
+                        fc_debug_I << temp << std::endl;
+                        fc_debug_Q << temp2 << std::endl;
                     }
                 }
             }
         }
     }
-    FFT_Plot(windowSize,signal,outBuffer);
-    delete read;
-    delete [] signal;
-    delete [] outBuffer;
-    fc_debug_I.close();
-    fc_debug_Q.close();
+
+    LOG_INFO("Running FFT_Plot with windowSize=%d", windowSize);
+    FFT_Plot(windowSize, signal, outBuffer);
+
+    // cleanup
+    delete[] read;
+    delete[] signal;
+    delete[] outBuffer;
+
+    if (fc_debug_I.is_open()) fc_debug_I.close();
+    if (fc_debug_Q.is_open()) fc_debug_Q.close();
+
+    LOG_INFO("Spectrum::on_pb_plot_with_file_clicked EXIT");
 }
 
 void Spectrum::playFile()
@@ -1017,226 +1044,239 @@ void Spectrum::on_m_PBPlayRecordData_clicked()
 
 void Spectrum::on_pb_plot_clicked()
 {
+    LOG_INFO("Spectrum::on_pb_plot_clicked ENTER");
 
-    if(windowSize<256 && windowSize>8192)
-    {
-        QMessageBox::critical(this,"warning","invalid Window SIze \n Out Of Range of 256 to 8192",QMessageBox::Ok);
+    if (windowSize < 256 || windowSize > 8192) {
+        LOG_ERROR("Invalid Window Size: %d (valid range 256..8192)", windowSize);
+        QMessageBox::critical(this, "warning", "invalid Window SIze \n Out Of Range of 256 to 8192", QMessageBox::Ok);
+        LOG_INFO("Spectrum::on_pb_plot_clicked EXIT (invalid window size)");
         return;
     }
-    qDebug()<<"plot enter"<<windowSize;
 
-    FILE *fp =fopen("StreamingData.bin","rb");
-    if(fp==NULL )
-    {
+    LOG_INFO("Plot enter. windowSize=%d", windowSize);
+
+    FILE *fp = fopen("StreamingData.bin", "rb");
+    if (fp == nullptr) {
+        LOG_ERROR("Failed to open StreamingData.bin");
+        LOG_INFO("Spectrum::on_pb_plot_clicked EXIT (file open failed)");
         return;
     }
+
+    // determine file size
     fseek(fp, 0, SEEK_END);
     dwFileSize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    char *read = new char[dwFileSize];
-    fftw_complex *signal= new fftw_complex[windowSize];
-    fftw_complex *outBuffer = new fftw_complex[windowSize];
-    fread(read,1,dwFileSize,fp);
+    LOG_INFO("StreamingData.bin size = %lld bytes", (long long)dwFileSize);
+
+    // allocate buffers, check for allocation failures
+    char *read = nullptr;
+    fftw_complex *signal = nullptr;
+    fftw_complex *outBuffer = nullptr;
+
+    read = new (std::nothrow) char[dwFileSize];
+    if (!read) {
+        LOG_ERROR("Memory allocation failed for read buffer (%lld bytes)", (long long)dwFileSize);
+        fclose(fp);
+        LOG_INFO("Spectrum::on_pb_plot_clicked EXIT (alloc fail)");
+        return;
+    }
+
+    signal = new (std::nothrow) fftw_complex[windowSize];
+    if (!signal) {
+        LOG_ERROR("Memory allocation failed for signal (windowSize=%d)", windowSize);
+        delete[] read;
+        fclose(fp);
+        LOG_INFO("Spectrum::on_pb_plot_clicked EXIT (alloc fail)");
+        return;
+    }
+
+    outBuffer = new (std::nothrow) fftw_complex[windowSize];
+    if (!outBuffer) {
+        LOG_ERROR("Memory allocation failed for outBuffer (windowSize=%d)", windowSize);
+        delete[] read;
+        delete[] signal;
+        fclose(fp);
+        LOG_INFO("Spectrum::on_pb_plot_clicked EXIT (alloc fail)");
+        return;
+    }
+
+    size_t bytesRead = fread(read, 1, dwFileSize, fp);
     fclose(fp);
-    ofstream fc_debug_I;
-    fc_debug_I.open("I_Data.txt",std::ios_base::out | std::ofstream::trunc);//("adc_data.txt", std::ios_base::out | std::ofstream::trunc);
+    LOG_INFO("Read %zu bytes from StreamingData.bin", bytesRead);
 
-    ofstream fc_debug_Q;
-    fc_debug_Q.open("Q_Data.txt",std::ios_base::out | std::ofstream::trunc);//("adc_data.txt", std::ios_base::out | std::ofstream::trunc);
+    std::ofstream fc_debug_I;
+    fc_debug_I.open("I_Data.txt", std::ios_base::out | std::ofstream::trunc);
+    if (!fc_debug_I.is_open()) {
+        LOG_ERROR("Failed to open I_Data.txt for writing");
+    } else {
+        LOG_INFO("Opened I_Data.txt");
+    }
 
-    if(ui->strmnStrt_radioButton->isChecked())
-    {
-        if(ui->DDC_DataradioButton->isChecked())
-        {
-            qDebug()<<"DDC select";
-            qDebug()<<"Window Size"<<windowSize;
-            qDebug()<<"Fs "<<Fs;
+    std::ofstream fc_debug_Q;
+    fc_debug_Q.open("Q_Data.txt", std::ios_base::out | std::ofstream::trunc);
+    if (!fc_debug_Q.is_open()) {
+        LOG_ERROR("Failed to open Q_Data.txt for writing");
+    } else {
+        LOG_INFO("Opened Q_Data.txt");
+    }
 
+    if (ui->strmnStrt_radioButton->isChecked()) {
+        if (ui->DDC_DataradioButton->isChecked()) {
+            LOG_INFO("DDC Data mode selected. windowSize=%d Fs=%f", windowSize, Fs);
 
-            if(ui->IQInterleved_radioButton->isChecked())
-            {
-                /// IQ 16
-                if(ui->DataSize_comboBox->currentIndex()==0)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
+            if (ui->IQInterleved_radioButton->isChecked()) {
+                LOG_INFO("IQ interleaved path selected. data size index=%d", ui->DataSize_comboBox->currentIndex());
+
+                // IQ 16
+                if (ui->DataSize_comboBox->currentIndex() == 0) {
+                    for (int i = 0; i < windowSize; ++i) {
                         short temp;
                         short temp2;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        {
-                            temp=((unsigned char)read[4*i]<<8)&0xFF00;
-                            temp |= (unsigned char)read[4*i+1];
-                            temp2=((unsigned char)read[4*i+2]<<8)&0xFF00;
-                            temp2 |= (unsigned char)read[4*i+3];
-                            signal[i][0] = (double)temp*multiplier;
-                            signal[i][1] = (double)temp2*multiplier;
-                        }
-                        //fc_debug_I << std::hex << temp2 <<endl;
-                        //fc_debug_Q << std::hex << temp << endl;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1))); // Hanning Window
+                        temp  = ((unsigned char)read[4 * i] << 8) & 0xFF00;
+                        temp |= (unsigned char)read[4 * i + 1];
+                        temp2 = ((unsigned char)read[4 * i + 2] << 8) & 0xFF00;
+                        temp2 |= (unsigned char)read[4 * i + 3];
+                        signal[i][0] = (double)temp * multiplier;
+                        signal[i][1] = (double)temp2 * multiplier;
                     }
-
+                    LOG_INFO("Completed IQ16 unpack for windowSize=%d", windowSize);
                 }
-                /// IQ 32
-                if(ui->DataSize_comboBox->currentIndex()==1)
-                {
-                    qDebug()<<"IQ interleaved 32";
-                    for(int i=0;i<windowSize;i++)
-                    {
 
-                        int temp;
-                        int temp2;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        {
-                            temp  =((unsigned char)read[8*i+0]<<24)&0xFF000000;
-                            temp |=((unsigned char)read[8*i+1]<<16)&0xFF0000;
-                            temp |=((unsigned char)read[8*i+2]<<8)&0xFF00;
-                            temp |=((unsigned char)read[8*i+3]);
-
-                            temp2  =((unsigned char)read[8*i+4]<<24)&0xFF000000;
-                            temp2 |=((unsigned char)read[8*i+5]<<16)&0xFF0000;
-                            temp2 |=((unsigned char)read[8*i+6]<<8)&0xFF00;
-                            temp2 |=((unsigned char)read[8*i+7]);
-
-
-                            signal[i][0] = (double)temp*multiplier;
-                            signal[i][1] = (double)temp2*multiplier;
-                        }
-                        fc_debug_I << std::hex << temp2 <<endl;
-                        fc_debug_Q << std::hex << temp << endl;
+                // IQ 32
+                if (ui->DataSize_comboBox->currentIndex() == 1) {
+                    LOG_INFO("IQ interleaved 32-bit path");
+                    for (int i = 0; i < windowSize; ++i) {
+                        int temp = 0;
+                        int temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp  = ((unsigned char)read[8 * i + 0] << 24) & 0xFF000000;
+                        temp |= ((unsigned char)read[8 * i + 1] << 16) & 0xFF0000;
+                        temp |= ((unsigned char)read[8 * i + 2] << 8) & 0xFF00;
+                        temp |= ((unsigned char)read[8 * i + 3]);
+                        temp2  = ((unsigned char)read[8 * i + 4] << 24) & 0xFF000000;
+                        temp2 |= ((unsigned char)read[8 * i + 5] << 16) & 0xFF0000;
+                        temp2 |= ((unsigned char)read[8 * i + 6] << 8) & 0xFF00;
+                        temp2 |= ((unsigned char)read[8 * i + 7]);
+                        signal[i][0] = (double)temp * multiplier;
+                        signal[i][1] = (double)temp2 * multiplier;
+                        fc_debug_I << std::hex << temp2 << std::endl;
+                        fc_debug_Q << std::hex << temp << std::endl;
                     }
-
+                    LOG_INFO("Completed IQ32 unpack for windowSize=%d", windowSize);
                 }
-                /// IQ 64
-                if(ui->DataSize_comboBox->currentIndex()==2)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
-                        // const int nConstShift = 56;
-                        long long temp;
-                        long long temp2;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
 
-                        //temp  =((unsigned long long )read[16*i] << 56)&0xFF00000000000000;
-
-
-                        temp  =((unsigned char)read[16*i] << 56)&0xFF00000000000000;
-                        temp |=((unsigned char)read[16*i+1]<<48)&0xFF000000000000;
-                        temp |=((unsigned char)read[16*i+2]<<40)&0xFF0000000000;
-                        temp |=((unsigned char)read[16*i+3]<<32)&0xFF00000000;
-                        temp |=((unsigned char)read[16*i+4]<<24)&0xFF000000;
-                        temp |=((unsigned char)read[16*i+5]<<16)&0xFF0000;
-                        temp |=((unsigned char)read[16*i+6]<<8)&0xFF00;
-                        temp |=((unsigned char)read[16*i+7]);
-
-                        temp2  =((unsigned char)read[16*i+8]<<56)&0xFF00000000000000;
-                        temp2 |=((unsigned char)read[16*i+9]<<48)&0xFF000000000000;
-                        temp2 |=((unsigned char)read[16*i+10]<<40)&0xFF0000000000;
-                        temp2 |=((unsigned char)read[16*i+11]<<32)&0xFF00000000;
-                        temp2 |=((unsigned char)read[16*i+12]<<24)&0xFF000000;
-                        temp2 |=((unsigned char)read[16*i+13]<<16)&0xFF0000;
-                        temp2 |=((unsigned char)read[16*i+14]<<8)&0xFF00;
-                        temp2 |=((unsigned char)read[16*i+15]);
-
-
-                        signal[i][0] = (double)temp2*multiplier;
-                        signal[i][1] = (double)temp*multiplier;
-
+                // IQ 64
+                if (ui->DataSize_comboBox->currentIndex() == 2) {
+                    LOG_INFO("IQ interleaved 64-bit path");
+                    for (int i = 0; i < windowSize; ++i) {
+                        long long temp = 0;
+                        long long temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp  = ((unsigned long long)(unsigned char)read[16 * i] << 56) & 0xFF00000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 1] << 48) & 0xFF000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 2] << 40) & 0xFF0000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 3] << 32) & 0xFF00000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 4] << 24) & 0xFF000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 5] << 16) & 0xFF0000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 6] << 8) & 0xFF00ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[16 * i + 7]);
+                        temp2  = ((unsigned long long)(unsigned char)read[16 * i + 8] << 56) & 0xFF00000000000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 9] << 48) & 0xFF000000000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 10] << 40) & 0xFF0000000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 11] << 32) & 0xFF00000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 12] << 24) & 0xFF000000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 13] << 16) & 0xFF0000ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 14] << 8) & 0xFF00ULL;
+                        temp2 |= ((unsigned long long)(unsigned char)read[16 * i + 15]);
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
                     }
+                    LOG_INFO("Completed IQ64 unpack for windowSize=%d", windowSize);
                 }
-            }
-            if(ui->IOnly_radioButton->isChecked())
-            {
-                qDebug()<<"I Only ";
-                /// I 16
-                if(ui->DataSize_comboBox->currentIndex()==0)
-                {
-                    qDebug()<<"I Only data size 16";
-                    for(int i=0;i<windowSize;i++)
-                    {
+            } // end IQInterleved
+
+            if (ui->IOnly_radioButton->isChecked()) {
+                LOG_INFO("I-only path selected. data size index=%d", ui->DataSize_comboBox->currentIndex());
+
+                // I-only 16
+                if (ui->DataSize_comboBox->currentIndex() == 0) {
+                    LOG_INFO("I-only 16-bit unpack");
+                    for (int i = 0; i < windowSize; ++i) {
                         short temp;
-                        short temp2=0;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        if(ui->byteReverse_checkBox->isChecked())
-                        {
-                            temp=((unsigned char)read[2*i+1]<<8)&0xFF00;
-                            temp |= (unsigned char)read[2*i];
-                            signal[i][0] = (double)temp2*multiplier;
-                            signal[i][1] = (double)temp*multiplier;
+                        short temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        if (ui->byteReverse_checkBox->isChecked()) {
+                            temp = ((unsigned char)read[2 * i + 1] << 8) & 0xFF00;
+                            temp |= (unsigned char)read[2 * i];
+                        } else {
+                            temp = ((unsigned char)read[2 * i] << 8) & 0xFF00;
+                            temp |= (unsigned char)read[2 * i + 1];
                         }
-                        else
-                        {
-                            temp=((unsigned char)read[2*i]<<8)&0xFF00;
-                            temp |= (unsigned char)read[2*i+1];
-                            //                        temp2=((unsigned char)read[2*i+2]<<8)&0xFF00;
-                            //                        temp2 |= (unsigned char)read[2*i+3];
-                            signal[i][0] = (double)temp2*multiplier;
-                            signal[i][1] = (double)temp*multiplier;
-                        }
-
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
                     }
                 }
-                /// I 32
-                if(ui->DataSize_comboBox->currentIndex()==1)
-                {
-                    qDebug()<<"I Only 32"<<windowSize;
-                    for(int i=0;i<windowSize;i++)
-                    {
-                        int temp;
-                        int temp2=0;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        if(ui->byteReverse_checkBox->isChecked())
-                        {
-                            temp  =((unsigned char)read[4*i+3]<<24)&0xFF000000;
-                            temp |=((unsigned char)read[4*i+2]<<16)&0xFF0000;
-                            temp |=((unsigned char)read[4*i+1]<<8)&0xFF00;
-                            temp |=((unsigned char)read[4*i]);
-                            signal[i][0] = (double)temp2*multiplier;
-                            signal[i][1] = (double)temp*multiplier;
-                        }
-                        else
-                        {
-                            temp  =((unsigned char)read[4*i]<<24)&0xFF000000;
-                            temp |=((unsigned char)read[4*i+1]<<16)&0xFF0000;
-                            temp |=((unsigned char)read[4*i+2]<<8)&0xFF00;
-                            temp |=((unsigned char)read[4*i+3]);
-                            signal[i][0] = (double)temp2*multiplier;
-                            signal[i][1] = (double)temp*multiplier;
-                        }
 
+                // I-only 32
+                if (ui->DataSize_comboBox->currentIndex() == 1) {
+                    LOG_INFO("I-only 32-bit unpack");
+                    for (int i = 0; i < windowSize; ++i) {
+                        int temp = 0;
+                        int temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        if (ui->byteReverse_checkBox->isChecked()) {
+                            temp  = ((unsigned char)read[4 * i + 3] << 24) & 0xFF000000;
+                            temp |= ((unsigned char)read[4 * i + 2] << 16) & 0xFF0000;
+                            temp |= ((unsigned char)read[4 * i + 1] << 8) & 0xFF00;
+                            temp |= ((unsigned char)read[4 * i]);
+                        } else {
+                            temp  = ((unsigned char)read[4 * i] << 24) & 0xFF000000;
+                            temp |= ((unsigned char)read[4 * i + 1] << 16) & 0xFF0000;
+                            temp |= ((unsigned char)read[4 * i + 2] << 8) & 0xFF00;
+                            temp |= ((unsigned char)read[4 * i + 3]);
+                        }
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
                     }
                 }
-                /// I 64
-                if(ui->DataSize_comboBox->currentIndex()==2)
-                {
-                    for(int i=0;i<windowSize;i++)
-                    {
-                        long long temp;
-                        long long temp2=0;
-                        double multiplier = 0.5 * (1 - cos(2*M_PI*i/(windowSize-1)));//Hanning Window
-                        temp  =((unsigned char)read[8*i]<<56)&0xFF00000000000000;
-                        temp |=((unsigned char)read[8*i+1]<<48)&0xFF000000000000;
-                        temp |=((unsigned char)read[8*i+2]<<40)&0xFF0000000000;
-                        temp |=((unsigned char)read[8*i+3]<<32)&0xFF00000000;
-                        temp |=((unsigned char)read[8*i+4]<<24)&0xFF000000;
-                        temp |=((unsigned char)read[8*i+5]<<16)&0xFF0000;
-                        temp |=((unsigned char)read[8*i+6]<<8)&0xFF00;
-                        temp |=((unsigned char)read[8*i+7]);
-                        signal[i][0] = (double)temp2*multiplier;
-                        signal[i][1] = (double)temp*multiplier;
 
+                // I-only 64
+                if (ui->DataSize_comboBox->currentIndex() == 2) {
+                    LOG_INFO("I-only 64-bit unpack");
+                    for (int i = 0; i < windowSize; ++i) {
+                        long long temp = 0;
+                        long long temp2 = 0;
+                        double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
+                        temp  = ((unsigned long long)(unsigned char)read[8 * i] << 56) & 0xFF00000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 1] << 48) & 0xFF000000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 2] << 40) & 0xFF0000000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 3] << 32) & 0xFF00000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 4] << 24) & 0xFF000000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 5] << 16) & 0xFF0000ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 6] << 8) & 0xFF00ULL;
+                        temp |= ((unsigned long long)(unsigned char)read[8 * i + 7]);
+                        signal[i][0] = (double)temp2 * multiplier;
+                        signal[i][1] = (double)temp * multiplier;
                     }
                 }
-            }
-        }
-        FFT_Plot(windowSize,signal,outBuffer);
-        fc_debug_I.close();
-        fc_debug_Q.close();
-        delete [] read;
-        delete [] signal;
-        delete [] outBuffer;
-    }
-   // exit(0);
+            } // end IOnly
+        } // end DDC_DataradioButton
+    } // end strmnStrt_radioButton
+
+    LOG_INFO("Calling FFT_Plot with windowSize=%d", windowSize);
+    FFT_Plot(windowSize, signal, outBuffer);
+
+    // cleanup
+    if (fc_debug_I.is_open()) fc_debug_I.close();
+    if (fc_debug_Q.is_open()) fc_debug_Q.close();
+    delete[] read;
+    delete[] signal;
+    delete[] outBuffer;
+
+    LOG_INFO("Spectrum::on_pb_plot_clicked EXIT");
 }
+
 
 void Spectrum::on_m_PBGetADCData_clicked()
 {
@@ -1306,7 +1346,7 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
         stFileReadWriteConf Cnf;
         Cnf.iFileSize = iFileSize;
         Cnf.sFilePath = sFilePath;
-        Cnf.eInterface = iface::eETH10G;
+        Cnf.eInterface = deviceType;
         Cnf._Dir = dir;
         setupTransferAgent->configure(Cnf);
 
@@ -1319,7 +1359,7 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
         stFileReadWriteConf Cnf;
         Cnf.iFileSize = iFileSize;
         Cnf.sFilePath = sFilePath;
-        Cnf.eInterface = iface::eETH10G;
+        Cnf.eInterface = deviceType;
         Cnf._Dir = dir;
         LOG_INFO("eETH10G: iFileSize:%d,sFilePath:%s",iFileSize,sFilePath.toStdString().c_str());
         setupTransferAgent->configure(Cnf);
@@ -1335,8 +1375,7 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
 
 void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
 {
-    LOG_INFO("Spectrum::handleRegisterWrite() <ENTER>");
-    LOG_INFO("Addr:0x%08X, value:0x%08X",iaddr,ival);
+    LOG_INFO("Spectrum::handleRegisterWrite <ENTER> Addr:0x%08X, value:0x%08X", iaddr, ival);
     char* byArrPkt = nullptr;
 
     Proto protocolobj;
@@ -1347,61 +1386,43 @@ void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
     {
         serial = UartSerial::getInstance();
         if (!serial) {
-            LOG_TO_FILE("ERROR: Serial pointer is null.");
+            LOG_ERROR("ERROR: Serial pointer is null.");
+            if (byArrPkt) delete[] byArrPkt;
+            LOG_INFO("Spectrum::handleRegisterWrite EXIT (serial null)");
             return;
         }
         if(!serial->sendData(byArrPkt, pktLen)){
-            LOG_TO_FILE("Sent filed!!!<Serial>");
+            LOG_ERROR("Serial sendData failed");
         }
         break;
     }
     case iface::eETHPL1G:
     {
-        eth1G = EthernetSocket::getInstance();
-        if (!eth1G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
-            return;
-        }
-        if(!eth1G->sendData(byArrPkt,pktLen,eth1G->RemoteIP.toStdString(),eth1G->Port)){
-            LOG_TO_FILE("Sent filed!!!<eth1G>");
-        }
-        {
-            char ByteArr64BitPakt[64]={0};
-            std::string senderIp;
-            uint16_t senderport;
-            //Read and discard the packet
-            if(eth10G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
-            {
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("RegVal:0x%08X",reg_val);
-
-            }else{
-                LOG_TO_FILE("Receive filed!!!<eth10G>");
-            }
-        }
+        Utils::RegisterWrite(deviceType,iaddr,ival);
         break;
     }
     case eETH10G:
         eth10G = EthernetSocket10G::getInstance();
         if (!eth10G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
+            LOG_ERROR("ERROR: Ethernet pointer is null.");
+            if (byArrPkt) delete[] byArrPkt;
+            LOG_INFO("Spectrum::handleRegisterWrite EXIT (eth10G null)");
             return;
         }
         if(!eth10G->sendData(byArrPkt,pktLen,eth10G->RemoteIP.toStdString(),eth10G->Port)){
-            LOG_TO_FILE("Sent filed!!!<eth1G>");
+            LOG_ERROR("eth10G sendData failed");
         }
         {
             char ByteArr64BitPakt[64]={0};
             std::string senderIp;
             uint16_t senderport;
-            //Read and discard the packet
+            // Read and discard the packet
             if(eth10G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
             {
                 int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("RegVal:0x%08X",reg_val);
-
-            }else{
-                LOG_TO_FILE("Receive filed!!!<eth10G>");
+                LOG_INFO("RegVal:0x%08X", reg_val);
+            } else {
+                LOG_ERROR("eth10G receiveData failed");
             }
         }
         break;
@@ -1411,102 +1432,89 @@ void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
         break;
     case eETHPS1G:
         break;
+    case ePLSERIAL:
+        break;
     }
-    LOG_INFO("MainWindow::handleRegisterWrite() <EXIT>");
+
+    if (byArrPkt) {
+        delete[] byArrPkt;
+        byArrPkt = nullptr;
+    }
+
+    LOG_INFO("Spectrum::handleRegisterWrite EXIT");
 }
 
-uint Spectrum::readRegisterValue(iface deviceType,uint addr)
+uint Spectrum::readRegisterValue(iface deviceType, uint addr)
 {
-    LOG_TO_FILE(" DeviceSetup::readRegisterValue() <ENTER>");
-    char* byArrPkt = nullptr;
-    uint reg_val = -20;
-    char ByteArr64BitPakt[64];
+    LOG_INFO("Spectrum::readRegisterValue ENTER. deviceType=%d addr=0x%08X", static_cast<int>(deviceType), addr);
+
+    char *byArrPkt = nullptr;
+    uint reg_val = 0;
+    char ByteArr64BitPakt[64] = {0};
     Proto protocolobj;
     int pktLen = protocolobj.mPktRegRead(addr, &byArrPkt);
+
     switch (deviceType)
     {
     case iface::eSERIAL:
     {
         serial = UartSerial::getInstance();
-        if (!serial)
-        {
-            LOG_TO_FILE("ERROR: Serial pointer is null.");
-            return -1;
+        if (!serial) {
+            LOG_ERROR("Serial pointer is null");
+            if (byArrPkt) delete[] byArrPkt;
+            LOG_INFO("DeviceSetup::readRegisterValue EXIT (serial null)");
+            return static_cast<uint>(-1);
         }
-        if(!serial->sendData(byArrPkt, pktLen))
-        {
-            LOG_TO_FILE("Sent filed!!!<Serial>");
-        }
-        else
-        {
-            serial->sendData(byArrPkt, pktLen);
-            if(serial->receiveData(ByteArr64BitPakt, pktLen)){
-                int reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("REG_VAL:0x%08X",reg_val);
+
+        if (!serial->sendData(byArrPkt, pktLen)) {
+            LOG_ERROR("Serial sendData failed");
+        } else {
+            // second send appears in original code; attempt receive once
+            if (serial->receiveData(ByteArr64BitPakt, pktLen)) {
+                int parsed = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
+                reg_val = static_cast<uint>(parsed);
+                LOG_INFO("REG_VAL: 0x%08X (serial)", reg_val);
+            } else {
+                LOG_ERROR("Serial receiveData failed");
             }
         }
         break;
     }
     case iface::eETHPL1G:
     {
-        eth1G = EthernetSocket::getInstance();
-        if (!eth1G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
-            return -1;
-        }
-        if(!eth1G->sendData(byArrPkt,pktLen,eth1G->RemoteIP.toStdString(),eth1G->Port)){
-            LOG_TO_FILE("Sent filed!!!<eth1G>");
-        }
-        else
-        {
-            std::string senderIp;
-            uint16_t senderport;
-            if(eth1G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
-            {
-                reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("REG_VAL:0x%08X",reg_val);
-            }else{
-                LOG_TO_FILE("Receive filed!!!<eth1G>");
-            }
-        }
-    }
-    break;
-    case iface::ePCIe:
+        reg_val = Utils::RegRead(deviceType, addr);
         break;
+    }
+    case iface::ePCIe:
+    {
+        LOG_ERROR("PCIe path not implemented");
+        break;
+    }
     case iface::eETH10G:
     {
-        eth10G = EthernetSocket10G::getInstance();
-        if (!eth10G) {
-            LOG_TO_FILE("ERROR: Ethernet pointer is null.");
-            return -1;
-        }
-        if(!eth10G->sendData(byArrPkt,pktLen,eth10G->RemoteIP.toStdString(),eth10G->Port)){
-            LOG_TO_FILE("Sent filed!!!<eth10G>");
-        }
-        {
-            char ByteArr64BitPakt[64]={0};
-            std::string senderIp;
-            uint16_t senderport;
-            if(eth10G->receiveData(ByteArr64BitPakt,pktLen,senderIp,senderport))
-            {
-                reg_val = protocolobj.mParseResponsePkt(ByteArr64BitPakt);
-                LOG_TO_FILE("REG_VAL:0x%08X",reg_val);
-            }else{
-                LOG_TO_FILE("Receive filed!!!<eth10G>");
-            }
-        }
+        reg_val = Utils::RegRead(deviceType, addr);
+        break;
     }
-    break;
     default:
-        LOG_TO_FILE("No valid interface selection");
+        LOG_ERROR("No valid interface selection");
+        break;
     }
-    delete byArrPkt;
+
+    if (byArrPkt) {
+        delete[] byArrPkt;
+        byArrPkt = nullptr;
+    }
+    LOG_INFO("Spectrum::readRegisterValue EXIT. addr=0x%08X reg_val=0x%08X", addr, reg_val);
     return reg_val;
-    LOG_TO_FILE(" DeviceSetup::readRegisterValue() <EXIT>");
 }
 
 void Spectrum::on_strmnStrt_radioButton_clicked()
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
     if(ui->DDC_DataradioButton->isChecked())
     {
         /// Device reset
@@ -1516,15 +1524,15 @@ void Spectrum::on_strmnStrt_radioButton_clicked()
             int dataSize = ui->DataSize_comboBox->currentIndex();
             switch (dataSize) {
             case 0:
-                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/4);
+                handleRegisterWrite(deviceType,0x51C,(unsigned int)ui->windowSize_lineEdit->text().toInt()/4);
 
                 break;
             case 1:
-                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
+                handleRegisterWrite(deviceType,0x51C,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
 
                 break;
             case 2:
-                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt());
+                handleRegisterWrite(deviceType,0x51C,(unsigned int)ui->windowSize_lineEdit->text().toInt());
                 break;
             default:
                 break;
@@ -1535,28 +1543,28 @@ void Spectrum::on_strmnStrt_radioButton_clicked()
             int dataSize = ui->DataSize_comboBox->currentIndex();
             switch (dataSize) {
             case 0:
-                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
+                handleRegisterWrite(deviceType,0x51C,(unsigned int)ui->windowSize_lineEdit->text().toInt()/2);
                 break;
             case 1:
-                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt());
+                handleRegisterWrite(deviceType,0x51C,(unsigned int)ui->windowSize_lineEdit->text().toInt());
                 break;
             case 2:
-                handleRegisterWrite(iface::eETH10G,0x2F4,(unsigned int)ui->windowSize_lineEdit->text().toInt()*2);
+                handleRegisterWrite(deviceType,0x51C,(unsigned int)ui->windowSize_lineEdit->text().toInt()*2);
                 break;
             default:
                 break;
             }
         }
-        uint reg_val = readRegisterValue(iface::eETH10G,0x2F8);
+        uint reg_val = readRegisterValue(deviceType,0x520);
         reg_val = BitUtils::setValueInBits19to12(reg_val,ui->chnl_comboBox->currentIndex());
-        handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
+        handleRegisterWrite(deviceType,0x520,reg_val);
 
-        reg_val = readRegisterValue(iface::eETH10G,0x2F8);
+        reg_val = readRegisterValue(deviceType,0x520);
         BitUtils::setBit(reg_val,0);
-        handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
-        reg_val = readRegisterValue(iface::eETH10G,0x2F8);
+        handleRegisterWrite(deviceType,0x520,reg_val);
+        reg_val = readRegisterValue(deviceType,0x520);
         BitUtils::clearBit(reg_val,0);
-        handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
+        handleRegisterWrite(deviceType,0x520,reg_val);
 
         // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x0C,0x3);
         // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x04,0x10);
@@ -1600,6 +1608,13 @@ void Spectrum::on_autoRefreshOn_radioButton_clicked()
 
 void Spectrum::on_strmnStop_radioButton_clicked()
 {
+
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("Interface not selected");
+        return;
+    }
+
     setupTransferAgent->abortTransfer();
     ui->DDC_DataradioButton->setDisabled(false);
     //ui->raw_radioButton->setDisabled(false);
@@ -1607,13 +1622,13 @@ void Spectrum::on_strmnStop_radioButton_clicked()
     ui->IOnly_radioButton->setDisabled(false);
     if(ui->DDC_DataradioButton->isChecked())
     {
-        uint reg_val = readRegisterValue(iface::eETH10G,0x2f8);
+        uint reg_val = readRegisterValue(deviceType,0x520);
         reg_val = BitUtils::setBit(reg_val,1);
-        handleRegisterWrite(iface::eETH10G,0x2f8,reg_val);
+        handleRegisterWrite(deviceType,0x520,reg_val);
 
-        reg_val = readRegisterValue(iface::eETH10G,0x2F8);
+        reg_val = readRegisterValue(deviceType,0x520);
         BitUtils::clearBit(reg_val,1);
-        handleRegisterWrite(iface::eETH10G,0x2F8,reg_val);
+        handleRegisterWrite(deviceType,0x520,reg_val);
 
     }
     plotTimer->stop();
@@ -1650,70 +1665,105 @@ void Spectrum::on_ChkBoxFFtShift_clicked(bool checked)
 
 void Spectrum::on_ChkBoxMixerData_checkStateChanged(const Qt::CheckState &arg1)
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("Interface not selected");
+        return;
+    }
+
     if(arg1 == Qt::Checked){
-        handleRegisterWrite(iface::eETH10G,0x14,0x2);
+        handleRegisterWrite(deviceType,0x514,0x2);
     }
     else{
-        handleRegisterWrite(iface::eETH10G,0x14,0x0);
+        handleRegisterWrite(deviceType,0x514,0x0);
     }
 }
 
 
 void Spectrum::on_ChkBoxADCData_checkStateChanged(const Qt::CheckState &arg1)
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("Interface not selected");
+        return;
+    }
+
     if(arg1 == Qt::Checked){
-        handleRegisterWrite(iface::eETH10G,0x14,0x1);
+        handleRegisterWrite(deviceType,0x514,0x1);
     }
     else{
-        handleRegisterWrite(iface::eETH10G,0x14,0x0);
+        handleRegisterWrite(deviceType,0x514,0x0);
     }
 }
 
 
 void Spectrum::on_ChkBoxCICData_checkStateChanged(const Qt::CheckState &arg1)
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("Interface not selected");
+        return;
+    }
+
     if(arg1 == Qt::Checked){
-        handleRegisterWrite(iface::eETH10G,0x14,0x4);
+        handleRegisterWrite(deviceType,0x514,0x4);
     }
     else{
-        handleRegisterWrite(iface::eETH10G,0x14,0x0);
+        handleRegisterWrite(deviceType,0x514,0x0);
     }
 }
 
 
 void Spectrum::on_ChkBoxCFIRData_checkStateChanged(const Qt::CheckState &arg1)
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("Interface not selected");
+        return;
+    }
+
     if(arg1 == Qt::Checked){
-        handleRegisterWrite(iface::eETH10G,0x14,0x8);
+        handleRegisterWrite(deviceType,0x514,0x8);
     }
     else{
-        handleRegisterWrite(iface::eETH10G,0x14,0x0);
+        handleRegisterWrite(deviceType,0x514,0x0);
     }
 }
 
 
 void Spectrum::on_ChkBoxPFIRData_checkStateChanged(const Qt::CheckState &arg1)
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("Interface not selected");
+        return;
+    }
+
     if(arg1 == Qt::Checked){
-        handleRegisterWrite(iface::eETH10G,0x14,0x10);
+        handleRegisterWrite(deviceType,0x514,0x10);
     }
     else{
-        handleRegisterWrite(iface::eETH10G,0x14,0x0);
+        handleRegisterWrite(deviceType,0x514,0x0);
     }
 }
-
 
 void Spectrum::on_DataSize_comboBox_currentIndexChanged(int index)
 {
-    if(ui->DataSize_comboBox->currentIndex() == 1){
-         handleRegisterWrite(iface::eETH10G,0x304,0x1);
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        Log::showStatusMessage(this, "Device Setup", "Please select an interface");
+        LOG_ERROR("Interface not selected");
+        return;
+    }
+
+    if(ui->DataSize_comboBox->currentIndex() == 1)
+    {
+         handleRegisterWrite(deviceType,0x528,0x1);
     }
     else{
-        handleRegisterWrite(iface::eETH10G,0x304,0x0);
+        handleRegisterWrite(deviceType,0x528,0x0);
     }
 }
-
-
 
 void Spectrum::on_ChkBoxFFtShift_checkStateChanged(const Qt::CheckState &arg1)
 {

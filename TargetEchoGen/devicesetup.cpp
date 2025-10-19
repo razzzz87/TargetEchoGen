@@ -132,6 +132,11 @@ void DeviceSetup::FileReadWriteSetup(iface deviceType, uint iFileSize, QString s
 
 void DeviceSetup::WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal)
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
     const QString addrStr = leAddr->text().trimmed();
     const QString valStr  = leVal->text().trimmed();
 
@@ -149,12 +154,6 @@ void DeviceSetup::WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal)
              valStr.toStdString().c_str(),
              addrOk ? parsedAddr : 0xFFFFFFFF,
              valOk  ? parsedVal  : 0xFFFFFFFF);
-
-    iface deviceType = getSelectedDeviceType();
-    if (deviceType == eNONE) {
-        LOG_ERROR("[WriteRegister] Interface not selected");
-        return;
-    }
 
     if (!addrOk) {
         LOG_ERROR("[WriteRegister] Invalid address string: %s", addrStr.toStdString().c_str());

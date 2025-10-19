@@ -33,6 +33,7 @@ public:
     FileTransferAgent  *setupTransferAgent;
     void load_files();
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
+    uint64_t ComputeDDSFCW(uint32_t fcw, uint32_t fs);
 
 private slots:
 
@@ -73,6 +74,10 @@ private slots:
     void on_PbDAC1Apply_clicked();
 
     void on_PbDAC1SUMRefresh_clicked();
+
+    void on_ChkBoxNBADCDDSEnable_checkStateChanged(const Qt::CheckState &arg1);
+
+    void on_PbNB_ADC_DDSFCWSet_clicked();
 
 private:
     Ui::MainWindow *ui;
