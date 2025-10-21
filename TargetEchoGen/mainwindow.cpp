@@ -401,10 +401,10 @@ void MainWindow::on_ChkBoxNBADCDDSEnable_checkStateChanged(const Qt::CheckState 
 {
     if(arg1 == Qt::Checked)
     {
-        Utils::RegisterWrite(iface::eETH10G,0x508,1);
+        Utils::RegisterWrite(eETHPL1G,0x508,1);
     }
     else{
-        Utils::RegisterWrite(iface::eETH10G,0x508,0);
+        Utils::RegisterWrite(eETHPL1G,0x508,0);
     }
 }
 
@@ -440,8 +440,8 @@ void MainWindow::on_PbNB_ADC_DDSFCWSet_clicked()
     //ui->lineEditWBCICInputFs->setText(ui->lineEditWBDDSFs_val->text());
 
     uint64_t totalval = ComputeDDSFCW(fcw,fs);
-    Utils::RegisterWrite(iface::eETH10G,0x504,totalval);
-    Utils::RegisterWrite(iface::eETH10G,0x508,3);
-    Utils::RegisterWrite(iface::eETH10G,0x508,1);
+    Utils::RegisterWrite(eETHPL1G,0x504,totalval);
+    Utils::RegisterWrite(eETHPL1G,0x508,3);
+    Utils::RegisterWrite(eETHPL1G,0x508,1);
 }
 

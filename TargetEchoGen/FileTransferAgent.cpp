@@ -7,28 +7,37 @@
 void FileTransferAgent::run()
 {
     LOG_INFO("FileTransferAgent::run() <ENTER>");
-    LOG_DEBUG("eInterFace:%d",_eInterFace);
+    LOG_INFO("eInterFace:%d",_eInterFace);
     if(_eInterFace == eETHPL1G){
 
         if(this->_Dir == eWrite){
-             LOG_DEBUG("FileTransferAgent::run()eWrite ");
+             LOG_INFO("FileTransferAgent::run()eWrite ");
+        }
+        else if(this->_Dir == eStream){
+
+            LOG_INFO("FileTransferAgent::run() call BulkFileReadStreamEth01G ");
+            BulkFileReadStreamEth01G(0x4200,NULL);
+        }
+        else if(this->_Dir == eRead){
+
+            LOG_INFO("FileTransferAgent::run() eRead ");
+            BulkReadFileEth01G(0x4200,NULL);
         }
         else{
-            LOG_DEBUG("FileTransferAgent::run() eRead ");
-            ReadFileBulkEth01G(0x40000,NULL);
+
         }
     }
     else if (_eInterFace == eETH10G){
 
         if(_Dir == eWrite){
-             LOG_DEBUG("eETH10G FileTransferAgent::run() eWrite ");
+             LOG_INFO("eETH10G FileTransferAgent::run() eWrite ");
             WriteFileBulk10G(0x4200,NULL);
         }
         else if(_Dir == eStream){
             StreamReadFileBulkEth10G(0x4200,NULL);
         }
         else{
-            LOG_DEBUG("eETH10G FileTransferAgent::run() eRead ");
+            LOG_INFO("eETH10G FileTransferAgent::run() eRead ");
             ReadFileBulkEth10G(0x4200,NULL);
         }
     }
@@ -37,8 +46,8 @@ void FileTransferAgent::run()
         if(_Dir == eWrite){
         }
         else{
-            LOG_DEBUG("FileTransferAgent::run() eRead ");
-            ReadFileBulkEth10G(0x40000,NULL);
+            LOG_INFO("FileTransferAgent::run() eRead ");
+            ReadFileBulkEth10G(0x4200,NULL);
         }
     }
     else{
@@ -73,99 +82,85 @@ void FileTransferAgent::setupDevice(iface deviceType) {
 
     }
 }
-int FileTransferAgent::ReadFileBulkEth01G(unsigned int startAddress, qint64* numBytesRdSuccess)
-{
-    LOG_INFO("FileTransferAgent::ReadFileBulkEth01G <ENTER>ReadSize:%lld, FilePath:%s", _iDataSize, _sFilePath.toStdString().c_str());
 
-    QFile throughputLog("test_10G.log");
-    if (!throughputLog.open(QIODevice::Append)) {
-        LOG_ERROR("Unable to open throughput log: %s", _sFilePath.toStdString().c_str());
-        // proceed without throughput logging
-    } else {
-        throughputLog.write(QTime::currentTime().toString("hh:mm:ss:zzz").toUtf8() + '\n');
-        throughputLog.write(_sFilePath.toUtf8() + '\n');
-    }
+int FileTransferAgent::BulkFileReadStreamEth01G(unsigned int startAddress, qint64* numBytesRdSuccess)
+{
+    LOG_INFO("FileTransferAgent::BulkFileReadStreamEth01G <ENTER> ReadSize:%lld, FilePath:%s", (long long)_iDataSize, qPrintable(_sFilePath));
 
     ethPL01G = EthernetSocketPL1G::getInstance();
     if (!ethPL01G) {
         LOG_ERROR("Error: Eth01G unavailable");
-        if (throughputLog.isOpen()) throughputLog.close();
         return 0;
     }
 
     FILE* pFile = fopen(_sFilePath.toUtf8().constData(), "wb");
     if (!pFile) {
-        LOG_ERROR("Error: File open failed: %s", _sFilePath.toStdString().c_str());
-        if (throughputLog.isOpen()) throughputLog.close();
+        LOG_ERROR("Error: File open failed %s", qPrintable(_sFilePath));
         return -2;
     }
 
-    if (!ethPL01G->getConnStatus()) {
-        LOG_ERROR("Error: Eth01G disconnected");
-        fclose(pFile);
-        if (throughputLog.isOpen()) throughputLog.close();
-        return -2;
-    }
+    const int dataPayloadSize = 1456;    // adjust to 1456 if required
+    const int headerSize = 12;
+    const int packetMax = headerSize + dataPayloadSize;
 
-    const int dataPayloadSize = 1456;
-    const int packetSize = dataPayloadSize + 12;
-    char ucBuffer[packetSize] = {0};
+    char ucBuffer[4096];
     char* byArrPkt = nullptr;
     Proto protocol;
 
     qint64 numByReadDone = 0;
     qint64 read_req_size = _iDataSize;
     int updateProgressbarCount = 0;
-
-    while (_iDataSize > 0 && !abort) {
+    while (_iDataSize > 0 && !abort)
+    {
         qint64 chunkToRequest = qMin(_iDataSize, static_cast<qint64>(dataPayloadSize));
         int pktLen = protocol.mPktBulkRead(startAddress, static_cast<int>(chunkToRequest), &byArrPkt);
         if (pktLen <= 0 || !byArrPkt) {
-            LOG_ERROR("Error: Failed to build bulk-read packet");
+            LOG_ERROR("Failed to build bulk-read packet");
+            if (byArrPkt) delete[] byArrPkt;
             break;
         }
+        //Log::printHexRecvBuffer(byArrPkt,16);
 
         if (!ethPL01G->sendData(byArrPkt, pktLen)) {
-            LOG_ERROR("Error: sendData failed for startAddress: %u", startAddress);
+            LOG_ERROR("sendData failed");
             delete[] byArrPkt;
             break;
         }
         delete[] byArrPkt;
         byArrPkt = nullptr;
 
-        qint64 sizeReceived = 0;
-        while ((sizeReceived < chunkToRequest) && !abort) {
-            int RecivedByte = 0;
-            sizeReceived = ethPL01G->receiveData(ucBuffer, packetSize, RecivedByte);
-            if (RecivedByte >= 12) {
+        qint64 sizeReceivedForChunk = 0;
+        while ((sizeReceivedForChunk < chunkToRequest) && !abort)
+        {
+            int want = headerSize + static_cast<int>(chunkToRequest); // header + requested payload
+            int RecvByte;
+            bool ok = ethPL01G->receivePacketWithSync2(ucBuffer, want, RecvByte);
+            if (ok)
+            {
+                //Log::printHexRecvBuffer(ucBuffer,16);
                 protocol.m_nPacketLength = protocol.mPktParseBulkRead(ucBuffer);
-                int payloadLen = protocol.m_nPacketLength - 12;
-                if (payloadLen > 0) {
-                    size_t written = fwrite(&ucBuffer[12], 1, static_cast<size_t>(payloadLen), pFile);
+                size_t payloadLen = protocol.m_nPacketLength - headerSize;
+                if (payloadLen > 0)
+                {
+                    size_t written = fwrite(&ucBuffer[12], 1,chunkToRequest, pFile);
                     fflush(pFile);
-                    if (static_cast<int>(written) != payloadLen) {
-                        LOG_ERROR("Error: fwrite wrote %zu of %d bytes", written, payloadLen);
-                        abort = true;
-                        break;
+                    if (written != chunkToRequest) {
+                        LOG_ERROR("fwrite short: wrote %zu of %d", written, written);
                     }
-                    bytesTransferred += payloadLen;
-                    _iDataSize -= payloadLen;
+                    bytesTransferred += written;
+                    _iDataSize -= written;
+                    sizeReceivedForChunk += written;
+                    numByReadDone += written;
                 }
             }
-
-            if ((updateProgressbarCount++ >= AFTER_NUMBER_OF_PKT) && !abort) {
-                int percentageComplete = static_cast<int>((bytesTransferred * 100.0) / read_req_size);
-                emit progressUpdated(percentageComplete);
-                updateProgressbarCount = 0;
-            }
         }
-
-        if (abort) break;
-
-        numByReadDone += sizeReceived;
-        startAddress += static_cast<unsigned int>(sizeReceived);
-    }
-
+        if ((updateProgressbarCount++ >= AFTER_NUMBER_OF_PKT) && !abort) {
+            int percentageComplete = read_req_size ? static_cast<int>((bytesTransferred * 100.0) / read_req_size) : 100;
+            // emit progressUpdated(percentageComplete);
+            updateProgressbarCount = 0;
+        }
+        startAddress += static_cast<unsigned int>(sizeReceivedForChunk);
+    } // outer loop
     if (numBytesRdSuccess)
         *numBytesRdSuccess = numByReadDone;
 
@@ -174,21 +169,105 @@ int FileTransferAgent::ReadFileBulkEth01G(unsigned int startAddress, qint64* num
         pFile = nullptr;
     }
 
-    if (throughputLog.isOpen()) {
-        throughputLog.write(QTime::currentTime().toString("hh:mm:ss:zzz").toUtf8() + '\n');
-        throughputLog.close();
+    LOG_INFO("[FileTransferAgent] Read complete: %lld bytes read", (long long)numByReadDone);
+    LOG_INFO(abort ? "File transmission aborted" : "File transmission complete.");
+    emit transferComplete();
+    LOG_INFO("FileTransferAgent::BulkFileReadStreamEth01G <EXIL>");
+    return abort ? -1 : 0;
+}
+
+
+int FileTransferAgent::BulkReadFileEth01G(unsigned int startAddress, qint64* numBytesRdSuccess)
+{
+    LOG_INFO("FileTransferAgent::BulkReadFileEth01G <ENTER> ReadSize:%lld, FilePath:%s", (long long)_iDataSize, qPrintable(_sFilePath));
+
+    ethPL01G = EthernetSocketPL1G::getInstance();
+    if (!ethPL01G) {
+        LOG_ERROR("Error: Eth01G unavailable");
+        return 0;
     }
 
-    LOG_INFO("FileTransferAgent Read complete: %lld bytes read", numByReadDone);
-    if (abort)
-        LOG_INFO("File transmission aborted");
-    else
-        LOG_INFO("File transmission complete");
+    FILE* pFile = fopen(_sFilePath.toUtf8().constData(), "wb");
+    if (!pFile) {
+        LOG_ERROR("Error: File open failed %s", qPrintable(_sFilePath));
+        return -2;
+    }
 
+    const int dataPayloadSize = 1456;    // adjust to 1456 if required
+    const int headerSize = 12;
+    const int packetMax = headerSize + dataPayloadSize;
+
+    char ucBuffer[4096];
+    char* byArrPkt = nullptr;
+    Proto protocol;
+
+    qint64 numByReadDone = 0;
+    qint64 read_req_size = _iDataSize;
+    int updateProgressbarCount = 0;
+    while (_iDataSize > 0 && !abort)
+    {
+        qint64 chunkToRequest = qMin(_iDataSize, static_cast<qint64>(dataPayloadSize));
+        int pktLen = protocol.mPktBulkRead(startAddress, static_cast<int>(chunkToRequest), &byArrPkt);
+        if (pktLen <= 0 || !byArrPkt) {
+            LOG_ERROR("Failed to build bulk-read packet");
+            if (byArrPkt) delete[] byArrPkt;
+            break;
+        }
+
+        if (!ethPL01G->sendData(byArrPkt, pktLen)) {
+            LOG_ERROR("sendData failed");
+            delete[] byArrPkt;
+            break;
+        }
+        delete[] byArrPkt;
+        byArrPkt = nullptr;
+
+        qint64 sizeReceivedForChunk = 0;
+        while ((sizeReceivedForChunk < chunkToRequest) && !abort)
+        {
+            int want = headerSize + static_cast<int>(chunkToRequest); // header + requested payload
+            int RecvByte;
+            bool ok = ethPL01G->receivePacketWithSync2(ucBuffer, want, RecvByte);
+            if (ok)
+            {
+                protocol.m_nPacketLength = protocol.mPktParseBulkRead(ucBuffer);
+                size_t payloadLen = protocol.m_nPacketLength - headerSize;
+                if (payloadLen > 0)
+                {
+                    size_t written = fwrite(&ucBuffer[12], 1,chunkToRequest, pFile);
+                    fflush(pFile);
+                    if (written != chunkToRequest) {
+                        LOG_ERROR("fwrite short: wrote %zu of %d", written, written);
+                    }
+                    bytesTransferred += written;
+                    _iDataSize -= written;
+                    sizeReceivedForChunk += written;
+                    numByReadDone += written;
+                }
+            }
+        }
+        if ((updateProgressbarCount++ >= AFTER_NUMBER_OF_PKT) && !abort) {
+            int percentageComplete = read_req_size ? static_cast<int>((bytesTransferred * 100.0) / read_req_size) : 100;
+            emit progressUpdated(percentageComplete);
+            updateProgressbarCount = 0;
+        }
+        startAddress += static_cast<unsigned int>(sizeReceivedForChunk);
+    } // outer loop
+    if (numBytesRdSuccess)
+        *numBytesRdSuccess = numByReadDone;
+
+    if (pFile) {
+        fclose(pFile);
+        pFile = nullptr;
+    }
+
+    LOG_INFO("[FileTransferAgent] Read complete: %lld bytes read", (long long)numByReadDone);
+    LOG_INFO(abort ? "File transmission aborted" : "File transmission complete.");
     emit transferComplete();
-    LOG_INFO("FileTransferAgent::ReadFileBulkEth01G EXIT");
-    return 0;
+    LOG_INFO("FileTransferAgent::BulkReadFileEth01G <EXIL>");
+    return abort ? -1 : 0;
 }
+
 
 int FileTransferAgent::ReadFileBulkEth10G(unsigned int startAddress, qint64* numBytesRdSuccess)
 {

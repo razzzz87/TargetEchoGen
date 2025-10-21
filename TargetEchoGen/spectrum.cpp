@@ -96,8 +96,8 @@ Spectrum::Spectrum(QWidget *parent)
     //ui->DataSize_comboBox->setCurrentIndex(0);
     ui->DDC_DataradioButton->setChecked(true);
     ui->IQInterleved_radioButton->setChecked(true);
-    ui->frame_plot_control->hide();
-    //ui->pb_hide_show_menu->setText("Show Menu");
+    //ui->frame_plot_control->hide();
+    ui->pb_hide_show_menu->hide();
     m_vMaxHoldBuffer=NULL;
 
     // Disable auto-exclusive behavior
@@ -129,7 +129,7 @@ void Spectrum::chunkReadCompleted()
 iface Spectrum::getSelectedDeviceType()
 {
     LOG_INFO("Spectrum::getSelectedDeviceType()<ENTER>");
-    if (ui->RbSpectrumEthPL10G->isChecked())       return eETHPL1G;
+    if (ui->RbSpectrumEthPL1G->isChecked())       return eETHPL1G;
     if (ui->RbSpectrumEthPL10G->isChecked())      return eETH10G;
     return eNONE;
 }
@@ -278,14 +278,15 @@ void Spectrum::on_pb_hide_show_menu_clicked()
 void Spectrum::on_pb_play_snap_shot_clicked()
 {
     LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked ENTER");
-
+    static int count =0;
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("Interface not selected");
         return;
     }
 
-    if (!eth10G) {
+    if (deviceType == eNONE)
+    {
         LOG_ERROR("No connection with FPGA 1G. Aborting snapshot.");
         QMessageBox::critical(this, "warning", "No Connection with FPGA 1G", QMessageBox::Ok);
         ui->pb_plot->setEnabled(false);
@@ -330,12 +331,12 @@ void Spectrum::on_pb_play_snap_shot_clicked()
         }
 
         LOG_DEBUG("Bytes to read: %u", byteToRd);
-        unsigned int fifo_level = readRegisterValue(deviceType, 0x52FC);
+        unsigned int fifo_level = readRegisterValue(deviceType, 0x52C);
         fifo_level = BitUtils::extractBits15to0(fifo_level);
         LOG_DEBUG("Read Data Available: %u", fifo_level);
 
         if (fifo_level >= byteToRd) {
-            QString filename = QStringLiteral("StreamingData%1.bin").arg(fifo_level);
+            QString filename = "StreamingData.bin";
             LOG_INFO("Sufficient FIFO level (%u >= %u). Starting FileReadWriteSetup with file: %s",
                      fifo_level, byteToRd, filename.toStdString().c_str());
             FileReadWriteSetup(deviceType, byteToRd, filename.toStdString().c_str(), eStream);
@@ -366,12 +367,13 @@ void Spectrum::on_pb_play_snap_shot_clicked()
         }
 
         LOG_DEBUG("Bytes to read: %u", byteToRd);
-        unsigned int fifo_level = readRegisterValue(deviceType, 0x52FC);
+        unsigned int fifo_level = readRegisterValue(deviceType, 0x52C);
         fifo_level = BitUtils::extractBits15to0(fifo_level);
         LOG_DEBUG("Read Data Available: %u", fifo_level);
 
         if (fifo_level >= byteToRd) {
-            QString filename = QStringLiteral("StreamingData%1.bin").arg(fifo_level);
+            QString filename = QStringLiteral("StreamingData%1.bin").arg(count++);
+            //QString filename = "StreamingData.bin";
             LOG_INFO("Sufficient FIFO level (%u >= %u). Starting FileReadWriteSetup with file: %s",
                      fifo_level, byteToRd, filename.toStdString().c_str());
             FileReadWriteSetup(deviceType, byteToRd, filename.toStdString().c_str(), eStream);
@@ -393,6 +395,7 @@ void Spectrum::on_pb_play_snap_shot_clicked()
     ui->pb_plot->setEnabled(true);
     LOG_INFO("Plot button enabled");
     LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT");
+    //exit(0);
 }
 
 void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outBuffer)
@@ -1348,7 +1351,9 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
         Cnf.sFilePath = sFilePath;
         Cnf.eInterface = deviceType;
         Cnf._Dir = dir;
+        LOG_INFO("eETHPL1G: iFileSize:%d,sFilePath:%s",iFileSize,sFilePath.toStdString().c_str());
         setupTransferAgent->configure(Cnf);
+        setupTransferAgent->start();
 
     }
     break;
@@ -1584,10 +1589,14 @@ void Spectrum::on_strmnStrt_radioButton_clicked()
 
 void Spectrum::on_autoRefreshOn_radioButton_clicked()
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
     if(ui->strmnStrt_radioButton->isChecked())
     {
-        eth10G = EthernetSocket10G::getInstance();
-        if(eth10G != nullptr)
+        if(deviceType != eNONE)
         {
             plotTimer->setInterval(ui->refrestRate_lineEdit->text().toInt());
             plotTimer->start();

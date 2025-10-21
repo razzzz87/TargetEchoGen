@@ -354,7 +354,7 @@
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Auto Refresh On      </string>
+        <string>Refresh On</string>
        </property>
       </widget>
      </item>
@@ -385,7 +385,7 @@
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Auto Refresh Off</string>
+        <string>Refresh Off</string>
        </property>
       </widget>
      </item>
