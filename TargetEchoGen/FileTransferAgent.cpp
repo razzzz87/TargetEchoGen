@@ -11,7 +11,8 @@ void FileTransferAgent::run()
     if(_eInterFace == eETHPL1G){
 
         if(this->_Dir == eWrite){
-             LOG_INFO("FileTransferAgent::run()eWrite ");
+            LOG_INFO("FileTransferAgent::run()eWrite ");
+            WriteFileBulk01G(0x4200,NULL);
         }
         else if(this->_Dir == eStream){
 
@@ -515,6 +516,86 @@ int FileTransferAgent::sendFileBulkPS01G(unsigned int startAddress, unsigned int
     return 0;
 }
 #endif
+
+int FileTransferAgent::WriteFileBulk01G(unsigned startAddress,qint64* numBytesRdSuccess){
+
+    LOG_TO_FILE("FileTransferAgent::WriteFileBulk01G <ENTER>");
+    constexpr int BUFFERED_PACKETS_SIZE = 0x10A000; // 1MB + 40KB
+    if (!QFile::exists(_sFilePath)) {
+        LOG_ERROR("File not found: %s", _sFilePath.toUtf8().constData());
+        return -1;
+    }
+    QFile file(_sFilePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        LOG_ERROR("File open failed: %s", file.errorString().toUtf8().constData());
+        return -2;
+    }
+    ethPL01G = EthernetSocketPL1G::getInstance();
+    if (!ethPL01G) {
+        LOG_ERROR("Error: Eth01G unavailable");
+        return 0;
+    }
+    char ucBuffer[1516] = {0};
+    const unsigned int totalSize = _iDataSize;//file.size();
+    unsigned int remainingSize = _iDataSize;//file.size();
+    TransferReqSize  = file.size();
+    int updateProgressbarCount = 0;
+    bytesTransferred = 0;
+    LOG_INFO("=========================================================================");
+    LOG_INFO("FileWrite:: startAddress:%u size:%u Filename:%s", startAddress, totalSize, _sFilePath.toUtf8().constData());
+    LOG_INFO("==========================================================================");
+    abort = false;
+
+    while ((remainingSize > 0) && !abort)
+    {
+        int bufferedSize = 0;
+        while ((bufferedSize < (BUFFERED_PACKETS_SIZE - (MAX_BYTES_WRITE_AT_ONCE + 12)) && remainingSize > 0 ) && !abort) {
+            int chunkSize = qMin(remainingSize, static_cast<unsigned int>(MAX_BYTES_WRITE_AT_ONCE));
+            QByteArray chunk = file.read(chunkSize);
+
+            if (chunk.isEmpty()) {
+                if (file.error() != QFile::NoError) {
+                    LOG_ERROR("Read error: %s", file.errorString().toUtf8().constData());
+                    file.close();
+                    return -3;
+                }
+                LOG_INFO("End of file reached.");
+                break;
+            }
+            Proto protocol;
+            char* packetData = nullptr;
+            int packetLen = protocol.mPktBulkWrite(startAddress, chunk.data(), chunk.size(), &packetData);
+            if (!packetData || packetLen <= 0) {
+                LOG_ERROR("Packet creation failed for chunk at addr: %u", startAddress);
+                file.close();
+                return -4;
+            }
+            if (!ethPL01G->sendData(packetData, packetLen)) {
+                LOG_ERROR("sendData failed");
+                delete[] packetData;
+                break;
+            }
+            delete[] packetData;
+            //startAddress += chunk.size();
+            remainingSize -= chunk.size();
+            bufferedSize += chunk.size();
+            bytesTransferred += chunk.size();
+            if((updateProgressbarCount++ < AFTER_NUMBER_OF_PKT) && !abort){
+                int percentageComplete = static_cast<int>((bytesTransferred * 100.0) / totalSize);
+                emit progressUpdated(percentageComplete);
+                updateProgressbarCount = 0;
+            }
+        }
+        LOG_TO_FILE("bytesTransferred:%d remainingSize:%d ",bytesTransferred,remainingSize);
+    }
+    file.close();
+    if(!abort)LOG_TO_FILE("File transmission complete.");
+    else LOG_TO_FILE("File transmission aborted");
+    emit transferComplete();
+    LOG_TO_FILE("FileTransferAgent::WriteFileBulk01G <EXIT>");
+    return 0;
+}
+
 
 int FileTransferAgent::WriteFileBulk10G(unsigned startAddress,qint64* numBytesRdSuccess){
 

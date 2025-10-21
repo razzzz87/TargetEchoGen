@@ -396,7 +396,12 @@ void DeviceSetup::on_PbMemWriteFileBrowse_clicked()
 
 void DeviceSetup::on_PbMemWrite_clicked()
 {
-    FileReadWriteSetup(eETH10G,ui->LeMemWriteFileSize->text().toInt(),ui->LeMemWriteFileNamePath->text(),eWrite);
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE){
+        LOG_ERROR("Interface not selected %d",deviceType);
+        return;
+    }
+    FileReadWriteSetup(deviceType,ui->LeMemWriteFileSize->text().toInt(),ui->LeMemWriteFileNamePath->text(),eWrite);
 }
 
 void DeviceSetup::on_PbLMKInitDefault_clicked()

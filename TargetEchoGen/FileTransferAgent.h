@@ -49,6 +49,7 @@ public:
     int receiveFileBulkEth10G(unsigned startAddress,qint64* numBytesRdSuccess);
     int sendFileBulkPL01G(unsigned int startAddress, unsigned int size, const QString& filePath);
     int WriteFileBulk10G(unsigned int startAddress, qint64* numBytesRdSuccess);
+    int WriteFileBulk01G(unsigned startAddress,qint64* numBytesRdSuccess);
     int BulkFileReadStreamEth01G(unsigned int startAddress, qint64* numBytesRdSuccess);
 
 public slots:
