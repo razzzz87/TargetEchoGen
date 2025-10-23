@@ -45,8 +45,12 @@ public:
     void FFT();
     void resizeEvent(QResizeEvent *);
     void mouseMoveEvent(QMouseEvent *e);
+
     void FFT_Plot(int windowSize, double *sample, fftw_complex *outBuffer);
     void FFT_Plot(int windowSize, fftw_complex *signal, fftw_complex *outBuffer);
+    void FFT_Plot_Real(int windowSize, double* sample, fftw_complex* outBuffer);
+    void FFT_Plot_Complex(int windowSize, fftw_complex* signal, fftw_complex* outBuffer);
+
     void fftshift(void *data, int N, size_t elementSize);
     void plotest();
     void handleRegisterWrite(iface deviceType, uint iaddr, uint ival);

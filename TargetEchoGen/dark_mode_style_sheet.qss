@@ -111,13 +111,13 @@ QGroupBox::title {
 
 /*-----QLineEdit-----*/
 QLineEdit {
-    background-color: #000000;
-    color: #00ff00;
+    background-color: #0b2c4d;   /* flat dark blue background */
+    border: 1px solid #1E90FF;
+    border-radius: 4px;
+    padding-left: 6px;
+    color: white;
     font-weight: bold;
-    border: 1px solid #333333;
-    padding: 4px;
-    max-width: 150px;
-    min-height: 20px;
+    min-height: 30px;
 }
 
 /*-----QComboBox-----*/
@@ -155,36 +155,25 @@ QComboBox::down-arrow {
     height: 8px;
 }
 
-/*-----QSpinBox-----*/
+/*=======================================QSpinBox=======================================*/
+/*----- QSpinBox (flat version) -----*/
 QSpinBox {
-    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
-        stop:0 rgba(3, 1, 50, 32),
-        stop:0.3 rgba(6, 82, 125, 255),
-        stop:0.5 rgba(8, 117, 178, 255),
-        stop:0.75 rgba(7, 100, 164, 255),
-        stop:1 rgba(3, 1, 50, 10));
-    border: 1px solid #1E90FF;;
-    border-radius: 3px;
-    padding-left: 6px;
-    color: lightgray;
+    background-color: #0b2c4d;   /* flat dark blue background */
+    border: 1px solid #1E90FF;
+    border-radius: 4px;
+    padding-left: 0px;
+    color: white;
     font-weight: bold;
     min-height: 30px;
 }
-
-/*QSpinBox::up-button, QSpinBox::down-button {
-    width: 16px;
-    height: 16px;
-    background-color: #00ff00;
-    border: none;
-}*/
-
+/*====================================================================================*/
 QCheckBox {
     color: white;
     font-weight: bold;
     background: transparent;   /* fully transparent background */
     min-height: 25px;
     max-height: 25px;
-    spacing: 8px;              /* space between indicator and text */
+    spacing: 4px;              /* space between indicator and text */
 }
 
 /* Size and appearance of the indicator box */
@@ -195,16 +184,12 @@ QCheckBox::indicator {
 
 /* Optional: Custom style for unchecked state */
 QCheckBox::indicator:unchecked {
-    /*border: 2px solid #607cff;*/
-    border-radius: 4px;
-    /*background-color: #fff;*/
+    border-radius: 2px;
 }
 
 /* Optional: Checked state */
 QCheckBox::indicator:checked {
-    /*border: 2px solid #ffa500;*/
     border-radius: 2px;
-    /*background-color: #ffa500;*/
 }
 
 QCheckBox::indicator:checked {

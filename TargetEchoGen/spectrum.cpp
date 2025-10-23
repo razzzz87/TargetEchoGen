@@ -525,8 +525,96 @@ void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outB
 
     LOG_INFO("FFT_Plot() <EXIT>");
 }
+#if 0
+//fft shift test code
+void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outBuffer)
+{
+    LOG_INFO("Spectrum::FFT_Plot(windowSize=%d) <ENTER>", windowSize);
 
+    Fs = ui->lineEdit_fs->text().toDouble(); // Sampling frequency
 
+    try {
+        // Allocate memory
+        std::vector<double> FF(windowSize);    // Frequency axis
+        std::vector<double> mag(windowSize);   // Magnitude (linear)
+        std::vector<double> db(windowSize);    // Magnitude (dB)
+
+        // Create FFT plan (reuse if already exists)
+        plan_forward = fftw_plan_dft_1d(windowSize, signal, outBuffer, FFTW_FORWARD, FFTW_ESTIMATE);
+        if (!plan_forward) {
+            LOG_ERROR("FFTW plan creation failed");
+            return;
+        }
+
+        // Execute FFT
+        fftw_execute(plan_forward);
+
+        // --- Step 1: Compute Magnitude ---
+        for (int i = 0; i < windowSize; ++i)
+            mag[i] = std::sqrt(outBuffer[i][0] * outBuffer[i][0] + outBuffer[i][1] * outBuffer[i][1]);
+
+        // --- Step 2: Apply FFT shift if enabled ---
+        if (ui->ChkBoxFFtShift->isChecked()) {
+            int half = windowSize / 2;
+            for (int i = 0; i < half; ++i)
+                std::swap(mag[i], mag[i + half]);
+        }
+
+        // --- Step 3: Build Frequency Axis ---
+        const double df = Fs / windowSize;
+        if (ui->ChkBoxFFtShift->isChecked()) {
+            // Shifted axis: centered around 0 Hz
+            for (int k = 0; k < windowSize; ++k)
+                FF[k] = (k - windowSize / 2.0) * df;
+        } else {
+            // Normal axis: 0 → Fs
+            for (int k = 0; k < windowSize; ++k)
+                FF[k] = k * df;
+        }
+
+        // --- Step 4: Normalize and Convert to dB ---
+        double max_val = *std::max_element(mag.begin(), mag.end());
+        if (ui->enableWeight_checkBox->isChecked()) {
+            max_val = ui->enableWeight_lineEdit->text().toDouble();
+        }
+        if (max_val <= 0) max_val = 1e-9;
+
+        for (int i = 0; i < windowSize; ++i) {
+            double val = mag[i] / max_val;
+            db[i] = 20.0 * log10(std::max(val, 1e-12));
+        }
+
+        // --- Step 5: Plot ---
+        if (ui->IOnly_radioButton->isChecked()) {
+            curve_Y->setSamples(FF.data(), db.data(), windowSize / 2);
+            curve_Y->setPen(Qt::yellow, 1.5, Qt::SolidLine);
+        } else {
+            curve_Y->setSamples(FF.data(), db.data(), windowSize);
+            curve_Y->setPen(Qt::yellow, 1.5, Qt::SolidLine);
+        }
+
+        X_graphPlot->replot();
+
+        // --- Step 6: Peak Frequency and Amplitude ---
+        auto maxIt = std::max_element(db.begin(), db.end());
+        int maxIndex = std::distance(db.begin(), maxIt);
+        double max_db = *maxIt;
+        double freqAtPeak = FF[maxIndex];
+
+        ui->frequency_label->setText(QString::number(freqAtPeak, 'f', 2));
+        ui->frequency_label_db->setText(QString::number(max_db, 'f', 2));
+
+        LOG_INFO("Peak at %.2f Hz, %.2f dB", freqAtPeak, max_db);
+
+        // Cleanup
+        fftw_destroy_plan(plan_forward);
+        LOG_INFO("FFT_Plot() <EXIT>");
+    }
+    catch (std::exception &e) {
+        LOG_ERROR("Exception in FFT_Plot: %s", e.what());
+    }
+}
+#endif
 void Spectrum::FFT_Plot(int windowSize, double* sample, fftw_complex* outBuffer)
 {
     LOG_INFO("FFT_Plot() <ENTER>");
@@ -566,6 +654,115 @@ void Spectrum::FFT_Plot(int windowSize, double* sample, fftw_complex* outBuffer)
 
     delete[] v;
     LOG_INFO("FFT_Plot() <EXIT>");
+}
+
+void Spectrum::FFT_Plot_Complex(int windowSize, fftw_complex* signal, fftw_complex* outBuffer)
+{
+    LOG_INFO("Spectrum::FFT_Plot_Complex(windowSize=%d) <ENTER>", windowSize);
+
+    double Fs = ui->lineEdit_fs->text().toDouble();
+    const double df = Fs / windowSize;
+
+    fftw_plan plan_forward = fftw_plan_dft_1d(windowSize, signal, outBuffer, FFTW_FORWARD, FFTW_ESTIMATE);
+    if (!plan_forward) {
+        LOG_ERROR("FFTW plan creation failed (complex input).");
+        return;
+    }
+
+    fftw_execute(plan_forward);
+
+    // Compute magnitude
+    std::vector<double> mag(windowSize);
+    for (int i = 0; i < windowSize; ++i)
+        mag[i] = std::sqrt(outBuffer[i][0]*outBuffer[i][0] + outBuffer[i][1]*outBuffer[i][1]);
+
+    // Optional FFT shift (centers DC in middle)
+    if (ui->ChkBoxFFtShift->isChecked()) {
+        int half = windowSize / 2;
+        for (int i = 0; i < half; ++i)
+            std::swap(mag[i], mag[i + half]);
+    }
+
+    // Build frequency axis
+    std::vector<double> freq(windowSize);
+    if (ui->ChkBoxFFtShift->isChecked()) {
+        for (int k = 0; k < windowSize; ++k)
+            freq[k] = (k - windowSize / 2.0) * df;   // -Fs/2 → +Fs/2
+    } else {
+        for (int k = 0; k < windowSize; ++k)
+            freq[k] = k * df;                        // 0 → Fs
+    }
+
+    // Normalize and convert to dB
+    double max_val = *std::max_element(mag.begin(), mag.end());
+    if (max_val <= 0) max_val = 1e-9;
+
+    std::vector<double> db(windowSize);
+    for (int i = 0; i < windowSize; ++i)
+        db[i] = 20.0 * log10(std::max(mag[i] / max_val, 1e-12));
+
+    // Plot
+    curve_Y->setSamples(freq.data(), db.data(), windowSize);
+    curve_Y->setPen(Qt::yellow, 1.5, Qt::SolidLine);
+    curve_Y->attach(X_graphPlot);
+    X_graphPlot->replot();
+
+    // Find and display peak
+    int maxIndex = std::max_element(db.begin(), db.end()) - db.begin();
+    ui->frequency_label->setText(QString::number(freq[maxIndex], 'f', 2));
+    ui->frequency_label_db->setText(QString::number(db[maxIndex], 'f', 2));
+
+    fftw_destroy_plan(plan_forward);
+    LOG_INFO("Spectrum::FFT_Plot_Complex() <EXIT>");
+}
+
+void Spectrum::FFT_Plot_Real(int windowSize, double* sample, fftw_complex* outBuffer)
+{
+    LOG_INFO("Spectrum::FFT_Plot_Real(windowSize=%d) <ENTER>", windowSize);
+
+    double Fs = ui->lineEdit_fs->text().toDouble();
+    const double df = Fs / windowSize;
+
+    // Create FFT plan for real input
+    fftw_plan plan_forward = fftw_plan_dft_r2c_1d(windowSize, sample, outBuffer, FFTW_ESTIMATE);
+    if (!plan_forward) {
+        LOG_ERROR("FFTW plan creation failed (real input).");
+        return;
+    }
+
+    fftw_execute(plan_forward);
+
+    // Magnitude (only N/2 valid bins for real FFT)
+    int Nhalf = windowSize / 2;
+    std::vector<double> mag(Nhalf);
+    std::vector<double> freq(Nhalf);
+
+    for (int i = 0; i < Nhalf; ++i) {
+        mag[i] = std::sqrt(outBuffer[i][0]*outBuffer[i][0] + outBuffer[i][1]*outBuffer[i][1]);
+        freq[i] = i * df;
+    }
+
+    // Normalize and convert to dB
+    double max_val = *std::max_element(mag.begin(), mag.end());
+    if (max_val <= 0) max_val = 1e-9;
+
+    std::vector<double> db(Nhalf);
+    for (int i = 0; i < Nhalf; ++i)
+        db[i] = 20.0 * log10(std::max(mag[i] / max_val, 1e-12));
+
+    // Plot (0 to Fs/2)
+    curve_Y->setSamples(freq.data(), db.data(), Nhalf);
+    curve_Y->setPen(Qt::yellow, 1.5, Qt::SolidLine);
+    curve_Y->attach(X_graphPlot);
+    X_graphPlot->replot();
+
+    // Peak frequency
+    int maxIndex = std::max_element(db.begin(), db.end()) - db.begin();
+    ui->frequency_label->setText(QString::number(freq[maxIndex], 'f', 2));
+    ui->frequency_label_db->setText(QString::number(db[maxIndex], 'f', 2));
+
+    fftw_destroy_plan(plan_forward);
+    LOG_INFO("Spectrum::FFT_Plot_Real() <EXIT>");
 }
 
 void Spectrum::on_pb_plot_with_file_clicked()

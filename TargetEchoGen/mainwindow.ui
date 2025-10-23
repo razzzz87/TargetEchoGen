@@ -75,7 +75,7 @@
           <x>600</x>
           <y>37</y>
           <width>621</width>
-          <height>130</height>
+          <height>138</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -3372,7 +3372,7 @@
        <widget class="QGroupBox" name="groupBox_con_settings">
         <property name="geometry">
          <rect>
-          <x>1340</x>
+          <x>1310</x>
           <y>36</y>
           <width>363</width>
           <height>175</height>
@@ -3383,7 +3383,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_79">
          <item>
-          <widget class="QFrame" name="frame_39">
+          <widget class="QFrame" name="FRMConSettings">
            <property name="minimumSize">
             <size>
              <width>273</width>
