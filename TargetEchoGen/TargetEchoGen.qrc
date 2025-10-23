@@ -18,5 +18,20 @@
         <file>images/icons8-chevron-up-26.png</file>
         <file>images/icons8-chevron-down-26.png</file>
         <file>images/icons8-dropdown-26.png</file>
+        <file>images/ConSettingIcon.png</file>
+        <file>images/Select.png</file>
+        <file>images/delect.png</file>
+        <file>images/un-checkbox.png</file>
+        <file>images/checked-checkbox-96.png</file>
+        <file>images/icons8-tick-box-50.png</file>
+        <file>images/blue-tick-checkbox-50.png</file>
+        <file>images/blue-unchecked-radio-button-48.png</file>
+        <file>images/bluse-checked-radio-button-48.png</file>
+        <file>images/white-radio-button-48.png</file>
+        <file>images/white-select-radio-button-48.png</file>
+        <file>images/white-un-checkbox-50.png</file>
+        <file>images/white-checked-checkbox-50.png</file>
+        <file>images/white-tick-box-96.png</file>
+        <file>images/white-checked-checkbox-52.png</file>
     </qresource>
 </RCC>

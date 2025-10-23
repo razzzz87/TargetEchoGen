@@ -83,7 +83,7 @@ void ConnectionType::on_PbConnPL1GConn_clicked()
     if(ui->PbConnPL1GConn->text() == "Connect")
     {
         QString TargetIP = ui->LeConnPL1GPort->text();
-        _pEthPL1G = EthernetSocketPL1G::Create("0.0.0.0",0,"10.0.0.80",ui->LeConnPL1GPort->text().toInt());
+        _pEthPL1G = EthernetSocketPL1G::Create("0.0.0.0",0,ui->LeConnPL1GIP->text().toStdString().c_str(),ui->LeConnPL1GPort->text().toInt());
         if(_pEthPL1G != nullptr){
             ui->PbConnPL1GConn->setText("Disconnect");
             ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));

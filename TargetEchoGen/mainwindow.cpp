@@ -444,4 +444,3 @@ void MainWindow::on_PbNB_ADC_DDSFCWSet_clicked()
     Utils::RegisterWrite(eETHPL1G,0x508,3);
     Utils::RegisterWrite(eETHPL1G,0x508,1);
 }
-

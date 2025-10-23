@@ -97,37 +97,6 @@ bool EthernetSocketPL1G::connectSocket(const std::string& localIp, uint16_t remo
     return true;
 }
 
-#if 0
-bool EthernetSocketPL1G::connectSocket(const std::string& localIp, uint16_t remotePort) {
-    LOG_TO_FILE("EthernetSocketPL1G::connectSocket() <ENTER>");
-    sockFd = socket(AF_INET, SOCK_STREAM, 0); // TCP socket
-    if (sockFd < 0) {
-        LOG_ERROR("Failed to create TCP socket");
-        return false;
-    }
-
-    sockaddr_in remoteAddr{};
-    remoteAddr.sin_family = AF_INET;
-    remoteAddr.sin_port = htons(remotePort);
-    if (inet_pton(AF_INET, RemoteIP.toStdString().c_str(), &remoteAddr.sin_addr) <= 0) {
-        LOG_ERROR("Invalid remote IP address: %s", RemoteIP.toStdString().c_str());
-        closeSocket();
-        return false;
-    }
-
-    if (connect(sockFd, reinterpret_cast<sockaddr*>(&remoteAddr), sizeof(remoteAddr)) < 0) {
-        LOG_ERROR("Failed to connect to %s:%d", RemoteIP.toStdString().c_str(), remotePort);
-        closeSocket();
-        return false;
-    }
-
-    IsConnected = true;
-    LOG_INFO("EthernetSocketPL1G::connectSocket() <CONNECTED>");
-    return true;
-}
-#endif
-
-
 bool EthernetSocketPL1G::setSocketBufferSize(int recvSize, int sendSize)
 {
     if (sockFd <= 0) {
@@ -148,23 +117,6 @@ bool EthernetSocketPL1G::setSocketBufferSize(int recvSize, int sendSize)
     LOG_INFO("Socket buffer sizes applied: RX=%d bytes, TX=%d bytes", recvSize, sendSize);
     return true;
 }
-
-#if 0
-bool EthernetSocketPL1G::sendData(const char* data, int datalen) {
-    if (sockFd < 0 || data == nullptr || datalen <= 0) {
-        LOG_ERROR("Invalid socket or data parameters. sockFd=%d, datalen=%d", sockFd, datalen);
-        return false;
-    }
-
-    ssize_t sent = send(sockFd, data, datalen, 0);
-    if (sent < 0) {
-        LOG_ERROR("send() failed. Error: %d (%s)", errno, strerror(errno));
-        return false;
-    }
-
-    return sent == datalen;
-}
-#endif
 
 bool EthernetSocketPL1G::waitForWriteReady(SOCKET fd, int timeoutSec) {
     fd_set writeSet;
@@ -242,21 +194,6 @@ bool EthernetSocketPL1G::receiveData(char* buffer, int bufferSize, int& received
     return true;
 }
 
-#if 0
-bool EthernetSocketPL1G::receiveData(char* buffer, int bufferSize, int& receivedLen) {
-    if (sockFd < 0 || buffer == nullptr || bufferSize <= 0) {
-        LOG_ERROR("Invalid receive parameters.");
-        return false;
-    }
-
-    receivedLen = recv(sockFd, buffer, bufferSize, 0);
-    if (receivedLen < 0) {
-        LOG_ERROR("recv() failed. Error: %d (%s)", errno, strerror(errno));
-        return false;
-    }
-    return true;
-}
-#endif
 bool EthernetSocketPL1G::receivePacketWithSync2(char* buffer, int want, int &receivedLen)
 {
     receivedLen = 0;
@@ -302,49 +239,6 @@ bool EthernetSocketPL1G::receivePacketWithSync2(char* buffer, int want, int &rec
     LOG_ERROR("Sync pattern not found after %d attempts", maxSyncAttempts);
     return false;
 }
-
-#if 0
-// buffer must be at least 'want' bytes
-bool EthernetSocketPL1G::receivePacketWithSync2(char* buffer, int want, int &receivedLen)
-{
-    receivedLen = 0;
-    if (!buffer || want <= 2) return false;
-
-    char window[2];
-    int got = 0, lowlvl = 0;
-
-    // prime read: read first two bytes into window
-    if (!receiveData(window, 2, lowlvl) || lowlvl < 2) return false;
-
-    while (true) {
-        // check window
-        if (static_cast<uint8_t>(window[0]) == 0xAAu && static_cast<uint8_t>(window[1]) == 0x88u) {
-            // sync found: copy and read remaining
-            buffer[0] = window[0];
-            buffer[1] = window[1];
-            got = 2;
-            int remain = want - 2;
-            while (remain > 0) {
-                int chunk = 0;
-                if (!receiveData(buffer + got, remain, chunk)) return false;
-                if (chunk == 0)
-                { receivedLen = got; return false; }
-                got += chunk; remain -= chunk;
-            }
-            receivedLen = want;
-            return true;
-        }
-
-        // shift window by one byte: window[1] becomes window[0]
-        window[0] = window[1];
-
-        // read one new byte into window[1]
-        if (!receiveData(&window[1], 1, lowlvl) || lowlvl < 1) return false;
-
-        // loop continues to check new window
-    }
-}
-#endif
 
 ssize_t EthernetSocketPL1G::receiveDataSafe(char* buffer, int bufferSize)
 {

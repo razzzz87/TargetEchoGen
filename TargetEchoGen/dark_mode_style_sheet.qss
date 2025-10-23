@@ -10,13 +10,33 @@ QWidget {
     font-family: "Segoe UI", "Arial";
 }
 
-/*-----QLabel-----*/
+/*--------------------------QLabel------------------------------------------------------*/
 QLabel {
     background-color: transparent;
     color: white;
     font-weight: bold;
     font-size: 14px;
 }
+
+/* 🔹 Specific labels: connection status and device LEDs */
+#LblConnPL10GStatusLed,
+#LblConnPL1GStatusLed,
+#LblConnPS1GStatusLed,
+#LblConnPSSerialStatusLed,
+#LblConnPLSerialStatusLed,
+#LblDevMemStatusLedSSD1,
+#LblDevMemStatusLedSSD2,
+#LblDevLedLMKLock,
+#LblDevLedLMXLock {
+    min-width: 30px;      /* 🔸 set minimum width */
+    max-width: 30px;      /* 🔸 set maximum width */
+    min-height: 30px;     /* 🔸 set minimum height */
+    max-height: 30px;     /* 🔸 set maximum height */
+    background: transparent;  /* optional, keep LED icons visible */
+    border: none;             /* remove border */
+}
+
+/*--------------------------QLabel------------------------------------------------------*/
 
 /*-----QPushButton-----*/
 QPushButton {
@@ -157,12 +177,41 @@ QSpinBox {
     background-color: #00ff00;
     border: none;
 }*/
-/*-----QCheckBox-----*/
+
 QCheckBox {
     color: white;
     font-weight: bold;
+    background: transparent;   /* fully transparent background */
     min-height: 25px;
     max-height: 25px;
+    spacing: 8px;              /* space between indicator and text */
+}
+
+/* Size and appearance of the indicator box */
+QCheckBox::indicator {
+    width: 25px;       /* ⬅️ increase width */
+    height: 25px;      /* ⬅️ increase height */
+}
+
+/* Optional: Custom style for unchecked state */
+QCheckBox::indicator:unchecked {
+    /*border: 2px solid #607cff;*/
+    border-radius: 4px;
+    /*background-color: #fff;*/
+}
+
+/* Optional: Checked state */
+QCheckBox::indicator:checked {
+    /*border: 2px solid #ffa500;*/
+    border-radius: 2px;
+    /*background-color: #ffa500;*/
+}
+
+QCheckBox::indicator:checked {
+    image: url(:/images/white-checked-checkbox-52.png);
+}
+QCheckBox::indicator:unchecked {
+    image: url(:/images/white-un-checkbox-50.png);
 }
 
 /*-----QScrollBar-----*/
@@ -178,29 +227,69 @@ QScrollBar::handle:vertical {
     min-height: 50px;
     width: 16px;
 }
-
+/*==================================================================*/
 /*-----QRadioButton-----*/
 QRadioButton {
     color: white;
+    background: transparent;
     min-height: 30px;
-	font: 700 9pt "Segoe UI";
+    font: 700 9pt "Segoe UI";
 }
 
-QRadioButton::indicator::unchecked {
-    border: 2px solid #607cff;
-    border-radius: 11px;
-    background-color: #fff;
-    width: 18px;
-    height: 18px;
+/* 🔹 Specific radio buttons: RbPL10GSel, RbPL1GSel, RbPS1GSel, RbPSSerialSel, RbPLSerialSel */
+#RbPL10GSel,
+#RbPL1GSel,
+#RbPS1GSel,
+#RbPSSerialSel,
+#RbPLSerialSel {
+    font-size: 15px;       /* ⬅️ change text size here */
+    font-weight: bold;     /* optional */
+    color: white;          /* text color */
+}
+/* 🔹 Specific radio buttons: RbPL10GSel, RbPL1GSel, RbPS1GSel, RbPSSerialSel, RbPLSerialSel */
+#RbPL10GSel::indicator,
+#RbPL1GSel::indicator,
+#RbPS1GSel::indicator,
+#RbPSSerialSel::indicator,
+#RbPLSerialSel::indicator {
+    width: 30px;        /* custom width */
+    height: 30px;       /* custom height */
 }
 
-QRadioButton::indicator::checked {
-    border: 2px solid #f8f8ff;
-    border-radius: 11px;
-    background-color: #ffa500;
-    width: 18px;
-    height: 18px;
+#RbPL10GSel::indicator:unchecked,
+#RbPL1GSel::indicator:unchecked,
+#RbPS1GSel::indicator:unchecked,
+#RbPSSerialSel::indicator:unchecked,
+#RbPLSerialSel::indicator:unchecked {
+    background: transparent;
 }
+
+/* Checked state */
+#RbPL10GSel::indicator:checked,
+#RbPL1GSel::indicator:checked,
+#RbPS1GSel::indicator:checked,
+#RbPSSerialSel::indicator:checked,
+#RbPLSerialSel::indicator:checked {
+    /*border: 2px solid #f8f8ff;*/
+    /*border-radius: 14px;*/
+    background: transparent;
+}
+
+QRadioButton::indicator {
+    width: 25px;
+    height: 25px;
+}
+
+/* When unchecked */
+QRadioButton::indicator:unchecked {
+    image: url(:/images/white-radio-button-48.png);
+}
+
+/* When checked */
+QRadioButton::indicator:checked {
+    image: url(:/images/white-select-radio-button-48.png);
+}
+/*=======================================================================================*/
 
 /*-----QTableWidget-----*/
 QTableWidget::item {
