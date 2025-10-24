@@ -103,6 +103,36 @@ inline const char* ReadErrorToString(ReadRegError err)
     }
 }
 
+QString ifaceToQString(iface type)
+{
+    switch (type)
+    {
+    case eETHPS1G:   return "ETH PS1G";
+    case eETHPL1G:   return "ETH PL1G";
+    case eETH10G:    return "ETH 10G";
+    case eSERIAL:    return "SERIAL";
+    case ePLSERIAL:  return "PL SERIAL";
+    case ePCIe:      return "PCIe";
+    case eNONE:
+    default:         return "NONE";
+    }
+}
+
+const char* ifaceToCStr(iface type)
+{
+    switch (type)
+    {
+    case eETHPS1G:   return "ETH PS1G";
+    case eETHPL1G:   return "ETH PL1G";
+    case eETH10G:    return "ETH 10G";
+    case eSERIAL:    return "SERIAL";
+    case ePLSERIAL:  return "PL SERIAL";
+    case ePCIe:      return "PCIe";
+    case eNONE:
+    default:         return "NONE";
+    }
+}
+
 GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal)
 {
     bool ok;
@@ -111,7 +141,6 @@ GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLi
 
     if (!ok) {
         LOG_ERROR("[readRegisterValue] INVALID_ADDR_FORMAT | Raw: %s", lineEditAddr->text().toStdString().c_str());
-        LOG_INFO("[readRegisterValue] EXIT | Addr: 0x%08X | RegVal: <FAILED>", addr);
         return GuiReadRegError::INVALID_ADDR_FORMAT;
     }
 

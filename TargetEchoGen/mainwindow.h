@@ -7,8 +7,14 @@
 #include <udpcon.h>
 #include "FileTransferAgent.h"
 #include <QTimer>
+#include "devicesetup.h"
+#include "fileprocessing.h"
+#include "rf.h"
+#include "selftest.h"
+#include "spectrum.h"
 #include "transferprogressdialog.h"
 #include "uartserial.h"
+#include "Utils.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -29,6 +35,13 @@ public:
     QGroupBox *ddr_groupbox;
     ConnectionType *conn;
     UartSerial *serial;
+
+    DeviceSetup* deviceSetup;
+    FileProcessing* fileProcessing;
+    SelfTest* selfTest;
+    Spectrum* spectrum;
+    RF* rf;
+
     TransferProgressDialog* progressDialog;
     FileTransferAgent  *setupTransferAgent;
     void load_files();
@@ -36,7 +49,8 @@ public:
     uint64_t ComputeDDSFCW(uint32_t fcw, uint32_t fs);
 
 private slots:
-
+    void onConnStateChanged(iface which, ConnInfo s);
+    //void onActiveChanged(iface active);
     void onTimeout();
     void updateTransferProgress(qint64 percentage);
     void close_Progress_pop(void);

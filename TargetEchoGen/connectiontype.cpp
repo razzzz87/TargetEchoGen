@@ -1,5 +1,6 @@
 #include "connectiontype.h"
 #include "ui_connectiontype.h"
+#include "connectionctx.h"
 
 ConnectionType::ConnectionType(QWidget *parent)
     : QWidget(parent)
@@ -85,6 +86,14 @@ void ConnectionType::on_PbConnPL1GConn_clicked()
         QString TargetIP = ui->LeConnPL1GPort->text();
         _pEthPL1G = EthernetSocketPL1G::Create("0.0.0.0",0,ui->LeConnPL1GIP->text().toStdString().c_str(),ui->LeConnPL1GPort->text().toInt());
         if(_pEthPL1G != nullptr){
+
+            ConnInfo info;
+            info.connected = true;
+            info.ip = ui->LeConnPL1GIP->text();
+            info.port = ui->LeConnPL1GPort->text().toInt();
+            ConnectionHelper::instance().setConnected(eETHPL1G, true, info);
+            ConnectionHelper::instance().setActive(eETHPL1G);     // make it the active TX path
+
             ui->PbConnPL1GConn->setText("Disconnect");
             ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
             emit connectionSucceeded(eETHPL1G);
@@ -93,6 +102,7 @@ void ConnectionType::on_PbConnPL1GConn_clicked()
         {
             ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
             ui->PbConnPL1GConn->setText("Connect");
+            ConnectionHelper::instance().setConnected(eETHPL1G, false);
             emit connectionFailed(eETHPL1G);
         }
     }
@@ -116,13 +126,22 @@ void ConnectionType::on_PbConn10GConn_clicked()
     {
         QString TargetIP = ui->LeConnPL1GPort->text();
         _pEthPL10G = EthernetSocket10G::Create("192.168.30.240",0,TargetIP,ui->LeConnPL1GPort->text().toInt());
-        if(_pEthPL10G != nullptr){
+        if(_pEthPL10G != nullptr)
+        {
+            ConnInfo info;
+            info.connected = true;
+            info.ip = ui->LeConnPL1GIP->text();
+            info.port = ui->LeConnPL1GPort->text().toInt();
+            ConnectionHelper::instance().setConnected(eETH10G, true, info);
+            ConnectionHelper::instance().setActive(eETH10G);     // make it the active TX path
+
             ui->PbConn10GConn->setText("Disconnect");
             ui->LblConn10GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
             emit connectionSucceeded(eETH10G);
         }
         else
         {
+            ConnectionHelper::instance().setConnected(eETH10G, false);
             ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
             ui->PbConnPL1GConn->setText("Connect");
             emit connectionFailed(eETH10G);

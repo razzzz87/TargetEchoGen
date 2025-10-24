@@ -15,6 +15,7 @@ QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 SOURCES += \
     Utils.cpp \
+    connectionctx.cpp \
     connectiontype.cpp \
     dachelper.cpp \
     devicesetup.cpp \
@@ -46,6 +47,7 @@ HEADERS += \
     IUDPConnection.h \
     RegDef.h \
     Utils.h \
+    connectionctx.h \
     connectiontype.h \
     dachelper.h \
     devicesetup.h \

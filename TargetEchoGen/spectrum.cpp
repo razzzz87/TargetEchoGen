@@ -1,23 +1,19 @@
 #include "spectrum.h"
 #include "ui_spectrum.h"
-#include "qcustomplot.h"
+#include "connectionctx.h"
 #include <QVector>
 #include <cmath>
-#include <complex>
 #include <vector>
 #include <QApplication>
 #include <QVector>
 #include <cmath>
-#include <complex>
 #include <vector>
 
 #include <QApplication>
 #include <QVector>
 #include <cmath>
-#include <complex>
 #include <vector>
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <qwt_plot_grid.h>
 #include <log.h>
@@ -128,10 +124,34 @@ void Spectrum::chunkReadCompleted()
 
 iface Spectrum::getSelectedDeviceType()
 {
-    LOG_INFO("Spectrum::getSelectedDeviceType()<ENTER>");
-    if (ui->RbSpectrumEthPL1G->isChecked())       return eETHPL1G;
-    if (ui->RbSpectrumEthPL10G->isChecked())      return eETH10G;
-    return eNONE;
+    auto& ctx = ConnectionHelper::instance();
+    iface sel = ctx.selectedInterface();
+
+    const QString ifaceName = Utils::ifaceToQString(sel);
+
+    // 1️⃣ Check if no interface selected
+    if (sel == eNONE)
+    {
+        LOG_ERROR("[Spectrum] No interface selected (iface=%s)", Utils::ifaceToCStr(sel));
+        Log::showStatusMessage(this, "Device Setup", "Please select an interface before proceeding.");
+        return eNONE;
+    }
+
+    // 2️⃣ Check if selected interface is connected
+    ConnInfo info = ctx.info(sel);
+    if (!info.connected)
+    {
+        LOG_ERROR("[Spectrum] Selected interface '%s' is NOT connected.", Utils::ifaceToCStr(sel));
+        Log::showStatusMessage(this, "Device Setup",
+                               QString("Selected interface '%1' is not connected.").arg(ifaceName));
+        return eNONE;
+    }
+
+    // 3️⃣ Success — valid and connected interface
+    LOG_INFO("[Spectrum] Selected and connected interface: %s", Utils::ifaceToCStr(sel));
+    //Log::showStatusMessage(this, "Device Setup", QString("Selected Interface: %1").arg(ifaceName));
+
+    return sel;
 }
 void Spectrum::resizeEvent(QResizeEvent *)
 {

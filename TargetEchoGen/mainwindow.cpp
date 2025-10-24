@@ -1,3 +1,11 @@
+#include <QTableWidgetItem>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QDir>
+#include <QFileInfoList>
+#include <QHostAddress>
+#include <QFileDialog>
+#include <QMessageBox>
 #include "mainwindow.h"
 #include "devicesetup.h"
 #include "fileprocessing.h"
@@ -7,14 +15,7 @@
 #include "spectrum.h"
 #include "ui_mainwindow.h"
 #include "dachelper.h"
-#include <QTableWidgetItem>
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QDir>
-#include <QFileInfoList>
-#include <QHostAddress>
-#include <QFileDialog>
-#include <QMessageBox>
+#include "connectionctx.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,13 +24,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     conn = new ConnectionType(this);
-    DeviceSetup *deviceSetup = new DeviceSetup(this);
 
-    ui->tabWidgetMainTab->addTab(new FileProcessing(),"File processing");
-    ui->tabWidgetMainTab->addTab(deviceSetup,"Device setup");
-    ui->tabWidgetMainTab->addTab(new SelfTest(),"Self Test");
-    ui->tabWidgetMainTab->addTab(new Spectrum(),"Spectrum Analyzer");
-    ui->tabWidget->addTab(new RF(),"RF");
+    deviceSetup   = new DeviceSetup(this);
+    fileProcessing= new FileProcessing(this);
+    selfTest      = new SelfTest(this);
+    spectrum      = new Spectrum(this);
+    rf            = new RF(this);
+
+    ui->tabWidgetMainTab->addTab(fileProcessing, "File processing");
+    ui->tabWidgetMainTab->addTab(deviceSetup,   "Device setup");
+    ui->tabWidgetMainTab->addTab(selfTest,      "Self Test");
+    ui->tabWidgetMainTab->addTab(spectrum,      "Spectrum Analyzer");
+    ui->tabWidget->addTab(rf,                   "RF");
 
     ui->PbRefresh->setIconSize(QSize(ui->PbRefresh->width(), ui->PbRefresh->height()));
     ui->PbConnSettings->setIconSize(QSize(ui->PbConnSettings->width(), ui->PbConnSettings->height()));
@@ -65,9 +71,6 @@ MainWindow::MainWindow(QWidget *parent)
     // connect(setupTransferAgent, &FileTransferAgent::progressUpdated,this, &MainWindow::updateTransferProgress);
     // connect(setupTransferAgent, &FileTransferAgent::close_progress_pop,this, &MainWindow::close_Progress_pop);
 
-    connect(conn, &ConnectionType::connectionSucceeded, this, &MainWindow::onConnectionSuccess);
-    connect(conn, &ConnectionType::connectionFailed, this, &MainWindow::onConnectionFailure);
-
     setupTransferAgent = new FileTransferAgent();
     progressDialog = new TransferProgressDialog(this); // Pass your QWidget parent
     // Connect progress signal
@@ -79,6 +82,41 @@ MainWindow::MainWindow(QWidget *parent)
     // Optional: Close dialog when transfer completes
     connect(setupTransferAgent, &FileTransferAgent::transferComplete,progressDialog, &QDialog::accept);
     progressDialog->hide();
+
+    //Connection and selection handling
+    auto& helper = ConnectionHelper::instance();
+    connect(&helper, &ConnectionHelper::stateChanged,  this, &MainWindow::onConnStateChanged);
+    connect(&helper, &ConnectionHelper::activeChanged, this, [this](iface active){
+        onConnStateChanged(active, ConnectionHelper::instance().info(active));
+    });
+    connect(&helper, &ConnectionHelper::selectedChanged, this, [this](iface sel){
+        onConnStateChanged(sel, ConnectionHelper::instance().info(sel));
+    });
+
+    // Example: radio button for PL1G selected in MainWindow
+    connect(ui->RbPL1GSel, &QRadioButton::toggled, this, [](bool on){
+        if (on) ConnectionHelper::instance().setSelected(eETHPL1G);
+    });
+
+    connect(ui->RbPS1GSel, &QRadioButton::toggled, this, [](bool on){
+        if (on) ConnectionHelper::instance().setSelected(eETHPS1G);
+    });
+
+    connect(ui->RbPL10GSel, &QRadioButton::toggled, this, [](bool on){
+        if (on) ConnectionHelper::instance().setSelected(eETH10G);
+    });
+
+    connect(ui->RbPSSerialSel, &QRadioButton::toggled, this, [](bool on){
+        if (on) ConnectionHelper::instance().setSelected(eSERIAL);
+    });
+
+    connect(ui->RbPLSerialSel, &QRadioButton::toggled, this, [](bool on){
+        if (on) ConnectionHelper::instance().setSelected(eSERIAL);
+    });
+
+    connect(conn, &ConnectionType::connectionSucceeded, this, &MainWindow::onConnectionSuccess);
+    connect(conn, &ConnectionType::connectionFailed, this, &MainWindow::onConnectionFailure);
+
 }
 
 MainWindow::~MainWindow()
@@ -86,6 +124,53 @@ MainWindow::~MainWindow()
     delete file_processing;
     delete device_setup;
     delete ui;
+}
+
+
+void MainWindow::onConnStateChanged(iface which, ConnInfo s)
+{
+    QLabel* ledLabel = nullptr;
+
+    // Select which LED to update
+    switch (which)
+    {
+    case eETHPS1G:
+        ledLabel = ui->LblConnPS1GStatusLed;
+        break;
+    case eETHPL1G:
+        ledLabel = ui->LblConnPL1GStatusLed;
+        break;
+    case eETH10G:
+        ledLabel = ui->LblConnPL10GStatusLed;
+        break;
+    default:
+        return; // ignore unsupported ones
+    }
+
+    if (!ledLabel)
+        return;
+
+    // Check if it's the currently active (or selected) connection
+    auto& ctx = ConnectionHelper::instance();
+    const bool isActive   = (ctx.activeInterface() == which);
+    const bool isSelected = (ctx.selectedInterface() == which);
+
+    // Pick LED color/icon
+    QString icon;
+    if (!s.connected){
+        icon = ":/images/led-icon-red.jpg";
+    }
+    else if (isSelected){
+        icon = ":/images/led-green_icon.jpg";       // bright green for selected
+    }
+    else if (isActive){
+        icon = ":/images/led-green_dim.png";        // dim green for active but not selected
+    }
+    else{
+        icon = ":/images/led-green_dim.png"; // connected but idle
+    }
+
+    ledLabel->setPixmap(QPixmap(icon));
 }
 
 void MainWindow::onConnectionSuccess(iface eInterface)

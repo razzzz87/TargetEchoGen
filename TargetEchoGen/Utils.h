@@ -20,6 +20,26 @@
 enum iface { eNONE,eETHPS1G,eETHPL1G, eETH10G, eSERIAL,ePLSERIAL, ePCIe };
 enum TransferMode { SendBulk, ReceiveBulk, Streaming };
 
+struct ConnParams {
+    // common fields (extend as needed)
+    QString ip;
+    quint16 port = 0;
+    QString serialPort;
+    int baud = 0;
+};
+
+struct ConnState {
+    bool       connected = false;
+    ConnParams params;
+};
+struct ConnInfo {
+    bool connected = false;     // link up/down
+    bool active    = false;     // the one allowed to TX/RX
+    QString ip;                 // optional
+    quint16 port = 0;           // optional
+    QString serialPort;         // optional
+
+};
 enum eXferDir {
     eWrite,   // Data sent from host to target
     eStream,  //
@@ -164,6 +184,12 @@ uint32_t IfCommonReadReg (iface deviceType, uint32_t offset);
 // Clock & Reset Control
 void     ClkRstWriteReg (iface deviceType, uint32_t offset, uint32_t value);
 uint32_t ClkRstReadReg  (iface deviceType, uint32_t offset);
+
+
+
+//Log helper funcation
+QString ifaceToQString(iface type);
+const char* ifaceToCStr(iface type);
 
 }
 

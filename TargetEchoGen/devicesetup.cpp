@@ -7,6 +7,7 @@
 #include "FileTransferAgent.h"
 #include "Utils.h"
 #include "devicesetuphelper.h"
+#include "connectionctx.h"
 
 DeviceSetup::DeviceSetup(QWidget *parent)
     : QWidget(parent)
@@ -65,15 +66,37 @@ DeviceSetup::~DeviceSetup()
 
 iface DeviceSetup::getSelectedDeviceType()
 {
-    if (ui->RbPS1G->isChecked())       return eETHPS1G;
-    if (ui->RbPL1G->isChecked())       return eETHPL1G;
-    if (ui->RbPL10G->isChecked())      return eETH10G;
-    if (ui->RbPSSerial->isChecked())   return eSERIAL;
-    if (ui->RbPLSerial->isChecked())   return ePLSERIAL;
+    auto& ctx = ConnectionHelper::instance();
+    iface sel = ctx.selectedInterface();
 
-    Log::showStatusMessage(this, "Device Setup", "Please select an interface");
-    return eNONE;
+    const QString ifaceName = Utils::ifaceToQString(sel);
+
+    // 1️⃣ Check if no interface selected
+    if (sel == eNONE)
+    {
+        LOG_ERROR("[DeviceSetup] No interface selected (iface=%s)", Utils::ifaceToCStr(sel));
+        Log::showStatusMessage(this, "Device Setup", "Please select an interface before proceeding.");
+        return eNONE;
+    }
+
+    // 2️⃣ Check if selected interface is connected
+    ConnInfo info = ctx.info(sel);
+    if (!info.connected)
+    {
+        LOG_ERROR("[DeviceSetup] Selected interface '%s' is NOT connected.", Utils::ifaceToCStr(sel));
+        Log::showStatusMessage(this, "Device Setup",
+                               QString("Selected interface '%1' is not connected.").arg(ifaceName));
+        return eNONE;
+    }
+
+    // 3️⃣ Success — valid and connected interface
+    LOG_INFO("[DeviceSetup] Selected and connected interface: %s", Utils::ifaceToCStr(sel));
+    //Log::showStatusMessage(this, "Device Setup", QString("Selected Interface: %1").arg(ifaceName));
+
+    return sel;
 }
+
+
 void DeviceSetup::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir)
 {
     LOG_INFO("DeviceSetup::FileReadWriteSetup()<ENTER>");
@@ -186,27 +209,22 @@ void DeviceSetup::WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal)
     else if (dev == DeviceType::LMK)
     {
         Utils::WriteSpiSynth(deviceType, addr, value);
-        LOG_INFO("[WriteRegister] Performed LMK SPI write addr=0x%08X val=0x%08X", addr, value);
     }
     else if (dev == DeviceType::FPGA)
     {
         Utils::RegWrite(deviceType, addr, value);
-        LOG_INFO("[WriteRegister] Performed FPGA register write addr=0x%08X val=0x%08X", addr, value);
     }
     else if (dev == DeviceType::DAC1)
     {
         Utils::SpiDacWrite(deviceType, addr, value, 0x00);
-        LOG_INFO("[WriteRegister] Performed DAC1 SPI write addr=0x%08X val=0x%08X", addr, value);
     }
     else if (dev == DeviceType::DAC2)
     {
         Utils::SpiDacWrite(deviceType, addr, value, 0x01);
-        LOG_INFO("[WriteRegister] Performed DAC2 SPI write addr=0x%08X val=0x%08X", addr, value);
     }
     else if (dev == DeviceType::DAC3)
     {
         Utils::RegWrite(deviceType, addr, value);
-        LOG_INFO("[WriteRegister] Performed DAC3 SPI write addr=0x%08X val=0x%08X", addr, value);
     }
     else if (dev == DeviceType::ATTN1)
     {
@@ -231,7 +249,6 @@ void DeviceSetup::WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal)
     else
     {
         Utils::RegWrite(deviceType, addr, value);
-        LOG_INFO("[WriteRegister] Performed default register write addr=0x%08X val=0x%08X", addr, value);
     }
 
     // Update UI to normalized hex string and final exit log
