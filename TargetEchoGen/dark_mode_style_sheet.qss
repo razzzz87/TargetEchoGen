@@ -158,14 +158,55 @@ QComboBox::down-arrow {
 /*=======================================QSpinBox=======================================*/
 /*----- QSpinBox (flat version) -----*/
 QSpinBox {
-    background-color: #0b2c4d;   /* flat dark blue background */
+    background-color:#0b2c4d;
     border: 1px solid #1E90FF;
     border-radius: 4px;
-    padding-left: 0px;
     color: white;
     font-weight: bold;
     min-height: 30px;
+    padding-right: 26px;      /* leave room for right-side buttons */
 }
+
+/* Right-side buttons */
+QSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 22px;
+    border-left: 1px solid #1E90FF;
+    background: #0b2c4d;
+    border-top-right-radius: 4px;
+}
+QSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 22px;
+    border-left: 1px solid #1E90FF;
+    background: #0b2c4d;
+    border-bottom-right-radius: 4px;
+}
+
+/* Hover/pressed feedback */
+QSpinBox::up-button:hover, QSpinBox::down-button:hover{
+    background: #1E90FF;
+}
+
+QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
+    background: #4682B4;
+}
+
+/* Visible arrow icons (from .qrc) */
+QSpinBox::up-arrow{
+
+    image: url(:/images/icons8-arrow-up-30.png);
+    width: 12px;
+    height: 12px;
+}
+QSpinBox::down-arrow{
+    image: url(:/images/icons8-arrow-down-24.png);
+    width: 12px;
+    height: 12px;
+}
+
 /*====================================================================================*/
 QCheckBox {
     color: white;
@@ -193,7 +234,7 @@ QCheckBox::indicator:checked {
 }
 
 QCheckBox::indicator:checked {
-    image: url(:/images/white-checked-checkbox-52.png);
+     image: url(:/images/white-checked-checkbox-50.png);
 }
 QCheckBox::indicator:unchecked {
     image: url(:/images/white-un-checkbox-50.png);

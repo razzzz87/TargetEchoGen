@@ -72,10 +72,10 @@
        <widget class="QGroupBox" name="grp_box_status">
         <property name="geometry">
          <rect>
-          <x>600</x>
+          <x>602</x>
           <y>37</y>
           <width>621</width>
-          <height>138</height>
+          <height>142</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -151,8 +151,8 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>40</width>
-                  <height>40</height>
+                  <width>30</width>
+                  <height>30</height>
                  </size>
                 </property>
                 <property name="pixmap">
@@ -456,19 +456,6 @@
           </widget>
          </item>
         </layout>
-       </widget>
-       <widget class="QLabel" name="label_29">
-        <property name="geometry">
-         <rect>
-          <x>1462</x>
-          <y>3</y>
-          <width>245</width>
-          <height>32</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Date &amp; Time:  09-10-2024:10:30</string>
-        </property>
        </widget>
        <widget class="QLabel" name="label_72">
         <property name="geometry">
@@ -1905,7 +1892,7 @@
           <property name="geometry">
            <rect>
             <x>860</x>
-            <y>220</y>
+            <y>200</y>
             <width>375</width>
             <height>383</height>
            </rect>
@@ -3372,9 +3359,9 @@
        <widget class="QGroupBox" name="groupBox_con_settings">
         <property name="geometry">
          <rect>
-          <x>1310</x>
+          <x>1303</x>
           <y>36</y>
-          <width>363</width>
+          <width>381</width>
           <height>175</height>
          </rect>
         </property>
@@ -3386,7 +3373,7 @@
           <widget class="QFrame" name="FRMConSettings">
            <property name="minimumSize">
             <size>
-             <width>273</width>
+             <width>288</width>
              <height>0</height>
             </size>
            </property>
@@ -3747,6 +3734,16 @@
         </property>
         <property name="scaledContents">
          <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="LeTopDateTime">
+        <property name="geometry">
+         <rect>
+          <x>1468</x>
+          <y>6</y>
+          <width>216</width>
+          <height>29</height>
+         </rect>
         </property>
        </widget>
       </widget>

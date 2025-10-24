@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->SbDAC1AMPLBaseValue->setRange(-27,0);
     ui->SbDAC2AMPLBaseValue->setRange(-27,0);
 
+    ui->LeTopDateTime->setText("Date & Time:  "+ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+
     // // 🔄 Initialize QProgressDialog for percentage-based progress tracking
     // transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
     // transferProgress->setWindowModality(Qt::WindowModal);

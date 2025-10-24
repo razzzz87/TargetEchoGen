@@ -31,7 +31,8 @@
         <file>images/white-select-radio-button-48.png</file>
         <file>images/white-un-checkbox-50.png</file>
         <file>images/white-checked-checkbox-50.png</file>
-        <file>images/white-tick-box-96.png</file>
-        <file>images/white-checked-checkbox-52.png</file>
+        <file>images/icons8-arrow-down-24.png</file>
+        <file>images/icons8-arrow-up-30.png</file>
+        <file>images/white-checked-checkbox-48.png</file>
     </qresource>
 </RCC>

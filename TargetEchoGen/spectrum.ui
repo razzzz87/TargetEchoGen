@@ -59,9 +59,9 @@
     <property name="geometry">
      <rect>
       <x>1713</x>
-      <y>27</y>
+      <y>23</y>
       <width>153</width>
-      <height>99</height>
+      <height>106</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -112,10 +112,10 @@
    <widget class="QFrame" name="FramePbControl">
     <property name="geometry">
      <rect>
-      <x>1207</x>
-      <y>25</y>
+      <x>1205</x>
+      <y>22</y>
       <width>504</width>
-      <height>101</height>
+      <height>107</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -125,10 +125,13 @@
      </sizepolicy>
     </property>
     <property name="frameShape">
-     <enum>QFrame::Shape::Box</enum>
+     <enum>QFrame::Shape::StyledPanel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Shadow::Raised</enum>
+     <enum>QFrame::Shadow::Sunken</enum>
+    </property>
+    <property name="midLineWidth">
+     <number>0</number>
     </property>
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="2">
@@ -252,10 +255,10 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>861</x>
+      <x>877</x>
       <y>23</y>
-      <width>344</width>
-      <height>104</height>
+      <width>324</width>
+      <height>107</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -265,10 +268,10 @@
      </sizepolicy>
     </property>
     <property name="frameShape">
-     <enum>QFrame::Shape::Box</enum>
+     <enum>QFrame::Shape::StyledPanel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Shadow::Raised</enum>
+     <enum>QFrame::Shadow::Sunken</enum>
     </property>
     <property name="lineWidth">
      <number>1</number>
@@ -396,8 +399,8 @@
      <rect>
       <x>5</x>
       <y>23</y>
-      <width>854</width>
-      <height>105</height>
+      <width>869</width>
+      <height>108</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -416,15 +419,21 @@
      <string notr="true"/>
     </property>
     <property name="frameShape">
-     <enum>QFrame::Shape::Box</enum>
+     <enum>QFrame::Shape::StyledPanel</enum>
     </property>
     <property name="frameShadow">
-     <enum>QFrame::Shadow::Raised</enum>
+     <enum>QFrame::Shadow::Sunken</enum>
     </property>
     <property name="lineWidth">
      <number>1</number>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
+     <property name="horizontalSpacing">
+      <number>5</number>
+     </property>
+     <property name="verticalSpacing">
+      <number>4</number>
+     </property>
      <item row="0" column="0">
       <widget class="QRadioButton" name="DDC_DataradioButton">
        <property name="styleSheet">
@@ -930,13 +939,13 @@ color: rgb(0, 0, 0);</string>
     </size>
    </property>
    <property name="frameShape">
-    <enum>QFrame::Shape::Box</enum>
+    <enum>QFrame::Shape::NoFrame</enum>
    </property>
    <property name="frameShadow">
     <enum>QFrame::Shadow::Plain</enum>
    </property>
    <property name="lineWidth">
-    <number>2</number>
+    <number>0</number>
    </property>
   </widget>
  </widget>
