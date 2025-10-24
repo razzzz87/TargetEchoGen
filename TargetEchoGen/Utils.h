@@ -109,7 +109,9 @@ GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLi
 
 ReadResult readRegisterValue(iface deviceType, uint32_t addr);
 uint32_t RegRead(iface deviceType, uint uiAddr);
+
 WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival);
+bool RegWrite(iface deviceType, uint iaddr, uint ival);
 
 // SPI Control Interface
 void SpiCtrlWriteReg(iface deviceType, uint32_t offset, uint32_t value);

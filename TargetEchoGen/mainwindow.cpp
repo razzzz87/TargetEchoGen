@@ -384,9 +384,9 @@ void MainWindow::on_PbDAC1Apply_clicked()
 
     DacHelper::WrIterpolation(eETHPL1G, ui->CbIDAC1InterpSelect->currentText().toInt());
     DacHelper::WrNCOFrq(eETHPL1G,ui->CbDAC1NOCFrequency->currentText());
-    Utils::RegisterWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x08,iPwSample);
-    Utils::RegisterWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x6C,iSignalDelay);
-    Utils::RegisterWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x40,iDoplerShiftHz);
+    Utils::RegWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x08,iPwSample);
+    Utils::RegWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x6C,iSignalDelay);
+    Utils::RegWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x40,iDoplerShiftHz);
 
 }
 
@@ -403,10 +403,10 @@ void MainWindow::on_ChkBoxNBADCDDSEnable_checkStateChanged(const Qt::CheckState 
 {
     if(arg1 == Qt::Checked)
     {
-        Utils::RegisterWrite(eETHPL1G,0x508,1);
+        Utils::RegWrite(eETHPL1G,0x508,1);
     }
     else{
-        Utils::RegisterWrite(eETHPL1G,0x508,0);
+        Utils::RegWrite(eETHPL1G,0x508,0);
     }
 }
 
@@ -442,7 +442,7 @@ void MainWindow::on_PbNB_ADC_DDSFCWSet_clicked()
     //ui->lineEditWBCICInputFs->setText(ui->lineEditWBDDSFs_val->text());
 
     uint64_t totalval = ComputeDDSFCW(fcw,fs);
-    Utils::RegisterWrite(eETHPL1G,0x504,totalval);
-    Utils::RegisterWrite(eETHPL1G,0x508,3);
-    Utils::RegisterWrite(eETHPL1G,0x508,1);
+    Utils::RegWrite(eETHPL1G,0x504,totalval);
+    Utils::RegWrite(eETHPL1G,0x508,3);
+    Utils::RegWrite(eETHPL1G,0x508,1);
 }

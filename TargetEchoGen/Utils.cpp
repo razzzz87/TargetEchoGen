@@ -69,6 +69,39 @@ inline void setControlBit(uint32_t& reg_val, ControlBit bit, BitState state)
     else
         reg_val &= ~(1 << pos);
 }
+inline const char* WriteErrorToString(WriteRegError err)
+{
+    switch (err) {
+    case WriteRegError::SUCCESS:              return "SUCCESS - Register write completed successfully.";
+    case WriteRegError::SERIAL_NULL:          return "SERIAL_NULL - Serial interface not initialized.";
+    case WriteRegError::SERIAL_SEND_FAIL:     return "SERIAL_SEND_FAIL - Serial transmission failed.";
+    case WriteRegError::ETHPL1G_NULL:         return "ETHPL1G_NULL - 1G Ethernet interface not initialized.";
+    case WriteRegError::ETHPL1G_SEND_FAIL:    return "ETHPL1G_SEND_FAIL - Failed to send over 1G Ethernet.";
+    case WriteRegError::ETH10G_NULL:          return "ETH10G_NULL - 10G Ethernet interface not initialized.";
+    case WriteRegError::ETH10G_SEND_FAIL:     return "ETH10G_SEND_FAIL - Failed to send over 10G Ethernet.";
+    case WriteRegError::ETH10G_RECV_FAIL:     return "ETH10G_RECV_FAIL - No response or timeout from 10G device.";
+    case WriteRegError::INVALID_INTERFACE:    return "INVALID_INTERFACE - Unsupported interface for write.";
+    default:                                  return "UNKNOWN_ERROR - Undefined write error code.";
+    }
+}
+
+inline const char* ReadErrorToString(ReadRegError err)
+{
+    switch (err) {
+    case ReadRegError::SUCCESS:               return "SUCCESS - Register read completed successfully.";
+    case ReadRegError::SERIAL_NULL:           return "SERIAL_NULL - Serial interface not initialized.";
+    case ReadRegError::SERIAL_SEND_FAIL:      return "SERIAL_SEND_FAIL - Serial send failed.";
+    case ReadRegError::SERIAL_RECV_FAIL:      return "SERIAL_RECV_FAIL - Serial receive failed.";
+    case ReadRegError::ETHPL1G_NULL:          return "ETHPL1G_NULL - 1G Ethernet interface not initialized.";
+    case ReadRegError::ETHPL1G_RECV_FAIL:     return "ETHPL1G_RECV_FAIL - No response from 1G Ethernet device.";
+    case ReadRegError::ETH10G_NULL:           return "ETH10G_NULL - 10G Ethernet interface not initialized.";
+    case ReadRegError::ETH10G_SEND_FAIL:      return "ETH10G_SEND_FAIL - Failed to send over 10G Ethernet.";
+    case ReadRegError::ETH10G_RECV_FAIL:      return "ETH10G_RECV_FAIL - Failed to receive from 10G Ethernet.";
+    case ReadRegError::INVALID_INTERFACE:     return "INVALID_INTERFACE - Unsupported interface for read.";
+    case ReadRegError::UNKNOWN_ERROR:         return "UNKNOWN_ERROR - Unexpected read error occurred.";
+    default:                                  return "UNDEFINED_ERROR - Unknown read error code.";
+    }
+}
 
 GuiReadRegError readRegisterValue(iface deviceType, QLineEdit* lineEditAddr, QLineEdit* lineEditVal)
 {
@@ -279,16 +312,48 @@ ReadResult readRegisterValue(iface deviceType, uint32_t addr)
     return result;
 }
 
-uint32_t RegRead(iface deviceType, uint uiAddr){
+uint32_t RegRead(iface deviceType, uint uiAddr)
+{
+    LOG_INFO("[RegRead] ENTER | Addr: 0x%08X", uiAddr);
 
     ReadResult result = readRegisterValue(deviceType, uiAddr);
     if (result.status != ReadRegError::SUCCESS) {
-        LOG_ERROR("[DacReadReg] Failed | Addr: 0x%08X | Status: %d", uiAddr, static_cast<int>(result.status));
+        LOG_ERROR("[RegRead] FAILED | Addr: 0x%08X | Code: %d | Desc: %s",uiAddr,static_cast<int>(result.status),
+                  ReadErrorToString(result.status));
     } else {
-        LOG_INFO("[DacReadReg] Success | Addr: 0x%08X | Value: 0x%08X", uiAddr, result.value);
+        LOG_INFO("[RegRead] SUCCESS | Addr: 0x%08X | Value: 0x%08X",uiAddr, result.value);
     }
+
+    LOG_INFO("[RegRead] EXIT | Addr: 0x%08X", uiAddr);
     return result.value;
 }
+
+bool RegWrite(iface deviceType, uint iaddr, uint ival)
+{
+    LOG_INFO("[RegWrite] ENTER | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
+
+    // Perform the low-level write
+    WriteRegError status = RegisterWrite(deviceType, iaddr, ival);
+
+    // Log the outcome with descriptive message
+    if (status == WriteRegError::SUCCESS) {
+        LOG_INFO("[RegWrite] SUCCESS | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
+    } else {
+        LOG_ERROR("[RegWrite] FAILED | Addr: 0x%08X | Val: 0x%08X | Code: %d | Desc: %s",
+                  iaddr,
+                  ival,
+                  static_cast<int>(status),
+                  WriteErrorToString(status));
+    }
+
+    // Final exit log showing summary
+    LOG_INFO("[RegWrite] EXIT | Addr: 0x%08X | Result: %s",
+             iaddr,
+             (status == WriteRegError::SUCCESS) ? "SUCCESS" : "FAIL");
+
+    return (status == WriteRegError::SUCCESS);
+}
+
 WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival)
 {
     LOG_INFO("[RegisterWrite] ENTER | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);

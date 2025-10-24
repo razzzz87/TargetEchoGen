@@ -121,13 +121,23 @@ QLineEdit {
 }
 
 /*-----QComboBox-----*/
-QComboBox {
+/*QComboBox {
     background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
         stop:0 rgba(3, 1, 50, 32),
         stop:0.3 rgba(6, 82, 125, 255),
         stop:0.5 rgba(8, 117, 178, 255),
         stop:0.75 rgba(7, 100, 164, 255),
         stop:1 rgba(3, 1, 50, 10));
+    border: 1px solid #1E90FF;;
+    border-radius: 3px;
+    padding-left: 6px;
+    color: lightgray;
+    font-weight: bold;
+    min-height: 30px;
+}*/
+QComboBox {
+
+    background-color:#0b2c4d;
     border: 1px solid #1E90FF;;
     border-radius: 3px;
     padding-left: 6px;
@@ -146,13 +156,13 @@ QComboBox::drop-down {
     border-left: 1px solid darkgray;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
-    min-width: 30px;
+    min-width: 20px;
 }
 
 QComboBox::down-arrow {
-    image: url(:/images/icons8-dropdown-26.png);
-    width: 20px;
-    height: 8px;
+    image: url(:/images/icons8-arrow-down-24.png);
+    width: 12px;
+    height: 12px;
 }
 
 /*=======================================QSpinBox=======================================*/

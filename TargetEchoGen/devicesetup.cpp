@@ -190,7 +190,7 @@ void DeviceSetup::WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal)
     }
     else if (dev == DeviceType::FPGA)
     {
-        Utils::RegisterWrite(deviceType, addr, value);
+        Utils::RegWrite(deviceType, addr, value);
         LOG_INFO("[WriteRegister] Performed FPGA register write addr=0x%08X val=0x%08X", addr, value);
     }
     else if (dev == DeviceType::DAC1)
@@ -205,7 +205,7 @@ void DeviceSetup::WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal)
     }
     else if (dev == DeviceType::DAC3)
     {
-        Utils::RegisterWrite(deviceType, addr, value);
+        Utils::RegWrite(deviceType, addr, value);
         LOG_INFO("[WriteRegister] Performed DAC3 SPI write addr=0x%08X val=0x%08X", addr, value);
     }
     else if (dev == DeviceType::ATTN1)
@@ -230,7 +230,7 @@ void DeviceSetup::WriteRegisterAndShow(QLineEdit *leAddr, QLineEdit *leVal)
     }
     else
     {
-        Utils::RegisterWrite(deviceType, addr, value);
+        Utils::RegWrite(deviceType, addr, value);
         LOG_INFO("[WriteRegister] Performed default register write addr=0x%08X val=0x%08X", addr, value);
     }
 

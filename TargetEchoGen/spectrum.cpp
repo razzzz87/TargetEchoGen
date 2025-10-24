@@ -1600,7 +1600,7 @@ void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
     }
     case iface::eETHPL1G:
     {
-        Utils::RegisterWrite(deviceType,iaddr,ival);
+        Utils::RegWrite(deviceType,iaddr,ival);
         break;
     }
     case eETH10G:
