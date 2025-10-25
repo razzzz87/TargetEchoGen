@@ -3359,8 +3359,8 @@
        <widget class="QGroupBox" name="groupBox_con_settings">
         <property name="geometry">
          <rect>
-          <x>1303</x>
-          <y>36</y>
+          <x>1290</x>
+          <y>20</y>
           <width>381</width>
           <height>175</height>
          </rect>
@@ -3739,11 +3739,17 @@
        <widget class="QLineEdit" name="LeTopDateTime">
         <property name="geometry">
          <rect>
-          <x>1468</x>
-          <y>6</y>
+          <x>190</x>
+          <y>5</y>
           <width>216</width>
-          <height>29</height>
+          <height>36</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+          <bold>true</bold>
+         </font>
         </property>
        </widget>
       </widget>

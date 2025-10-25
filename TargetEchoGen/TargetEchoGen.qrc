@@ -34,5 +34,7 @@
         <file>images/icons8-arrow-down-24.png</file>
         <file>images/icons8-arrow-up-30.png</file>
         <file>images/white-checked-checkbox-48.png</file>
+        <file>images/green-checked-radio-button-48.png</file>
+        <file>images/green-unchecked-radio-button-48.png</file>
     </qresource>
 </RCC>

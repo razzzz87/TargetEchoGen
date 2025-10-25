@@ -55,66 +55,12 @@
    <property name="alignment">
     <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
-   <widget class="QFrame" name="frame_2">
-    <property name="geometry">
-     <rect>
-      <x>1713</x>
-      <y>23</y>
-      <width>153</width>
-      <height>106</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::Shape::Box</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Shadow::Raised</enum>
-    </property>
-    <property name="lineWidth">
-     <number>1</number>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QPushButton" name="pb_hide_show_menu">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Hide/Show Menu</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="RbSpectrumEthPL1G">
-       <property name="text">
-        <string>EthPL1G    </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="RbSpectrumEthPL10G">
-       <property name="text">
-        <string>Eth10G</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QFrame" name="FramePbControl">
     <property name="geometry">
      <rect>
-      <x>1205</x>
-      <y>22</y>
-      <width>504</width>
+      <x>1415</x>
+      <y>23</y>
+      <width>454</width>
       <height>107</height>
      </rect>
     </property>
@@ -255,7 +201,7 @@
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>877</x>
+      <x>1090</x>
       <y>23</y>
       <width>324</width>
       <height>107</height>
@@ -399,7 +345,7 @@
      <rect>
       <x>5</x>
       <y>23</y>
-      <width>869</width>
+      <width>1080</width>
       <height>108</height>
      </rect>
     </property>
@@ -434,31 +380,59 @@
      <property name="verticalSpacing">
       <number>4</number>
      </property>
-     <item row="0" column="0">
-      <widget class="QRadioButton" name="DDC_DataradioButton">
+     <item row="2" column="7">
+      <widget class="QComboBox" name="DataSize_comboBox">
+       <item>
+        <property name="text">
+         <string>16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>32</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>64</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="5">
+      <widget class="QCheckBox" name="byteReverse_checkBox">
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Data Enable</string>
+        <string>Front End Direct</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QCheckBox" name="ChkBoxADCData">
+     <item row="1" column="6">
+      <widget class="QLabel" name="LblChannel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
        <property name="text">
-        <string>ADC Data</string>
+        <string>Channel</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="0" column="4">
       <widget class="QCheckBox" name="ChkBoxCFIRData">
        <property name="text">
         <string>CFIR Data</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
+     <item row="0" column="5">
       <widget class="QCheckBox" name="ChkBoxFFtShift">
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 0, 0);</string>
@@ -468,33 +442,13 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QCheckBox" name="enableWeight_checkBox">
+     <item row="0" column="1">
+      <widget class="QRadioButton" name="IOnly_radioButton">
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Enable Weight</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QLineEdit" name="enableWeight_lineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>1700000004000</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="6" colspan="2">
-      <widget class="QLabel" name="warning_label">
-       <property name="text">
-        <string/>
+        <string>I Only</string>
        </property>
       </widget>
      </item>
@@ -511,47 +465,49 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="1" column="2">
       <widget class="QCheckBox" name="ChkBoxCICData">
        <property name="text">
         <string>CIC Data</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QCheckBox" name="ChkBoxPFIRData">
+     <item row="2" column="6">
+      <widget class="QLabel" name="LblDataSize">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+       </property>
        <property name="text">
-        <string>PFIR Data</string>
+        <string>Data Size</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="3">
-      <widget class="QCheckBox" name="byteReverse_checkBox">
+     <item row="0" column="0">
+      <widget class="QRadioButton" name="DDC_DataradioButton">
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Front End Direct</string>
+        <string>Data Enable</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="4">
-      <widget class="QLabel" name="LblChannel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="ChkBoxMixerData">
        <property name="text">
-        <string>Channel</string>
+        <string>Mixer Data</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="5">
+     <item row="0" column="2">
+      <widget class="QCheckBox" name="ChkBoxADCData">
+       <property name="text">
+        <string>ADC Data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="7">
       <widget class="QComboBox" name="chnl_comboBox">
        <item>
         <property name="text">
@@ -635,7 +591,57 @@
        </item>
       </widget>
      </item>
-     <item row="1" column="6">
+     <item row="0" column="7">
+      <widget class="QLineEdit" name="enableWeight_lineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>1700000004000</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <widget class="QCheckBox" name="enableWeight_checkBox">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>Enable Weight</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QCheckBox" name="m_CBSpectrumdata">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>Spectrum</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QCheckBox" name="ChkBoxPFIRData">
+       <property name="text">
+        <string>PFIR Data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="QCheckBox" name="m_CBMaxHold">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>MAx Hold</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="8">
       <widget class="QLabel" name="LblFs">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -654,7 +660,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="7">
+     <item row="0" column="9">
       <widget class="QLineEdit" name="lineEdit_fs">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -673,74 +679,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QRadioButton" name="IOnly_radioButton">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>I Only</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QCheckBox" name="ChkBoxMixerData">
-       <property name="text">
-        <string>Mixer Data</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QCheckBox" name="m_CBSpectrumdata">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Spectrum</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="3">
-      <widget class="QCheckBox" name="m_CBMaxHold">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>MAx Hold</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="4">
-      <widget class="QLabel" name="LblDataSize">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);
-color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Data Size</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="5">
-      <widget class="QComboBox" name="DataSize_comboBox">
-       <item>
-        <property name="text">
-         <string>16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>32</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>64</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="2" column="6">
+     <item row="1" column="8">
       <widget class="QLabel" name="LblWindowSize">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -761,7 +700,7 @@ color: rgb(0, 0, 0);</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="7">
+     <item row="1" column="9">
       <widget class="QLineEdit" name="windowSize_lineEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -946,6 +885,73 @@ color: rgb(0, 0, 0);</string>
    </property>
    <property name="lineWidth">
     <number>0</number>
+   </property>
+   <widget class="QFrame" name="frame_2">
+    <property name="geometry">
+     <rect>
+      <x>1640</x>
+      <y>50</y>
+      <width>153</width>
+      <height>106</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <property name="lineWidth">
+     <number>1</number>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QPushButton" name="pb_hide_show_menu">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Hide/Show Menu</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="RbSpectrumEthPL1G">
+       <property name="text">
+        <string>EthPL1G    </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="RbSpectrumEthPL10G">
+       <property name="text">
+        <string>Eth10G</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="warning_label">
+   <property name="geometry">
+    <rect>
+     <x>930</x>
+     <y>160</y>
+     <width>125</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

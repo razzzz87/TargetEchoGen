@@ -63,6 +63,13 @@ QPushButton:pressed {
     border-style: inset;
 }
 
+#PbRegWrite1,
+#PbRegWrite2,
+#PbRegWrite3,
+#PbRegWrite4{
+    min-width: 145px;
+}
+
 /*-----QProgressBar-----*/
 QProgressBar {
     min-height: 20px;
@@ -318,12 +325,12 @@ QRadioButton::indicator {
 
 /* When unchecked */
 QRadioButton::indicator:unchecked {
-    image: url(:/images/white-radio-button-48.png);
+    image: url(:/images/green-unchecked-radio-button-48.png);
 }
 
 /* When checked */
 QRadioButton::indicator:checked {
-    image: url(:/images/white-select-radio-button-48.png);
+    image: url(:/images/green-checked-radio-button-48.png);
 }
 /*=======================================================================================*/
 
