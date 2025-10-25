@@ -1067,7 +1067,7 @@ void Spectrum::playFile()
                 LOG_INFO("Mode: IQ Interleaved selected");
 
                 int dataSizeIndex = ui->DataSize_comboBox->currentIndex();
-                bool byteReversed = ui->byteReverse_checkBox->isChecked();
+                bool byteReversed =  0 ;//ui->byteReverse_checkBox->isChecked();
                 LOG_INFO("Data Size Index: %d, Byte Reversed: %s", dataSizeIndex, byteReversed ? "true" : "false");
 
                 for (int i = 0; i < windowSize; ++i) {
@@ -1116,7 +1116,7 @@ void Spectrum::playFile()
             {
                 LOG_INFO("Mode: I Only selected");
                 int dataSizeIndex = ui->DataSize_comboBox->currentIndex();
-                bool byteReversed = ui->byteReverse_checkBox->isChecked();
+                bool byteReversed = 0;
                 LOG_INFO("Data Size Index: %d, Byte Reversed: %s", dataSizeIndex, byteReversed ? "true" : "false");
 
                 for (int i = 0; i < windowSize; ++i)
@@ -1426,13 +1426,8 @@ void Spectrum::on_pb_plot_clicked()
                         short temp;
                         short temp2 = 0;
                         double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
-                        if (ui->byteReverse_checkBox->isChecked()) {
-                            temp = ((unsigned char)read[2 * i + 1] << 8) & 0xFF00;
-                            temp |= (unsigned char)read[2 * i];
-                        } else {
-                            temp = ((unsigned char)read[2 * i] << 8) & 0xFF00;
-                            temp |= (unsigned char)read[2 * i + 1];
-                        }
+                        temp = ((unsigned char)read[2 * i] << 8) & 0xFF00;
+                        temp |= (unsigned char)read[2 * i + 1];
                         signal[i][0] = (double)temp2 * multiplier;
                         signal[i][1] = (double)temp * multiplier;
                     }
@@ -1445,17 +1440,10 @@ void Spectrum::on_pb_plot_clicked()
                         int temp = 0;
                         int temp2 = 0;
                         double multiplier = 0.5 * (1 - cos(2 * M_PI * i / (windowSize - 1)));
-                        if (ui->byteReverse_checkBox->isChecked()) {
-                            temp  = ((unsigned char)read[4 * i + 3] << 24) & 0xFF000000;
-                            temp |= ((unsigned char)read[4 * i + 2] << 16) & 0xFF0000;
-                            temp |= ((unsigned char)read[4 * i + 1] << 8) & 0xFF00;
-                            temp |= ((unsigned char)read[4 * i]);
-                        } else {
-                            temp  = ((unsigned char)read[4 * i] << 24) & 0xFF000000;
-                            temp |= ((unsigned char)read[4 * i + 1] << 16) & 0xFF0000;
-                            temp |= ((unsigned char)read[4 * i + 2] << 8) & 0xFF00;
-                            temp |= ((unsigned char)read[4 * i + 3]);
-                        }
+                        temp  = ((unsigned char)read[4 * i] << 24) & 0xFF000000;
+                        temp |= ((unsigned char)read[4 * i + 1] << 16) & 0xFF0000;
+                        temp |= ((unsigned char)read[4 * i + 2] << 8) & 0xFF00;
+                        temp |= ((unsigned char)read[4 * i + 3]);
                         signal[i][0] = (double)temp2 * multiplier;
                         signal[i][1] = (double)temp * multiplier;
                     }
@@ -1788,8 +1776,6 @@ void Spectrum::on_strmnStrt_radioButton_clicked()
         BitUtils::clearBit(reg_val,0);
         handleRegisterWrite(deviceType,0x520,reg_val);
 
-        // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x0C,0x3);
-        // pObjConnectionModes->objMiddleAPI.RegWrite(LFT_HOST_CONNECTION_ETH,0,LFT_SPPU_DEV_FPGA,0x04,0x10);
         if(ui->IQInterleved_radioButton->isChecked())
             X_graphPlot->setAxisScale(QwtPlot::xBottom,0,ui->lineEdit_fs->text().toInt(),1);
         if(ui->IOnly_radioButton->isChecked())
@@ -1809,66 +1795,73 @@ void Spectrum::on_autoRefreshOn_radioButton_clicked()
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("[WriteRegister] Interface not selected");
+        QMessageBox::critical(this, "Error", "Interface not selected", QMessageBox::Ok);
+        ui->autoRefreshOff_radioButton->setChecked(true);
         return;
     }
-    if(ui->strmnStrt_radioButton->isChecked())
-    {
-        if(deviceType != eNONE)
-        {
-            plotTimer->setInterval(ui->refrestRate_lineEdit->text().toInt());
-            plotTimer->start();
-        }
-        else
-        {
-            QMessageBox::critical(this,"Error","No Connection with FPGA 1G",QMessageBox::Ok);
-            ui->autoRefreshOff_radioButton->setChecked(true);
-        }
-    }
-    else
-    {
 
-        QMessageBox::critical(this,"Invalid Selection","Please Check Start",QMessageBox::Ok);
+    if (!ui->strmnStrt_radioButton->isChecked()) {
+        QMessageBox::critical(this, "Invalid Selection", "Please Check Start", QMessageBox::Ok);
         ui->autoRefreshOff_radioButton->setChecked(true);
+        return;
     }
+
+    bool ok = false;
+    int refreshRate = ui->refrestRate_lineEdit->text().toInt(&ok);
+    if (!ok || refreshRate <= 0) {
+        QMessageBox::critical(this, "Invalid Input", "Refresh rate must be a positive number", QMessageBox::Ok);
+        ui->autoRefreshOff_radioButton->setChecked(true);
+        return;
+    }
+
+    plotTimer->setInterval(refreshRate);
+    plotTimer->start();
+}
+
+void Spectrum::enableDataModeRadioButtons(bool enable)
+{
+    ui->DDC_DataradioButton->setDisabled(!enable);
+    // ui->raw_radioButton->setDisabled(!enable); // Uncomment if needed
+    ui->IQInterleved_radioButton->setDisabled(!enable);
+    ui->IOnly_radioButton->setDisabled(!enable);
+}
+
+void Spectrum::toggleDDCControlBit(iface deviceType, uint address, int bit)
+{
+    uint reg_val = readRegisterValue(deviceType, address);
+    reg_val = BitUtils::setBit(reg_val, bit);
+    handleRegisterWrite(deviceType, address, reg_val);
+
+    reg_val = readRegisterValue(deviceType, address);
+    reg_val = BitUtils::clearBit(reg_val, bit);
+    handleRegisterWrite(deviceType, address, reg_val);
 }
 
 void Spectrum::on_strmnStop_radioButton_clicked()
 {
-
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("Interface not selected");
         return;
     }
 
+    // Stop ongoing data transfer and plotting
     setupTransferAgent->abortTransfer();
-    ui->DDC_DataradioButton->setDisabled(false);
-    //ui->raw_radioButton->setDisabled(false);
-    ui->IQInterleved_radioButton->setDisabled(false);
-    ui->IOnly_radioButton->setDisabled(false);
-    if(ui->DDC_DataradioButton->isChecked())
-    {
-        uint reg_val = readRegisterValue(deviceType,0x520);
-        reg_val = BitUtils::setBit(reg_val,1);
-        handleRegisterWrite(deviceType,0x520,reg_val);
-
-        reg_val = readRegisterValue(deviceType,0x520);
-        BitUtils::clearBit(reg_val,1);
-        handleRegisterWrite(deviceType,0x520,reg_val);
-
-    }
     plotTimer->stop();
-    ui->DDC_DataradioButton->setDisabled(false);
-    //ui->raw_radioButton->setDisabled(false);
-    ui->IQInterleved_radioButton->setDisabled(false);
-    ui->IOnly_radioButton->setDisabled(false);
 
+    // Re-enable radio buttons
+    enableDataModeRadioButtons(true);
+
+    // Reset DDC register if DDC mode was active
+    if (ui->DDC_DataradioButton->isChecked()) {
+        toggleDDCControlBit(deviceType, 0x520, 1);
+    }
+
+    // Reset UI state
     ui->autoRefreshOff_radioButton->setChecked(true);
     ui->ChkBoxFFtShift->setChecked(false);
     on_ChkBoxFFtShift_clicked(false);
-    setupTransferAgent->abortTransfer();
 }
-
 
 void Spectrum::on_ChkBoxFFtShift_clicked(bool checked)
 {

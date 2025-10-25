@@ -156,7 +156,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -177,8 +177,13 @@
                   <height>30</height>
                  </size>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>1</pointsize>
+                 </font>
+                </property>
                 <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -335,7 +340,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -367,7 +372,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3359,9 +3364,9 @@
        <widget class="QGroupBox" name="groupBox_con_settings">
         <property name="geometry">
          <rect>
-          <x>1290</x>
+          <x>1244</x>
           <y>20</y>
-          <width>381</width>
+          <width>463</width>
           <height>175</height>
          </rect>
         </property>
@@ -3373,7 +3378,7 @@
           <widget class="QFrame" name="FRMConSettings">
            <property name="minimumSize">
             <size>
-             <width>288</width>
+             <width>350</width>
              <height>0</height>
             </size>
            </property>
@@ -3384,6 +3389,159 @@
             <enum>QFrame::Shadow::Raised</enum>
            </property>
            <layout class="QGridLayout" name="gridLayout">
+            <item row="1" column="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QRadioButton" name="RbPLSerialSel">
+                <property name="text">
+                 <string>PL Serial</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="LblConnPLSerialStatusLed">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Inactive</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QRadioButton" name="RbPL1GSel">
+                <property name="text">
+                 <string>PL 1G </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="LblConnPL1GStatusLed">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Inactive</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QRadioButton" name="RbPSSerialSel">
+                <property name="text">
+                 <string>PS Serial</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="LblConnPSSerialStatusLed">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="sizeIncrement">
+                 <size>
+                  <width>2</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>Inactive</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item row="0" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
@@ -3403,63 +3561,34 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>20</width>
+                  <height>20</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
-                </property>
-                <property name="scaledContents">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="1" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QRadioButton" name="RbPL1GSel">
-                <property name="text">
-                 <string>PL 1G</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="LblConnPL1GStatusLed">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>20</width>
+                  <height>20</height>
                  </size>
                 </property>
                 <property name="text">
                  <string/>
                 </property>
+                <property name="textFormat">
+                 <enum>Qt::TextFormat::AutoText</enum>
+                </property>
                 <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="text">
+                 <string>Inactive</string>
                 </property>
                </widget>
               </item>
@@ -3470,7 +3599,7 @@
               <item>
                <widget class="QRadioButton" name="RbPS1GSel">
                 <property name="text">
-                 <string>PS 1G</string>
+                 <string>PS 1G </string>
                 </property>
                </widget>
               </item>
@@ -3484,111 +3613,28 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>20</width>
+                  <height>20</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>20</width>
+                  <height>20</height>
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
+                 <pixmap resource="TargetEchoGen.qrc">:/images/gray-status-led-48.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
                 </property>
                </widget>
               </item>
-             </layout>
-            </item>
-            <item row="0" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
-               <widget class="QRadioButton" name="RbPSSerialSel">
+               <widget class="QLabel" name="label_3">
                 <property name="text">
-                 <string>PS Serial</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="LblConnPSSerialStatusLed">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="sizeIncrement">
-                 <size>
-                  <width>2</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
-                </property>
-                <property name="scaledContents">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="1" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="QRadioButton" name="RbPLSerialSel">
-                <property name="text">
-                 <string>PL Serial</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="LblConnPLSerialStatusLed">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="pixmap">
-                 <pixmap resource="TargetEchoGen.qrc">:/images/led-circle-grey.png</pixmap>
-                </property>
-                <property name="scaledContents">
-                 <bool>true</bool>
+                 <string>Inactive</string>
                 </property>
                </widget>
               </item>
@@ -3739,9 +3785,9 @@
        <widget class="QLineEdit" name="LeTopDateTime">
         <property name="geometry">
          <rect>
-          <x>190</x>
+          <x>183</x>
           <y>5</y>
-          <width>216</width>
+          <width>320</width>
           <height>36</height>
          </rect>
         </property>
@@ -3750,6 +3796,9 @@
           <pointsize>13</pointsize>
           <bold>true</bold>
          </font>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </widget>

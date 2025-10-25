@@ -380,35 +380,6 @@
      <property name="verticalSpacing">
       <number>4</number>
      </property>
-     <item row="2" column="7">
-      <widget class="QComboBox" name="DataSize_comboBox">
-       <item>
-        <property name="text">
-         <string>16</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>32</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>64</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="1" column="5">
-      <widget class="QCheckBox" name="byteReverse_checkBox">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Front End Direct</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="6">
       <widget class="QLabel" name="LblChannel">
        <property name="sizePolicy">
@@ -423,12 +394,46 @@
        <property name="text">
         <string>Channel</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+       </property>
       </widget>
      </item>
      <item row="0" column="4">
       <widget class="QCheckBox" name="ChkBoxCFIRData">
        <property name="text">
         <string>CFIR Data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QCheckBox" name="m_CBSpectrumdata">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>Spectrum</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="8">
+      <widget class="QLabel" name="LblWindowSize">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>Window Size </string>
        </property>
       </widget>
      </item>
@@ -472,14 +477,22 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="6">
-      <widget class="QLabel" name="LblDataSize">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(255, 255, 255);
-color: rgb(0, 0, 0);</string>
+     <item row="1" column="9">
+      <widget class="QLineEdit" name="windowSize_lineEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="text">
-        <string>Data Size</string>
+        <string>2048</string>
        </property>
       </widget>
      </item>
@@ -500,10 +513,36 @@ color: rgb(0, 0, 0);</string>
        </property>
       </widget>
      </item>
+     <item row="0" column="8">
+      <widget class="QLabel" name="LblFs">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>Fs</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="2">
       <widget class="QCheckBox" name="ChkBoxADCData">
        <property name="text">
         <string>ADC Data</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QCheckBox" name="ChkBoxPFIRData">
+       <property name="text">
+        <string>PFIR Data</string>
        </property>
       </widget>
      </item>
@@ -591,46 +630,6 @@ color: rgb(0, 0, 0);</string>
        </item>
       </widget>
      </item>
-     <item row="0" column="7">
-      <widget class="QLineEdit" name="enableWeight_lineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>1700000004000</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="6">
-      <widget class="QCheckBox" name="enableWeight_checkBox">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Enable Weight</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QCheckBox" name="m_CBSpectrumdata">
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Spectrum</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QCheckBox" name="ChkBoxPFIRData">
-       <property name="text">
-        <string>PFIR Data</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="4">
       <widget class="QCheckBox" name="m_CBMaxHold">
        <property name="styleSheet">
@@ -641,22 +640,16 @@ color: rgb(0, 0, 0);</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="8">
-      <widget class="QLabel" name="LblFs">
+     <item row="0" column="7">
+      <widget class="QLineEdit" name="enableWeight_lineEdit">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
        <property name="text">
-        <string>Fs</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignCenter</set>
+        <string>1700000004000</string>
        </property>
       </widget>
      </item>
@@ -679,45 +672,49 @@ color: rgb(0, 0, 0);</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="8">
-      <widget class="QLabel" name="LblWindowSize">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <bold>false</bold>
-        </font>
-       </property>
+     <item row="0" column="6">
+      <widget class="QCheckBox" name="enableWeight_checkBox">
        <property name="styleSheet">
         <string notr="true">color: rgb(0, 0, 0);</string>
        </property>
        <property name="text">
-        <string>Window Size </string>
+        <string>Enable Weight</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="9">
-      <widget class="QLineEdit" name="windowSize_lineEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>2048</string>
-       </property>
-      </widget>
+     <item row="1" column="5">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="LblDataSize">
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);
+color: rgb(0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>Data Size</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="DataSize_comboBox">
+         <item>
+          <property name="text">
+           <string>16</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>32</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>64</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>

@@ -216,12 +216,12 @@ QSpinBox::up-arrow{
 
     image: url(:/images/icons8-arrow-up-30.png);
     width: 12px;
-    height: 12px;
+    height: 11px;
 }
 QSpinBox::down-arrow{
     image: url(:/images/icons8-arrow-down-24.png);
     width: 12px;
-    height: 12px;
+    height: 11px;
 }
 
 /*====================================================================================*/
@@ -285,7 +285,7 @@ QRadioButton {
 #RbPS1GSel,
 #RbPSSerialSel,
 #RbPLSerialSel {
-    font-size: 15px;       /* ⬅️ change text size here */
+    font-size: 11px;       /* ⬅️ change text size here */
     font-weight: bold;     /* optional */
     color: white;          /* text color */
 }
@@ -325,13 +325,14 @@ QRadioButton::indicator {
 
 /* When unchecked */
 QRadioButton::indicator:unchecked {
-    image: url(:/images/green-unchecked-radio-button-48.png);
+    image: url(:/images/white-radio-button-48.png);
 }
 
 /* When checked */
 QRadioButton::indicator:checked {
     image: url(:/images/green-checked-radio-button-48.png);
 }
+
 /*=======================================================================================*/
 
 /*-----QTableWidget-----*/

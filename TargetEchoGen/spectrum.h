@@ -56,6 +56,8 @@ public:
     void handleRegisterWrite(iface deviceType, uint iaddr, uint ival);
     uint readRegisterValue(iface deviceType,uint addr);
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
+    void enableDataModeRadioButtons(bool enable);
+    void toggleDDCControlBit(iface deviceType, uint address, int bit);
     iface getSelectedDeviceType();
     QwtPlot* X_graphPlot;
     QwtPlotCurve *curve_Y ;

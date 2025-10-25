@@ -114,8 +114,8 @@ MainWindow::MainWindow(QWidget *parent)
         if (on) ConnectionHelper::instance().setSelected(eSERIAL);
     });
 
-    connect(conn, &ConnectionType::connectionSucceeded, this, &MainWindow::onConnectionSuccess);
-    connect(conn, &ConnectionType::connectionFailed, this, &MainWindow::onConnectionFailure);
+    //connect(conn, &ConnectionType::connectionSucceeded, this, &MainWindow::onConnectionSuccess);
+    //connect(conn, &ConnectionType::connectionFailed, this, &MainWindow::onConnectionFailure);
 
 }
 
@@ -158,16 +158,18 @@ void MainWindow::onConnStateChanged(iface which, ConnInfo s)
     // Pick LED color/icon
     QString icon;
     if (!s.connected){
-        icon = ":/images/led-icon-red.jpg";
+        //icon = ":/images/led-icon-red.jpg";
+        icon = ":/images/red-tick-radio-button-48.png";
     }
     else if (isSelected){
-        icon = ":/images/led-green_icon.jpg";       // bright green for selected
+        //icon = ":/images/led-green_icon.jpg";       // bright green for selected
+        icon = ":/images/icons8-cancel-52.png";
     }
     else if (isActive){
-        icon = ":/images/led-green_dim.png";        // dim green for active but not selected
+        //icon = ":/images/led-green_dim.png";        // dim green for active but not selected
     }
     else{
-        icon = ":/images/led-green_dim.png"; // connected but idle
+        //icon = ":/images/led-green_dim.png"; // connected but idle
     }
 
     ledLabel->setPixmap(QPixmap(icon));
@@ -203,13 +205,16 @@ void MainWindow::onConnectionFailure(iface eInterface)
     case eNONE:
         break;
     case eETHPS1G:
-        ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+        //ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+        ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/icons8-cancel-52.png"));
         break;
     case eETHPL1G:
-        ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+        //ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+        ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/icons8-cancel-52.png"));
         break;
     case eETH10G:
-        ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+        //ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+        ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/icons8-cancel-52.png"));
         break;
     case eSERIAL:
         break;
