@@ -20,6 +20,8 @@
 #include <QTimer>
 #include <QtGlobal>
 #include <QRandomGenerator>
+#include <qwt_plot_canvas.h>
+
 using namespace std;
 Spectrum::Spectrum(QWidget *parent)
     : QWidget(parent)
@@ -29,94 +31,172 @@ Spectrum::Spectrum(QWidget *parent)
     N = NUM_POINT;
     frq = FRQ;
 
-    ui->frequency_label->setStyleSheet("color: rgb(235, 13, 43); font: 20pt \"MS UI Gothic\";");
-    ui->frequency_label_db->setStyleSheet("color: rgb(235, 13, 43); font: 20pt \"MS UI Gothic\";");
-    ui->label_mhz->setStyleSheet("color: rgb(255, 170, 0);\nfont: 20pt \"MS UI Gothic\";");
-    ui->label_db->setStyleSheet("color: rgb(255, 170, 0);\nfont: 20pt \"MS UI Gothic\";");
+    // Labels: numbers in radar-green, units in soft light text
+    ui->frequency_label->setStyleSheet("color:#27D07D; font: 700 18pt \"Segoe UI\";");
+    ui->frequency_label_db->setStyleSheet("color:#27D07D; font: 700 18pt \"Segoe UI\";");
+    ui->label_mhz->setStyleSheet("color:#E6F8F1; font: 600 14pt \"Segoe UI\";");
+    ui->label_db->setStyleSheet("color:#E6F8F1; font: 600 14pt \"Segoe UI\";");
 
+    // Plot
     X_graphPlot = new QwtPlot(ui->spectrum_plot_frame);
-    X_graphPlot->setStyleSheet("background-color: rgb(0, 0, 0);color: rgb(255, 170, 0);border:none");
-    X_graphPlot->setAxisScale(QwtPlot::yLeft,-150,10,10);
-    X_graphPlot->setAxisTitle(QwtPlot::yLeft,"dBm");
-    X_graphPlot->setAxisTitle(QwtPlot::xBottom,"MHz");
-    X_graphPlot->plotLayout()->setCanvasMargin(10,QwtPlot::xBottom);
 
-    picker = new QwtPlotPicker(X_graphPlot->xBottom, X_graphPlot->yLeft, QwtPicker::NoRubberBand, QwtPicker::AlwaysOn, X_graphPlot->canvas());
-    picker->setRubberBandPen( QColor( Qt::red ) );
-    picker->setTrackerPen( QColor( Qt::red ) );
+    // Apply radar plot theme (canvas, axes, grid, fonts, margins)
+    applyRadarPlotTheme(X_graphPlot);
 
-     QHBoxLayout *obj= new QHBoxLayout(this);
-     ui->spectrum_plot_frame->setLayout(obj);
-     obj->addWidget(X_graphPlot);
+    // If you want different y-range, keep your original line:
+    // X_graphPlot->setAxisScale(QwtPlot::yLeft,-150,10,10);
 
-    QFont font;
-    font.setBold(true);
-    font.setFamily("TimesNewRoman");
-    font.setPointSizeF(12);
-    picker->setTrackerFont(font);
+    // Picker (crosshair/track) — use radar green instead of red
+    picker = new QwtPlotPicker(
+        X_graphPlot->xBottom,
+        X_graphPlot->yLeft,
+        QwtPicker::NoRubberBand,
+        QwtPicker::AlwaysOn,
+        X_graphPlot->canvas());
+
+    picker->setRubberBandPen(QPen(RadarTheme::AccentGreenBright, 1));
+    picker->setTrackerPen(QPen(RadarTheme::AccentGreenBright, 1));
+
+    QFont trackerFont("Segoe UI");
+    trackerFont.setBold(true);
+    trackerFont.setPointSizeF(10);
+    picker->setTrackerFont(trackerFont);
 
     pickerMachine = new QwtPickerDragPointMachine();
-
     picker->setStateMachine(pickerMachine);
-    connect(picker,SIGNAL(moved(QPoint)),this,SLOT(plotPicker(QPoint)));
+    connect(picker, SIGNAL(moved(QPoint)), this, SLOT(plotPicker(QPoint)));
 
-    FilePlay =false;
+    // Layout
+    auto *obj = new QHBoxLayout(this);
+    ui->spectrum_plot_frame->setLayout(obj);
+    obj->addWidget(X_graphPlot);
 
-    QwtPlotGrid *grid = new QwtPlotGrid;
+    FilePlay = false;
 
-    /// Set style sheet of grid /////
-    grid->setPen(Qt::gray,0,Qt::DashDotLine);
-    grid->attach(X_graphPlot);
-    adcData_Point = (char *)malloc(0x100000);
-    curve_Y= new QwtPlotCurve() ;
+    // Curves
+    curve_Y = new QwtPlotCurve();            // live spectrum
+    curve_Y->setPen(QPen(RadarTheme::CurveMain, 2.0, Qt::SolidLine));
     curve_Y->attach(X_graphPlot);
+
+    m_ObjMaxCurve = new QwtPlotCurve();      // max hold (if you use it)
+    m_ObjMaxCurve->setPen(QPen(RadarTheme::CurveMaxHold, 1.5, Qt::DotLine));
+    // m_ObjMaxCurve->attach(X_graphPlot); // attach when you actually use it
+
     X_graphPlot->show();
-    m_ObjMaxCurve    = new QwtPlotCurve();
 
-    //obj_thread = new MAPI_Thread() ;
+    // Timer, FFT buffers, and the rest unchanged
     plotTimer = new QTimer(this);
+    connect(plotTimer, SIGNAL(timeout()), this, SLOT(on_plotTimer_TimeOut()));
 
-    //connect(obj_thread,SIGNAL(sThreadFinish()),this,SLOT(thread_Finished()));
-    connect(plotTimer,SIGNAL(timeout()),this,SLOT(on_plotTimer_TimeOut()));
-    //connect(obj_thread, SIGNAL(readWrite_Status(qint64)), this, SLOT(UpdateProgressBAR(qint64)));
+    in  = (double*)         fftw_malloc(sizeof(double) * N);
+    out = (fftw_complex*)   fftw_malloc(sizeof(fftw_complex) * N);
 
-
-    in = (double*) fftw_malloc(sizeof(double) * N);
-    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
     ui->strmnStop_radioButton->setChecked(true);
     ui->autoRefreshOff_radioButton->setChecked(true);
 
-    sample_count=0;
-    maxHold= false;
-    windowSize=2048;
-    //ui->DataSize_comboBox->setCurrentIndex(0);
-    ui->DDC_DataradioButton->setChecked(true);
-    ui->IQInterleved_radioButton->setChecked(true);
-    //ui->frame_plot_control->hide();
-    ui->pb_hide_show_menu->hide();
-    m_vMaxHoldBuffer=NULL;
+    sample_count = 0;
+    maxHold      = false;
+    windowSize   = 2048;
 
-    // Disable auto-exclusive behavior
+    ui->pb_hide_show_menu->hide();
+    m_vMaxHoldBuffer = NULL;
+
+    // Keep your radio-button exclusivity logic
     ui->strmnStrt_radioButton->setAutoExclusive(false);
     ui->strmnStop_radioButton->setAutoExclusive(false);
-    //ui->raw_radioButton->setAutoExclusive(false);
     ui->DDC_DataradioButton->setAutoExclusive(false);
     ui->IQInterleved_radioButton->setAutoExclusive(false);
     ui->IOnly_radioButton->setAutoExclusive(false);
 
-    //ui->raw_radioButton->setChecked(false);
     ui->DDC_DataradioButton->setChecked(false);
     ui->IQInterleved_radioButton->setChecked(false);
     ui->IOnly_radioButton->setChecked(false);
 
     setupTransferAgent = new FileTransferAgent();
-    connect(setupTransferAgent, &FileTransferAgent::transferComplete, this, &Spectrum::chunkReadCompleted);
+    connect(setupTransferAgent, &FileTransferAgent::transferComplete,this, &Spectrum::chunkReadCompleted);
+
+    // Example: dynamic axis label color sync with theme (optional)
+    // X_graphPlot->axisWidget(QwtPlot::xBottom)->setTitle(QwtText("MHz", QwtText::RichText));
+    // X_graphPlot->axisWidget(QwtPlot::yLeft)->setTitle(QwtText("dBm", QwtText::RichText));
 }
 
 Spectrum::~Spectrum()
 {
     delete ui;
 }
+
+// Reusable theming for a QwtPlot
+void Spectrum::applyRadarPlotTheme(QwtPlot* plot)
+{
+    // Canvas background
+    auto *canvas = qobject_cast<QwtPlotCanvas*>(plot->canvas());
+    if (canvas) {
+        QPalette pal = canvas->palette();
+        pal.setColor(QPalette::Window, RadarTheme::CanvasDark);
+        pal.setColor(QPalette::WindowText, RadarTheme::Text);
+        canvas->setAutoFillBackground(true);
+        canvas->setPalette(pal);
+        canvas->setFrameStyle(QFrame::NoFrame);
+    } else {
+        plot->setCanvasBackground(RadarTheme::CanvasDark);
+    }
+
+    // Plot title (if any) & fonts
+    QFont base("Segoe UI");
+    base.setPointSize(10);
+    plot->setTitle(QwtText()); // no title by default
+
+    // Axis titles
+    QwtText yTitle("dBm");
+    yTitle.setFont(QFont("Segoe UI", 10, QFont::DemiBold));
+    yTitle.setColor(RadarTheme::TextSoft);
+    plot->setAxisTitle(QwtPlot::yLeft, yTitle);
+
+    QwtText xTitle("MHz");
+    xTitle.setFont(QFont("Segoe UI", 10, QFont::DemiBold));
+    xTitle.setColor(RadarTheme::TextSoft);
+    plot->setAxisTitle(QwtPlot::xBottom, xTitle);
+
+    // Axis fonts & colors (ticks/labels)
+    auto *xAxis = plot->axisWidget(QwtPlot::xBottom);
+    auto *yAxis = plot->axisWidget(QwtPlot::yLeft);
+    if (xAxis) {
+        xAxis->setFont(QFont("Segoe UI", 9));
+        QPalette p = xAxis->palette();
+        p.setColor(QPalette::WindowText, RadarTheme::AxisTicks);
+        p.setColor(QPalette::Text,       RadarTheme::AxisTicks);
+        xAxis->setPalette(p);
+        xAxis->setTitle(xTitle);
+    }
+    if (yAxis) {
+        yAxis->setFont(QFont("Segoe UI", 9));
+        QPalette p = yAxis->palette();
+        p.setColor(QPalette::WindowText, RadarTheme::AxisTicks);
+        p.setColor(QPalette::Text,       RadarTheme::AxisTicks);
+        yAxis->setPalette(p);
+        yAxis->setTitle(yTitle);
+    }
+
+    // Axis scales (keep your ranges—just here for clarity)
+    plot->setAxisScale(QwtPlot::yLeft, -150, 10, 10);
+
+    // Grid (subtle, radar-green)
+    auto *grid = new QwtPlotGrid;
+    grid->setPen(QPen(RadarTheme::Grid, 1, Qt::DotLine));
+#if QWT_VERSION >= 0x060000
+    grid->setMinorPen(QPen(RadarTheme::GridMinor, 1, Qt::DotLine));
+    grid->enableXMin(true);
+    grid->enableYMin(true);
+#endif
+    grid->attach(plot);
+
+    // Margins around canvas so labels breathe
+    plot->plotLayout()->setCanvasMargin(8, QwtPlot::xBottom);
+    plot->plotLayout()->setAlignCanvasToScales(true);
+
+    plot->replot();
+}
+
 void Spectrum::chunkReadCompleted()
 {
     LOG_INFO("Transfer completed");

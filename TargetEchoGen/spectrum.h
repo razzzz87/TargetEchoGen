@@ -53,6 +53,7 @@ public:
 
     void fftshift(void *data, int N, size_t elementSize);
     void plotest();
+    void applyRadarPlotTheme(QwtPlot* plot);
     void handleRegisterWrite(iface deviceType, uint iaddr, uint ival);
     uint readRegisterValue(iface deviceType,uint addr);
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
@@ -162,4 +163,19 @@ private:
     FileTransferAgent *setupTransferAgent;
 };
 
+// --- Radar palette (keep in one place) ---
+namespace RadarTheme {
+static const QColor Text                 ("#FFFFFF");
+static const QColor TextSoft             ("#E6F8F1");
+static const QColor AccentTeal           ("#18A0B6");
+static const QColor AccentGreen          ("#27D07D");   // radar green
+static const QColor AccentGreenBright    ("#33E1A0");
+static const QColor CanvasDark           ("#081820");
+static const QColor CanvasPane           ("#06141A");
+static const QColor Grid                 (39,208,125,60);   // radar green @ ~24% alpha
+static const QColor GridMinor            (24,160,182,40);   // teal @ ~16% alpha
+static const QColor CurveMain            ("#27D07D");   // live spectrum
+static const QColor CurveMaxHold         (255,170,0);   // amber
+static const QColor AxisTicks            ("#E6F8F1");
+}
 #endif // SPECTRUM_H

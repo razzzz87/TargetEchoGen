@@ -1,24 +1,37 @@
-/*-----QWidget-----*/
+/* =========================================================================
+   RADAR UI THEME (Qt Style Sheet / QSS)
+   Compatible with Qt5/Qt6 — No unsupported properties
+   =========================================================================
+   Palette:
+     - Base background: deep navy/black with subtle teal gradient
+     - Primary accent (radar green): #27D07D
+     - Secondary accent (teal/cyan):  #18A0B6
+     - Borders / focus:               #33E1A0
+     - Selection / active:            #27D07D
+     - Text:                          #FFFFFF
+   ========================================================================= */
+
+/*----- QWidget (app-wide background) -------------------------------------*/
 QWidget {
     background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
-        stop:0 rgba(3, 1, 50, 32),
-        stop:0.3 rgba(6, 82, 125, 255),
-        stop:0.5 rgba(8, 117, 178, 255),
-        stop:0.75 rgba(7, 100, 164, 255),
-        stop:1 rgba(3, 1, 50, 10));
-    color: #ffffff;
+        stop:0   rgba(3, 10, 20, 255),
+        stop:0.35 rgba(10, 35, 55, 255),
+        stop:0.7  rgba(8, 28, 48, 255),
+        stop:1    rgba(2, 6, 12, 255));
+    color: #FFFFFF;
     font-family: "Segoe UI", "Arial";
+    font-size: 12px;
 }
 
-/*--------------------------QLabel------------------------------------------------------*/
+/*----- QLabel -------------------------------------------------------------*/
 QLabel {
     background-color: transparent;
-    color: white;
-    font-weight: bold;
+    color: #FFFFFF;
+    font-weight: 600;
     font-size: 14px;
 }
 
-/* 🔹 Specific labels: connection status and device LEDs */
+/* Specific LED/status labels */
 #LblConnPL10GStatusLed,
 #LblConnPL1GStatusLed,
 #LblConnPS1GStatusLed,
@@ -28,142 +41,146 @@ QLabel {
 #LblDevMemStatusLedSSD2,
 #LblDevLedLMKLock,
 #LblDevLedLMXLock {
-    min-width: 30px;      /* 🔸 set minimum width */
-    max-width: 30px;      /* 🔸 set maximum width */
-    min-height: 30px;     /* 🔸 set minimum height */
-    max-height: 30px;     /* 🔸 set maximum height */
-    background: transparent;  /* optional, keep LED icons visible */
-    border: none;             /* remove border */
+    min-width: 30px;
+    max-width: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    background: transparent;
+    border: none;
 }
 
-/*--------------------------QLabel------------------------------------------------------*/
-
-/*-----QPushButton-----*/
+/*----- QPushButton --------------------------------------------------------*/
 QPushButton {
-    background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:1, y2:1,
-        stop:0 rgba(42, 95, 113, 255),
-        stop:1 rgba(12, 53, 97, 255));
-    color: #ffffff;
-    border: 1px solid #1E90FF;
-    border-radius: 4px;
-    padding: 6px;
-    font-weight: bold;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0   rgba(24, 82, 92, 255),
+        stop:1   rgba(9, 45, 55, 255));
+    color: #FFFFFF;
+    border: 1px solid #18A0B6;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-weight: 600;
     font-size: 14px;
-    min-height: 25px;
+    min-height: 26px;
+    max-height: 26px;
 }
 
 QPushButton:hover {
-    background-color: #0056B3;
-    border: 1px solid #ffffff;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0   rgba(35, 112, 125, 255),
+        stop:1   rgba(14, 65, 78, 255));
+    border: 1px solid #33E1A0;
 }
 
 QPushButton:pressed {
-    background-color: #000000;
-    color: #ffffff;
-    border-style: inset;
+    background-color: #0B1C24;
+    border: 1px solid #27D07D;
+}
+
+QPushButton:disabled {
+    background: #0E232B;
+    color: rgba(255,255,255,0.45);
+    border: 1px solid rgba(24,160,182,0.35);
 }
 
 #PbRegWrite1,
 #PbRegWrite2,
 #PbRegWrite3,
-#PbRegWrite4{
+#PbRegWrite4 {
     min-width: 145px;
 }
 
-/*-----QProgressBar-----*/
+/*----- Focus highlight (Qt-safe) -----------------------------------------*/
+*:focus {
+    outline: none;
+    border: 2px solid #33E1A0;
+}
+
+/*----- QProgressBar -------------------------------------------------------*/
 QProgressBar {
     min-height: 20px;
     max-height: 20px;
-    border: 1px solid #ffffff;
-    color: white;
+    border: 1px solid #18A0B6;
+    color: #FFFFFF;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 600;
     text-align: center;
-    background-color: #000000;
+    background-color: #081820;
+    border-radius: 4px;
 }
 
 QProgressBar::chunk {
-    background-color: #0056B3;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0   rgba(39, 208, 125, 255),
+        stop:1   rgba(20, 140, 92, 255));
     margin: 1px;
+    border-radius: 3px;
 }
+
+/*----- QGroupBox ----------------------------------------------------------*/
 QGroupBox {
-    border: 1px solid #1E90FF;
-    border-radius: 5px;
-    margin-top: 0.5em; /* Enough space for title */
-    padding-top: 5px;
-	background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
-	stop:0 rgba(3, 1, 50, 32),
-	stop:0.3 rgba(6, 82, 125, 255),
-	stop:0.5 rgba(8, 117, 178, 255),
-	stop:0.75 rgba(7, 100, 164, 255),
-	stop:1 rgba(3, 1, 50, 10));
-    color: white;
-    font-size: 14px;
-	font: 700 12pt "Segoe UI";
+    border: 1px solid #18A0B6;
+    border-radius: 6px;
+    margin-top: 0.7em;
+    padding: 8px 8px 6px 8px;
+    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
+        stop:0   rgba(5, 18, 28, 220),
+        stop:0.5 rgba(6, 28, 40, 235),
+        stop:1   rgba(4, 12, 18, 220));
+    color: #FFFFFF;
+    font: 700 12pt "Segoe UI";
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 0 0px;
-    /*background-color: qlineargradient(
-        spread:pad, x1:0, y1:0, x2:0, y2:0,
-        stop:0 rgba(58, 90, 105, 255),
-        stop:1 rgba(42, 75, 95, 255)
-    );*/
-    color: white;
-    font-size: 14px;
+    padding: 0 4px;
+    color: #FFFFFF;
+    background: transparent;
     font: 700 12pt "Segoe UI";
 }
 
-/*-----QLineEdit-----*/
+/*----- QLineEdit ----------------------------------------------------------*/
 QLineEdit {
-    background-color: #0b2c4d;   /* flat dark blue background */
-    border: 1px solid #1E90FF;
+    background-color: #0B2C3A;
+    border: 1px solid #18A0B6;
     border-radius: 4px;
-    padding-left: 6px;
-    color: white;
-    font-weight: bold;
-    min-height: 30px;
+    padding: 4px 6px;
+    color: #FFFFFF;
+    font-weight: 600;
+    min-height: 28px;
+    max-height: 28px;
 }
 
-/*-----QComboBox-----*/
-/*QComboBox {
-    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1,
-        stop:0 rgba(3, 1, 50, 32),
-        stop:0.3 rgba(6, 82, 125, 255),
-        stop:0.5 rgba(8, 117, 178, 255),
-        stop:0.75 rgba(7, 100, 164, 255),
-        stop:1 rgba(3, 1, 50, 10));
-    border: 1px solid #1E90FF;;
-    border-radius: 3px;
-    padding-left: 6px;
-    color: lightgray;
-    font-weight: bold;
-    min-height: 30px;
-}*/
-QComboBox {
+QLineEdit:disabled {
+    background-color: #0E232B;
+    color: rgba(255,255,255,0.5);
+    border-color: rgba(24,160,182,0.35);
+}
 
-    background-color:#0b2c4d;
-    border: 1px solid #1E90FF;;
-    border-radius: 3px;
+/*----- QComboBox ----------------------------------------------------------*/
+QComboBox {
+    background-color: #0B2C3A;
+    border: 1px solid #18A0B6;
+    border-radius: 4px;
     padding-left: 6px;
-    color: lightgray;
-    font-weight: bold;
+    color: #E6F8F1;
+    font-weight: 600;
     min-height: 30px;
 }
 
 QComboBox:hover {
-    background-color: #008b8b;
+    background-color: #0E3646;
+    border-color: #33E1A0;
 }
 
 QComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
-    border-left: 1px solid darkgray;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    min-width: 20px;
+    border-left: 1px solid #18A0B6;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    min-width: 22px;
+    background: #0B2C3A;
 }
 
 QComboBox::down-arrow {
@@ -172,82 +189,66 @@ QComboBox::down-arrow {
     height: 12px;
 }
 
-/*=======================================QSpinBox=======================================*/
-/*----- QSpinBox (flat version) -----*/
+/*----- QSpinBox -----------------------------------------------------------*/
 QSpinBox {
-    background-color:#0b2c4d;
-    border: 1px solid #1E90FF;
+    background-color: #0B2C3A;
+    border: 1px solid #18A0B6;
     border-radius: 4px;
-    color: white;
-    font-weight: bold;
+    color: #FFFFFF;
+    font-weight: 600;
     min-height: 30px;
-    padding-right: 26px;      /* leave room for right-side buttons */
+    padding-right: 28px;
 }
 
-/* Right-side buttons */
-QSpinBox::up-button {
+QSpinBox::up-button, QSpinBox::down-button {
     subcontrol-origin: border;
-    subcontrol-position: top right;
     width: 22px;
-    border-left: 1px solid #1E90FF;
-    background: #0b2c4d;
+    border-left: 1px solid #18A0B6;
+    background: #0B2C3A;
+}
+
+QSpinBox::up-button {
+    subcontrol-position: top right;
     border-top-right-radius: 4px;
 }
 QSpinBox::down-button {
-    subcontrol-origin: border;
     subcontrol-position: bottom right;
-    width: 22px;
-    border-left: 1px solid #1E90FF;
-    background: #0b2c4d;
     border-bottom-right-radius: 4px;
 }
 
-/* Hover/pressed feedback */
-QSpinBox::up-button:hover, QSpinBox::down-button:hover{
-    background: #1E90FF;
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+    background: #0E3646;
+    border-left-color: #33E1A0;
 }
 
 QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
-    background: #4682B4;
+    background: #0B1C24;
 }
 
-/* Visible arrow icons (from .qrc) */
-QSpinBox::up-arrow{
-
+QSpinBox::up-arrow {
     image: url(:/images/icons8-arrow-up-30.png);
     width: 12px;
     height: 11px;
 }
-QSpinBox::down-arrow{
+QSpinBox::down-arrow {
     image: url(:/images/icons8-arrow-down-24.png);
     width: 12px;
     height: 11px;
 }
 
-/*====================================================================================*/
+/*----- QCheckBox ----------------------------------------------------------*/
 QCheckBox {
-    color: white;
-    font-weight: bold;
-    background: transparent;   /* fully transparent background */
+    color: #FFFFFF;
+    font-weight: 600;
+    background: transparent;
     min-height: 25px;
     max-height: 25px;
-    spacing: 4px;              /* space between indicator and text */
+    spacing: 6px;
 }
 
-/* Size and appearance of the indicator box */
 QCheckBox::indicator {
-    width: 25px;       /* ⬅️ increase width */
-    height: 25px;      /* ⬅️ increase height */
-}
-
-/* Optional: Custom style for unchecked state */
-QCheckBox::indicator:unchecked {
-    border-radius: 2px;
-}
-
-/* Optional: Checked state */
-QCheckBox::indicator:checked {
-    border-radius: 2px;
+    width: 24px;
+    height: 24px;
 }
 
 QCheckBox::indicator:checked {
@@ -257,123 +258,122 @@ QCheckBox::indicator:unchecked {
     image: url(:/images/white-un-checkbox-50.png);
 }
 
-/*-----QScrollBar-----*/
+QCheckBox:disabled {
+    color: rgba(255,255,255,0.5);
+}
+
+/*----- QScrollBar (vertical) ---------------------------------------------*/
 QScrollBar:vertical {
     border: none;
-    width: 10px;
+    width: 12px;
+    background: transparent;
 }
 
 QScrollBar::handle:vertical {
-    background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:1, y2:1,
-        stop:0 rgba(167, 214, 50, 255),
-        stop:1 rgba(98, 169, 67, 255));
-    min-height: 50px;
-    width: 16px;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0   rgba(39, 208, 125, 255),
+        stop:1   rgba(20, 140, 92, 255));
+    min-height: 48px;
+    border-radius: 6px;
 }
-/*==================================================================*/
-/*-----QRadioButton-----*/
+
+/*----- QRadioButton -------------------------------------------------------*/
 QRadioButton {
-    color: white;
+    color: #FFFFFF;
     background: transparent;
-    min-height: 30px;
+    min-height: 28px;
     font: 700 9pt "Segoe UI";
 }
 
-/* 🔹 Specific radio buttons: RbPL10GSel, RbPL1GSel, RbPS1GSel, RbPSSerialSel, RbPLSerialSel */
 #RbPL10GSel,
 #RbPL1GSel,
 #RbPS1GSel,
 #RbPSSerialSel,
 #RbPLSerialSel {
-    font-size: 11px;       /* ⬅️ change text size here */
-    font-weight: bold;     /* optional */
-    color: white;          /* text color */
-}
-/* 🔹 Specific radio buttons: RbPL10GSel, RbPL1GSel, RbPS1GSel, RbPSSerialSel, RbPLSerialSel */
-#RbPL10GSel::indicator,
-#RbPL1GSel::indicator,
-#RbPS1GSel::indicator,
-#RbPSSerialSel::indicator,
-#RbPLSerialSel::indicator {
-    width: 30px;        /* custom width */
-    height: 30px;       /* custom height */
-}
-
-#RbPL10GSel::indicator:unchecked,
-#RbPL1GSel::indicator:unchecked,
-#RbPS1GSel::indicator:unchecked,
-#RbPSSerialSel::indicator:unchecked,
-#RbPLSerialSel::indicator:unchecked {
-    background: transparent;
-}
-
-/* Checked state */
-#RbPL10GSel::indicator:checked,
-#RbPL1GSel::indicator:checked,
-#RbPS1GSel::indicator:checked,
-#RbPSSerialSel::indicator:checked,
-#RbPLSerialSel::indicator:checked {
-    /*border: 2px solid #f8f8ff;*/
-    /*border-radius: 14px;*/
-    background: transparent;
+    font-size: 11px;
+    font-weight: 700;
+    color: #FFFFFF;
 }
 
 QRadioButton::indicator {
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
 }
 
-/* When unchecked */
 QRadioButton::indicator:unchecked {
     image: url(:/images/white-radio-button-48.png);
 }
-
-/* When checked */
 QRadioButton::indicator:checked {
     image: url(:/images/green-checked-radio-button-48.png);
 }
 
-/*=======================================================================================*/
+/*----- QTableWidget -------------------------------------------------------*/
+QTableWidget {
+    background: #081820;
+    gridline-color: #0F3A44;
+    border: 1px solid #18A0B6;
+    border-radius: 4px;
+}
 
-/*-----QTableWidget-----*/
 QTableWidget::item {
-    color: white;
-    font-weight: bold;
+    color: #FFFFFF;
+    font-weight: 600;
 }
 
 QTableWidget::item:selected {
-    background-color: green;
-    color: white;
+    background-color: #27D07D;
+    color: #041016;
 }
 
-/*-----QTabWidget-----*/
+QHeaderView::section {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(14, 50, 60, 255),
+        stop:1 rgba(8, 28, 36, 255));
+    color: #E6F8F1;
+    border: 1px solid #18A0B6;
+    padding: 4px 6px;
+    font-weight: 700;
+}
+
+/*----- QTabWidget / QTabBar ----------------------------------------------*/
 QTabWidget::pane {
-    border: 1px solid #1E90FF;;
+    border: 1px solid #18A0B6;
     top: -1px;
+    background: #06141A;
+    border-radius: 6px;
 }
 
 QTabBar::tab {
-    background-color: qlineargradient(spread:pad, x1:1, y1:0, x2:1, y2:1,
-        stop:0 rgba(42, 95, 113, 255),
-        stop:1 rgba(12, 53, 97, 255));
-    color: #ffffff;
-    border: 1px solid #1E90FF;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    padding: 6px;
-    font-weight: bold;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+        stop:0   rgba(24, 82, 92, 255),
+        stop:1   rgba(9, 45, 55, 255));
+    color: #FFFFFF;
+    border: 1px solid #18A0B6;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 6px 12px;
+    font-weight: 700;
     font-size: 14px;
-    min-width: 80px;
-    min-height: 20px;
+    min-width: 86px;
+    min-height: 22px;
 }
 
 QTabBar::tab:selected {
-    background-color: #0D1A4F;
-    border-bottom-color: #000000;
+    background-color: #0B2C3A;
+    border-bottom-color: #0B2C3A;
+    color: #FFFFFF;
 }
 
 QTabBar::tab:hover {
-    /*background-color: #008b8b;*/
-	background-color: #0056B3;
-    border: 1px solid #ffffff;
+    background-color: #0E3646;
+    border: 1px solid #33E1A0;
+}
+
+/*----- QToolTip -----------------------------------------------------------*/
+QToolTip {
+    color: #041016;
+    background: #27D07D;
+    border: 1px solid #33E1A0;
+    padding: 4px 6px;
+    font: 600 10pt "Segoe UI";
 }
