@@ -114,7 +114,7 @@ Spectrum::Spectrum(QWidget *parent)
 
     setupTransferAgent = new FileTransferAgent();
     connect(setupTransferAgent, &FileTransferAgent::transferComplete,this, &Spectrum::chunkReadCompleted);
-
+    ui->FramePbControl->hide();
     // Example: dynamic axis label color sync with theme (optional)
     // X_graphPlot->axisWidget(QwtPlot::xBottom)->setTitle(QwtText("MHz", QwtText::RichText));
     // X_graphPlot->axisWidget(QwtPlot::yLeft)->setTitle(QwtText("dBm", QwtText::RichText));
@@ -497,7 +497,149 @@ void Spectrum::on_pb_play_snap_shot_clicked()
     LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked EXIT");
     //exit(0);
 }
+//this is test funcation will remove it
+void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outBuffer)
+{
+    LOG_INFO("Spectrum::FFT_Plot(windowSize=%d) <ENTER>", windowSize);
 
+    // Read Fs once (use double precision for math)
+    const double fs = ui->lineEdit_fs->text().toDouble();
+    Fs = static_cast<int>(fs);
+
+    // Checkbox states (keep responsibilities separate)
+    const bool fftShiftEnabled = ui->ChkBoxFFtShift->isChecked();
+    const bool maxHoldEnabled  = ui->m_CBMaxHold->isChecked();
+
+    // Allocate workspace
+    double* FF   = nullptr;   // frequency axis
+    double* temp = nullptr;   // magnitude (linear)
+    double* v    = nullptr;   // magnitude (dB)
+
+    fftw_plan plan_forward = nullptr;
+
+    try {
+        // --- Allocate arrays ---
+        FF   = new double[windowSize];
+        temp = new double[windowSize];
+        v    = new double[windowSize];
+
+        // --- Plan & execute FFT ---
+        plan_forward = fftw_plan_dft_1d(windowSize, signal, outBuffer, FFTW_FORWARD, FFTW_ESTIMATE);
+        if (!plan_forward) {
+            LOG_INFO("FFTW plan creation failed.");
+            throw std::runtime_error("FFTW plan creation failed");
+        }
+        fftw_execute(plan_forward);
+
+        // --- Magnitude (linear) ---
+        for (int i = 0; i < windowSize; ++i) {
+            temp[i] = std::hypot(outBuffer[i][0], outBuffer[i][1]);
+        }
+
+        // --- Build frequency axis (unshifted by default: [0, fs) in N bins of width fs/N) ---
+        // Use N (not N-1) for consistent bin spacing; bin centers at i*fs/N
+        for (int i = 0; i < windowSize; ++i) {
+            FF[i] = (fs * i) / static_cast<double>(windowSize);
+        }
+
+        // --- Apply FFT shift once if requested ---
+        if (fftShiftEnabled) {
+            // Shift magnitude array
+            fftshift(temp, windowSize, sizeof(double));
+
+            // Rebuild frequency axis to be centered: [-fs/2, fs/2)
+            const double df = fs / static_cast<double>(windowSize);
+            double x = -fs / 2.0;
+            for (int i = 0; i < windowSize; ++i, x += df) {
+                FF[i] = x;
+            }
+        }
+
+        // --- Find peak (after any optional shift) ---
+        double max_val = temp[0];
+        int    maxIndex = 0;
+        for (int i = 1; i < windowSize; ++i) {
+            if (temp[i] > max_val) {
+                max_val = temp[i];
+                maxIndex = i;
+            }
+        }
+
+        // --- Choose reference amplitude (guard edge cases) ---
+        double ref_amp = (max_val > 0.0) ? max_val : 1.0;
+        if (ui->enableWeight_checkBox->isChecked()) {
+            const double user_ref = ui->enableWeight_lineEdit->text().toDouble();
+            if (user_ref > 0.0) ref_amp = user_ref; // ignore non-positive overrides
+        }
+
+        // --- Convert to dB (clamp to avoid -inf) ---
+        const double eps = 1e-12;
+        for (int i = 0; i < windowSize; ++i) {
+            const double ratio = std::max(temp[i] / ref_amp, eps);
+            v[i] = 20.0 * std::log10(ratio);
+        }
+
+        // --- Max Hold buffer update (independent of FFT shift) ---
+        if (maxHoldEnabled) {
+            if (!m_bMaxHoldEnable) {
+                m_vMaxHoldBuffer = new double[windowSize];
+                // Initialize with current frame to avoid undefined comparisons
+                std::copy(v, v + windowSize, m_vMaxHoldBuffer);
+                m_bMaxHoldEnable = true;
+            } else {
+                for (int i = 0; i < windowSize; ++i) {
+                    if (v[i] > m_vMaxHoldBuffer[i]) m_vMaxHoldBuffer[i] = v[i];
+                }
+            }
+        }
+
+        // --- Decide how many points to plot ---
+        // If "I-only" (real input) and NOT FFT-shifted, plot the positive half (N/2).
+        // Otherwise, plot the full N.
+        const bool iOnly = ui->IOnly_radioButton->isChecked();
+        const int nPlot = (iOnly && !fftShiftEnabled) ? (windowSize / 2) : windowSize;
+
+        // --- Plot Max Hold curve if enabled ---
+        if (maxHoldEnabled) {
+            m_ObjMaxCurve->setSamples(FF, m_vMaxHoldBuffer, nPlot);
+            m_ObjMaxCurve->setPen(Qt::green, 1.5, Qt::SolidLine);
+            m_ObjMaxCurve->attach(X_graphPlot);
+        }
+
+        // --- Plot current spectrum ---
+        curve_Y->setSamples(FF, v, nPlot);
+        curve_Y->setPen(Qt::yellow, 1.5, Qt::SolidLine);
+
+        X_graphPlot->replot();
+
+        // --- UI labels: use frequency axis for peak frequency (works for both shifted/unshifted) ---
+        const double peakFreq = FF[maxIndex];
+        const double peakDb   = v[maxIndex];
+
+        ui->frequency_label->setText(QString::number(peakFreq));
+        ui->frequency_label_db->setText(QString::number(peakDb));
+
+        LOG_INFO("Peak at bin %d: f=%.6f Hz, %.2f dB", maxIndex, peakFreq, peakDb);
+    }
+    catch (const std::exception& e) {
+        LOG_INFO("Exception occurred: %s", e.what());
+    }
+
+    // --- Cleanup ---
+    if (plan_forward) {
+        fftw_destroy_plan(plan_forward);
+        plan_forward = nullptr;
+        // (Optional) fftw_cleanup(); // only if you want to free FFTW wisdom/workspace globally
+    }
+
+    delete[] v;
+    delete[] temp;
+    delete[] FF;
+
+    LOG_INFO("FFT_Plot() <EXIT>");
+}
+
+#if 0
 void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outBuffer)
 {
     LOG_INFO("Spectrum::FFT_Plot(windowSize=%d) <ENTER>", windowSize);
@@ -625,6 +767,7 @@ void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outB
 
     LOG_INFO("FFT_Plot() <EXIT>");
 }
+#endif
 #if 0
 //fft shift test code
 void Spectrum::FFT_Plot(int windowSize, fftw_complex* signal, fftw_complex* outBuffer)
@@ -1803,6 +1946,7 @@ void Spectrum::on_strmnStrt_radioButton_clicked()
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("[WriteRegister] Interface not selected");
+        ui->strmnStrt_radioButton->setChecked(false);
         return;
     }
     if(ui->DDC_DataradioButton->isChecked())
@@ -1921,6 +2065,7 @@ void Spectrum::on_strmnStop_radioButton_clicked()
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("Interface not selected");
+        ui->strmnStop_radioButton->setChecked(false);
         return;
     }
 
