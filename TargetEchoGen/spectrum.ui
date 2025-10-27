@@ -26,9 +26,9 @@
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>6</y>
+     <y>-10</y>
      <width>1874</width>
-     <height>135</height>
+     <height>115</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -40,7 +40,7 @@
    <property name="minimumSize">
     <size>
      <width>1600</width>
-     <height>130</height>
+     <height>100</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -50,7 +50,7 @@
     </size>
    </property>
    <property name="title">
-    <string>Control Area</string>
+    <string/>
    </property>
    <property name="alignment">
     <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -61,7 +61,7 @@
       <x>1415</x>
       <y>23</y>
       <width>454</width>
-      <height>107</height>
+      <height>84</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -204,7 +204,7 @@
       <x>1090</x>
       <y>23</y>
       <width>324</width>
-      <height>107</height>
+      <height>85</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -346,7 +346,7 @@
       <x>5</x>
       <y>23</y>
       <width>1080</width>
-      <height>108</height>
+      <height>86</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -723,7 +723,7 @@ color: rgb(0, 0, 0);</string>
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>148</y>
+     <y>110</y>
      <width>400</width>
      <height>45</height>
     </rect>
@@ -857,9 +857,9 @@ color: rgb(0, 0, 0);</string>
    <property name="geometry">
     <rect>
      <x>9</x>
-     <y>202</y>
+     <y>160</y>
      <width>1876</width>
-     <height>530</height>
+     <height>539</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -870,8 +870,8 @@ color: rgb(0, 0, 0);</string>
    </property>
    <property name="minimumSize">
     <size>
-     <width>1500</width>
-     <height>519</height>
+     <width>0</width>
+     <height>0</height>
     </size>
    </property>
    <property name="frameShape">

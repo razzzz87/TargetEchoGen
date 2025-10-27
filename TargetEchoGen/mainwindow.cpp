@@ -23,6 +23,20 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->scrollArea->setWidgetResizable(false);
+    ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->scrollArea->setMinimumSize(QSize(0,0));
+    ui->scrollArea->setFrameShape(QFrame::NoFrame);
+    //Adjust the value to when that scroll bar appear
+    ui->scrollAreaWidgetContents->setFixedSize(1925,1025);  // or setMinimumSize(1920,1080)
+    ui->scrollAreaWidgetContents->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+    this->setMinimumSize(800,600);
+
+    qDebug() << "Viewport:" << this->size()<< "Scroll hint " << ui->scrollArea->sizeHint();
+
+
     conn = new ConnectionType(this);
 
     deviceSetup   = new DeviceSetup(this);
@@ -51,25 +65,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->SbDAC2AMPLBaseValue->setRange(-27,0);
 
     ui->LeTopDateTime->setText("Date & Time:  "+ QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-
-    // // 🔄 Initialize QProgressDialog for percentage-based progress tracking
-    // transferProgress = new QProgressDialog("Preparing file transfer...", "Cancel", 0, 100, this);
-    // transferProgress->setWindowModality(Qt::WindowModal);
-    // transferProgress->setWindowTitle("File Transfer Progress");
-    // transferProgress->setAutoClose(false);     // Keep open until transfer finishes
-    // transferProgress->setAutoReset(false);     // Manual control over reset
-    // transferProgress->setMinimumDuration(1000); // Avoid premature popup (1s)
-    // transferProgress->reset();                 // Clear stale values
-    // transferProgress->hide();                  // Hide until file transfer starts
-
-    // // Connect cancel behavior just once
-    // connect(transferProgress, &QProgressDialog::canceled, this, [=]() {
-    //     transferCanceled = true;
-    //     setupTransferAgent->abortFileWrite(true);
-    //     LOG_TO_FILE("User canceled the file transfer.");
-    // });
-    // connect(setupTransferAgent, &FileTransferAgent::progressUpdated,this, &MainWindow::updateTransferProgress);
-    // connect(setupTransferAgent, &FileTransferAgent::close_progress_pop,this, &MainWindow::close_Progress_pop);
 
     setupTransferAgent = new FileTransferAgent();
     progressDialog = new TransferProgressDialog(this); // Pass your QWidget parent
@@ -126,6 +121,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    emit resizeEventTriggered();  // custom signal
+    QMainWindow::resizeEvent(event);
+}
 
 void MainWindow::onConnStateChanged(iface which, ConnInfo s)
 {
