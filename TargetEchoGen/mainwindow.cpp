@@ -34,9 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->setMinimumSize(800,600);
 
-    qDebug() << "Viewport:" << this->size()<< "Scroll hint " << ui->scrollArea->sizeHint();
-
-
     conn = new ConnectionType(this);
 
     deviceSetup   = new DeviceSetup(this);
@@ -119,12 +116,6 @@ MainWindow::~MainWindow()
     delete file_processing;
     delete device_setup;
     delete ui;
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-    emit resizeEventTriggered();  // custom signal
-    QMainWindow::resizeEvent(event);
 }
 
 void MainWindow::onConnStateChanged(iface which, ConnInfo s)

@@ -1875,7 +1875,6 @@ void Spectrum::on_autoRefreshOn_radioButton_clicked()
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("[WriteRegister] Interface not selected");
-        QMessageBox::critical(this, "Error", "Interface not selected", QMessageBox::Ok);
         ui->autoRefreshOff_radioButton->setChecked(true);
         return;
     }

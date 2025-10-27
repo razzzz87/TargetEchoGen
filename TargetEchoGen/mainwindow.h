@@ -47,11 +47,9 @@ public:
     void load_files();
     void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
     uint64_t ComputeDDSFCW(uint32_t fcw, uint32_t fs);
-    void resizeEvent(QResizeEvent *event);
 
 private slots:
     void onConnStateChanged(iface which, ConnInfo s);
-    //void onActiveChanged(iface active);
     void onTimeout();
     void updateTransferProgress(qint64 percentage);
     void close_Progress_pop(void);
