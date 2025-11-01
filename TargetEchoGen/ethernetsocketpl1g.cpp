@@ -312,7 +312,7 @@ EthernetSocketPL1G* EthernetSocketPL1G::getInstance() {
 EthernetSocketPL1G* EthernetSocketPL1G::Create(const std::string& localIp, uint16_t localPort, QString remoteIP, quint16 port) {
     LOG_INFO("EthernetSocketPL1G::Create() <ENTER>");
     if (instance == nullptr) {
-        LOG_INFO("EthernetSocketPL1G::Create() <ALLOCATING> IP:%s PORT:%d LPORT:%d", localIp.c_str(), port, localPort);
+        LOG_INFO("EthernetSocketPL1G::Create() <ALLOCATING> IP:%s PORT:%d LPORT:%d RemoteIP %s", localIp.c_str(), port, localPort,remoteIP.toStdString().c_str());
         instance = new EthernetSocketPL1G();
         instance->setInterfaceLabel("ETHPL1G");
         instance->RemoteIP = remoteIP;

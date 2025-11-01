@@ -102,15 +102,12 @@ int FileTransferAgent::BulkFileReadStreamEth01G(unsigned int startAddress, qint6
 
     const int dataPayloadSize = 1456;    // adjust to 1456 if required
     const int headerSize = 12;
-    const int packetMax = headerSize + dataPayloadSize;
 
     char ucBuffer[4096];
     char* byArrPkt = nullptr;
     Proto protocol;
 
     qint64 numByReadDone = 0;
-    qint64 read_req_size = _iDataSize;
-    int updateProgressbarCount = 0;
     abort = false;
     while (_iDataSize > 0 && !abort)
     {
@@ -139,7 +136,6 @@ int FileTransferAgent::BulkFileReadStreamEth01G(unsigned int startAddress, qint6
             bool ok = ethPL01G->receivePacketWithSync2(ucBuffer, want, RecvByte);
             if (ok)
             {
-                //Log::printHexRecvBuffer(ucBuffer,16);
                 protocol.m_nPacketLength = protocol.mPktParseBulkRead(ucBuffer);
                 size_t payloadLen = protocol.m_nPacketLength - headerSize;
                 if (payloadLen > 0)
@@ -156,12 +152,6 @@ int FileTransferAgent::BulkFileReadStreamEth01G(unsigned int startAddress, qint6
                 }
             }
         }
-        if ((updateProgressbarCount++ >= AFTER_NUMBER_OF_PKT) && !abort) {
-            int percentageComplete = read_req_size ? static_cast<int>((bytesTransferred * 100.0) / read_req_size) : 100;
-            // emit progressUpdated(percentageComplete);
-            updateProgressbarCount = 0;
-        }
-        startAddress += static_cast<unsigned int>(sizeReceivedForChunk);
     } // outer loop
     if (numBytesRdSuccess)
         *numBytesRdSuccess = numByReadDone;

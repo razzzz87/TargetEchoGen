@@ -28,14 +28,17 @@ Spectrum::Spectrum(QWidget *parent)
     , ui(new Ui::Spectrum)
 {
     ui->setupUi(this);
+    applyCustomStyle();
     N = NUM_POINT;
     frq = FRQ;
+    qDebug() << ui->DDC_DataradioButton->styleSheet();
 
     // Labels: numbers in radar-green, units in soft light text
     ui->frequency_label->setStyleSheet("color:#27D07D; font: 700 18pt \"Segoe UI\";");
     ui->frequency_label_db->setStyleSheet("color:#27D07D; font: 700 18pt \"Segoe UI\";");
     ui->label_mhz->setStyleSheet("color:#E6F8F1; font: 600 14pt \"Segoe UI\";");
     ui->label_db->setStyleSheet("color:#E6F8F1; font: 600 14pt \"Segoe UI\";");
+
 
     // Plot
     X_graphPlot = new QwtPlot(ui->spectrum_plot_frame);
@@ -123,6 +126,37 @@ Spectrum::Spectrum(QWidget *parent)
 Spectrum::~Spectrum()
 {
     delete ui;
+}
+
+void Spectrum::applyCustomStyle()
+{
+    QString style = R"(
+        #DDC_DataradioButton,
+        #IQInterleved_radioButton,
+        #IOnly_radioButton,
+        #ChkBoxMixerData,
+        #ChkBoxADCData,
+        #ChkBoxCICData,
+        #m_CBSpectrumdata,
+        #ChkBoxPFIRData,
+        #ChkBoxCFIRData,
+        #m_CBMaxHold,
+        #ChkBoxFFtShift,
+        #LblDataSize,
+        #enableWeight_checkBox,
+        #LblChannel,
+        #LblFs,
+        #LblWindowSize,
+        #strmnStrt_radioButton,
+        #strmnStop_radioButton,
+        #LblRefreshRate,
+        #autoRefreshOff_radioButton,
+        #autoRefreshOn_radioButton {
+            color: white;
+        }
+    )";
+
+    this->setStyleSheet(style);
 }
 
 // Reusable theming for a QwtPlot
@@ -378,7 +412,7 @@ void Spectrum::on_pb_hide_show_menu_clicked()
 void Spectrum::on_pb_play_snap_shot_clicked()
 {
     LOG_INFO("Spectrum::on_pb_play_snap_shot_clicked ENTER");
-    static int count =0;
+    //static int count =0;
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("Interface not selected");
@@ -472,8 +506,8 @@ void Spectrum::on_pb_play_snap_shot_clicked()
         LOG_DEBUG("Read Data Available: %u", fifo_level);
 
         if (fifo_level >= byteToRd) {
-            QString filename = QStringLiteral("StreamingData%1.bin").arg(count++);
-            //QString filename = "StreamingData.bin";
+            //QString filename = QStringLiteral("StreamingData%1.bin").arg(count++);
+            QString filename = "StreamingData.bin";
             LOG_INFO("Sufficient FIFO level (%u >= %u). Starting FileReadWriteSetup with file: %s",
                      fifo_level, byteToRd, filename.toStdString().c_str());
             FileReadWriteSetup(deviceType, byteToRd, filename.toStdString().c_str(), eStream);

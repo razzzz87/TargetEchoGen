@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
     spectrum      = new Spectrum(this);
     rf            = new RF(this);
 
+
     ui->tabWidgetMainTab->addTab(fileProcessing, "File processing");
     ui->tabWidgetMainTab->addTab(deviceSetup,   "Device setup");
     ui->tabWidgetMainTab->addTab(selfTest,      "Self Test");
