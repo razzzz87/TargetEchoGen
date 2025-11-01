@@ -163,7 +163,7 @@ int FileTransferAgent::BulkFileReadStreamEth01G(unsigned int startAddress, qint6
 
     LOG_INFO("[FileTransferAgent] Read complete: %lld bytes read", (long long)numByReadDone);
     LOG_INFO(abort ? "File transmission aborted" : "File transmission complete.");
-    emit transferComplete();
+    emit transferComplete(eReadDone);
     LOG_INFO("FileTransferAgent::BulkFileReadStreamEth01G <EXIL>");
     return abort ? -1 : 0;
 }
@@ -256,7 +256,7 @@ int FileTransferAgent::BulkReadFileEth01G(unsigned int startAddress, qint64* num
 
     LOG_INFO("[FileTransferAgent] Read complete: %lld bytes read", (long long)numByReadDone);
     LOG_INFO(abort ? "File transmission aborted" : "File transmission complete.");
-    emit transferComplete();
+    emit transferComplete(eReadDone);
     LOG_INFO("FileTransferAgent::BulkReadFileEth01G <EXIL>");
     return abort ? -1 : 0;
 }
@@ -339,7 +339,7 @@ int FileTransferAgent::ReadFileBulkEth10G(unsigned int startAddress, qint64* num
 
     LOG_INFO("[FileTransferAgent] Read complete: %lld bytes read", numByReadDone);
     LOG_INFO(abort ? "File transmission aborted" : "File transmission complete.");
-    emit transferComplete();
+    emit transferComplete(eReadDone);
     LOG_INFO("FileTransferAgent::ReadFileBulkEth10G <EXIT>");
     return 0;
 }
@@ -420,7 +420,7 @@ int FileTransferAgent::StreamReadFileBulkEth10G(unsigned int startAddress, qint6
 
     LOG_INFO("[FileTransferAgent] Read complete: %lld bytes read", numByReadDone);
     LOG_INFO(abort ? "File transmission aborted" : "File transmission complete.");
-    emit transferComplete();
+    emit transferComplete(eReadDone);
     QFileInfo fileinfo(_sFilePath);
     if(fileinfo.exists() && fileinfo.isFile()){
         LOG_INFO("Steaming bin Size:%ld",fileinfo.size());
@@ -510,7 +510,7 @@ int FileTransferAgent::WriteFileBulk01G(unsigned startAddress,qint64* numBytesRd
     file.close();
     if(!abort)LOG_TO_FILE("File transmission complete.");
     else LOG_TO_FILE("File transmission aborted");
-    emit transferComplete();
+    emit transferComplete(eWriteDone);
     LOG_TO_FILE("FileTransferAgent::WriteFileBulk01G <EXIT>");
     return 0;
 }
@@ -592,7 +592,7 @@ int FileTransferAgent::WriteFileBulk10G(unsigned startAddress,qint64* numBytesRd
     file.close();
     if(!abort)LOG_INFO("File transmission complete.");
     else LOG_INFO("File transmission aborted");
-    emit transferComplete();
+    emit transferComplete(eWriteDone);
     LOG_INFO("FileTransferAgent::WriteFileBulk10G <EXIT>");
     return 0;
 }

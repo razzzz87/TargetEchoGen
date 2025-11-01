@@ -76,6 +76,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(setupTransferAgent, &FileTransferAgent::transferComplete,progressDialog, &QDialog::accept);
     progressDialog->hide();
 
+    // Optional: Close dialog when transfer completes
+    connect(setupTransferAgent, &FileTransferAgent::transferComplete,this, &MainWindow::TransferDone);
+
     //Connection and selection handling
     auto& helper = ConnectionHelper::instance();
     connect(&helper, &ConnectionHelper::stateChanged,  this, &MainWindow::onConnStateChanged);
@@ -107,8 +110,8 @@ MainWindow::MainWindow(QWidget *parent)
         if (on) ConnectionHelper::instance().setSelected(eSERIAL);
     });
 
-    //connect(conn, &ConnectionType::connectionSucceeded, this, &MainWindow::onConnectionSuccess);
-    //connect(conn, &ConnectionType::connectionFailed, this, &MainWindow::onConnectionFailure);
+    connect(conn, &ConnectionType::connectionSucceeded, this, &MainWindow::onConnectionSuccess);
+    connect(conn, &ConnectionType::connectionFailed, this, &MainWindow::onConnectionFailure);
 
 }
 
@@ -117,6 +120,19 @@ MainWindow::~MainWindow()
     delete file_processing;
     delete device_setup;
     delete ui;
+}
+
+void MainWindow::TransferDone(eStatus DoneStatus){
+
+    switch (DoneStatus) {
+    case eReadDone:
+        break;
+    case eWriteDone:
+
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::onConnStateChanged(iface which, ConnInfo s)
@@ -150,10 +166,11 @@ void MainWindow::onConnStateChanged(iface which, ConnInfo s)
     // Pick LED color/icon
     QString icon;
     if (!s.connected){
-        icon = ":/images/red-tick-radio-button-48.png";
+        Log::showStatusMessage(this,"Connection","Device not connected");
+        icon = ":/images/icons8-red-notconn-cross-48.png";
     }
     else if (isSelected){
-        icon = ":/images/red-tick-radio-button-48.png";
+        icon = ":/images/green-checked-radio-button-48.png";
     }
     else if (isActive){
         //icon = ":/images/led-green_dim.png";        // dim green for active but not selected
@@ -170,13 +187,13 @@ void MainWindow::onConnectionSuccess(iface eInterface)
     case eNONE:
         break;
     case eETHPS1G:
-        ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
+        ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/green-checked-radio-button-48.png"));
         break;
     case eETHPL1G:
-        ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
+        ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/green-checked-radio-button-48.png"));
         break;
     case eETH10G:
-        ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/led-green_icon.jpg"));
+        ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/green-checked-radio-button-48.png"));
         break;
     case eSERIAL:
         break;
@@ -195,15 +212,15 @@ void MainWindow::onConnectionFailure(iface eInterface)
         break;
     case eETHPS1G:
         //ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-        ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/icons8-cancel-52.png"));
+        ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/icons8-red-notconn-cross-48.png"));
         break;
     case eETHPL1G:
         //ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-        ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/icons8-cancel-52.png"));
+        ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/icons8-red-notconn-cross-48.png"));
         break;
     case eETH10G:
         //ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-        ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/icons8-cancel-52.png"));
+        ui->LblConnPL10GStatusLed->setPixmap(QPixmap(":/images/icons8-red-notconn-cross-48.png"));
         break;
     case eSERIAL:
         break;
@@ -224,7 +241,7 @@ iface MainWindow::getSelectedDeviceType()
     // 1️⃣ Check if no interface selected
     if (sel == eNONE)
     {
-        LOG_ERROR("[DeviceSetup] No interface selected (iface=%s)", Utils::ifaceToCStr(sel));
+        LOG_ERROR("[MainWindow] No interface selected (iface=%s)", Utils::ifaceToCStr(sel));
         Log::showStatusMessage(this, "Device Setup", "Please select an interface before proceeding.");
         return eNONE;
     }
@@ -233,14 +250,14 @@ iface MainWindow::getSelectedDeviceType()
     ConnInfo info = ctx.info(sel);
     if (!info.connected)
     {
-        LOG_ERROR("[DeviceSetup] Selected interface '%s' is NOT connected.", Utils::ifaceToCStr(sel));
+        LOG_ERROR("[MainWindow] Selected interface '%s' is NOT connected.", Utils::ifaceToCStr(sel));
         Log::showStatusMessage(this, "Device Setup",
                                QString("Selected interface '%1' is not connected.").arg(ifaceName));
         return eNONE;
     }
 
     // 3️⃣ Success — valid and connected interface
-    LOG_INFO("[DeviceSetup] Selected and connected interface: %s", Utils::ifaceToCStr(sel));
+    LOG_INFO("[MainWindow] Selected and connected interface: %s", Utils::ifaceToCStr(sel));
     //Log::showStatusMessage(this, "Device Setup", QString("Selected Interface: %1").arg(ifaceName));
 
     return sel;
@@ -322,9 +339,10 @@ void MainWindow::FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString 
         stFileReadWriteConf Cnf;
         Cnf.iFileSize = iFileSize;
         Cnf.sFilePath = sFilePath;
-        Cnf.eInterface = iface::eETH10G;
+        Cnf.eInterface = deviceType;
         Cnf._Dir = dir;
         setupTransferAgent->configure(Cnf);
+        setupTransferAgent->start();
 
     }
     break;
@@ -380,8 +398,8 @@ void MainWindow::on_PbDAC1IQFileSend_clicked()
 
 
     // Split into two 32-bit parts
-    const quint32 size_lo = static_cast<quint32>(fileSize & 0xFFFFFFFFULL);
-    const quint32 size_hi = static_cast<quint32>((fileSize >> 32) & 0xFFFFFFFFULL);
+    size_lo = static_cast<quint32>(fileSize & 0xFFFFFFFFULL);
+    size_hi = static_cast<quint32>((fileSize >> 32) & 0xFFFFFFFFULL);
 
     // Write lower 32 bits to 0x100
     Utils::RegWrite(deviceType,0x108, size_lo);
@@ -390,14 +408,30 @@ void MainWindow::on_PbDAC1IQFileSend_clicked()
     Utils::RegWrite(deviceType, 0x128, size_hi);
 
     //Write start pulse
-    quint32 value = (1u << 9);
+    quint32 value = (1u << 10);
     Utils::RegWrite(deviceType, 0x118, value);
     value = 0;
     Utils::RegWrite(deviceType, 0x118, value);
 
     FileReadWriteSetup(deviceType,fileSize,filename,eWrite);
 }
+void MainWindow::SetDAC1ReadSettingAfterFileSend()
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+    //Write start pulse
+    Utils::RegWrite(deviceType, 0x210C,0x00); //Start address
+    Utils::RegWrite(deviceType, 0x2110,0x00); //Start address
 
+    Utils::RegWrite(deviceType, 0x2114, size_lo);
+    Utils::RegWrite(deviceType, 0x212C,size_hi);
+
+    Utils::RegWrite(deviceType, 0x2118,0x200);
+
+}
 void MainWindow::on_PbDAC2TgrSetup_clicked()
 {
     uint32_t trigSourceSelect = 0;

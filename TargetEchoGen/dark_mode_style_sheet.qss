@@ -304,7 +304,7 @@ QRadioButton::indicator:unchecked {
     image: url(:/images/white-radio-button-48.png);
 }
 QRadioButton::indicator:checked {
-    image: url(:/images/green-checked-radio-button-48.png);
+    image: url(:/images/icons8-circle-select-48.png);
 }
 
 /*----- QTableWidget -------------------------------------------------------*/

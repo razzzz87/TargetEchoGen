@@ -47,10 +47,12 @@ public:
     void load_files();
     void FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString sFilePath, eXferDir dir);
     iface getSelectedDeviceType();
+    void SetDAC1ReadSettingAfterFileSend();
     uint64_t ComputeDDSFCW(uint32_t fcw, uint32_t fs);
 
 private slots:
     void onConnStateChanged(iface which, ConnInfo s);
+    void TransferDone(eStatus DoneStatus);
     void onTimeout();
     void updateTransferProgress(qint64 percentage);
     void close_Progress_pop(void);
@@ -99,6 +101,8 @@ signals:
 
 private:
     Ui::MainWindow *ui;
+    quint32 size_lo;
+    quint32 size_hi;
     bool transferCanceled = false;
 };
 #endif // MAINWINDOW_H

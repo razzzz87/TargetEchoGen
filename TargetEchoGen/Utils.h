@@ -17,6 +17,7 @@
 #include "proto.h"
 #include "AvrRegAddrDef.h"
 
+enum eStatus{eSNONE,eReadDone,eWriteDone};
 enum iface { eNONE,eETHPS1G,eETHPL1G, eETH10G, eSERIAL,ePLSERIAL, ePCIe };
 enum TransferMode { SendBulk, ReceiveBulk, Streaming };
 

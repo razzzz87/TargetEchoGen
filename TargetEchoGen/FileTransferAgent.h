@@ -60,7 +60,7 @@ public slots:
 
 signals:
     void progressUpdated(qint64 bytesTransferred);
-    void transferComplete();
+    void transferComplete(eStatus);
 
 protected:
     void run() override;
