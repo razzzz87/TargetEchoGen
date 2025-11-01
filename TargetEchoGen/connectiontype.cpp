@@ -10,7 +10,7 @@ ConnectionType::ConnectionType(QWidget *parent)
     setWindowFlags(Qt::Window | Qt::WindowCloseButtonHint);
 
     ui->LeConnPS1GIP->setText("127.0.0.1");
-    ui->LeConnPL1GIP->setText("10.0.0.123");
+    ui->LeConnPL1GIP->setText("10.0.0.80");
     ui->LeConn10GIP->setText("192.168.30.245");
     ui->LeConnPS1GPort->setText("12345");
     ui->LeConnPL1GPort->setText("50002");

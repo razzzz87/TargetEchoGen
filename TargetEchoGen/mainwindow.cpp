@@ -150,12 +150,10 @@ void MainWindow::onConnStateChanged(iface which, ConnInfo s)
     // Pick LED color/icon
     QString icon;
     if (!s.connected){
-        //icon = ":/images/led-icon-red.jpg";
         icon = ":/images/red-tick-radio-button-48.png";
     }
     else if (isSelected){
-        //icon = ":/images/led-green_icon.jpg";       // bright green for selected
-        icon = ":/images/icons8-cancel-52.png";
+        icon = ":/images/red-tick-radio-button-48.png";
     }
     else if (isActive){
         //icon = ":/images/led-green_dim.png";        // dim green for active but not selected
@@ -163,7 +161,6 @@ void MainWindow::onConnStateChanged(iface which, ConnInfo s)
     else{
         //icon = ":/images/led-green_dim.png"; // connected but idle
     }
-
     ledLabel->setPixmap(QPixmap(icon));
 }
 

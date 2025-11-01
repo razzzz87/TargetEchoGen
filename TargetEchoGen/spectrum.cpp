@@ -130,34 +130,40 @@ Spectrum::~Spectrum()
 
 void Spectrum::applyCustomStyle()
 {
-    QString style = R"(
-        #DDC_DataradioButton,
-        #IQInterleved_radioButton,
-        #IOnly_radioButton,
-        #ChkBoxMixerData,
-        #ChkBoxADCData,
-        #ChkBoxCICData,
-        #m_CBSpectrumdata,
-        #ChkBoxPFIRData,
-        #ChkBoxCFIRData,
-        #m_CBMaxHold,
-        #ChkBoxFFtShift,
-        #LblDataSize,
-        #enableWeight_checkBox,
-        #LblChannel,
-        #LblFs,
-        #LblWindowSize,
-        #strmnStrt_radioButton,
-        #strmnStop_radioButton,
-        #LblRefreshRate,
-        #autoRefreshOff_radioButton,
-        #autoRefreshOn_radioButton {
-            color: white;
-        }
-    )";
+    // Create a QStringList of all control object names
+    QStringList controls = {
+        "DDC_DataradioButton",
+        "IQInterleved_radioButton",
+        "IOnly_radioButton",
+        "ChkBoxMixerData",
+        "ChkBoxADCData",
+        "ChkBoxCICData",
+        "m_CBSpectrumdata",
+        "ChkBoxPFIRData",
+        "ChkBoxCFIRData",
+        "m_CBMaxHold",
+        "ChkBoxFFtShift",
+        "LblDataSize",
+        "enableWeight_checkBox",
+        "LblChannel",
+        "LblFs",
+        "LblWindowSize",
+        "strmnStrt_radioButton",
+        "strmnStop_radioButton",
+        "LblRefreshRate",
+        "autoRefreshOff_radioButton",
+        "autoRefreshOn_radioButton"
+    };
 
-    this->setStyleSheet(style);
+    // Apply white color style individually to each control
+    for (const QString &name : controls)
+    {
+        QWidget *widget = this->findChild<QWidget *>(name);
+        if (widget)
+            widget->setStyleSheet("color: white;");
+    }
 }
+
 
 // Reusable theming for a QwtPlot
 void Spectrum::applyRadarPlotTheme(QwtPlot* plot)
