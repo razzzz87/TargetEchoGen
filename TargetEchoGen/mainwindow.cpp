@@ -213,6 +213,39 @@ void MainWindow::onConnectionFailure(iface eInterface)
         LOG_INFO("Ivalide interface\n");
     }
 }
+
+iface MainWindow::getSelectedDeviceType()
+{
+    auto& ctx = ConnectionHelper::instance();
+    iface sel = ctx.selectedInterface();
+
+    const QString ifaceName = Utils::ifaceToQString(sel);
+
+    // 1️⃣ Check if no interface selected
+    if (sel == eNONE)
+    {
+        LOG_ERROR("[DeviceSetup] No interface selected (iface=%s)", Utils::ifaceToCStr(sel));
+        Log::showStatusMessage(this, "Device Setup", "Please select an interface before proceeding.");
+        return eNONE;
+    }
+
+    // 2️⃣ Check if selected interface is connected
+    ConnInfo info = ctx.info(sel);
+    if (!info.connected)
+    {
+        LOG_ERROR("[DeviceSetup] Selected interface '%s' is NOT connected.", Utils::ifaceToCStr(sel));
+        Log::showStatusMessage(this, "Device Setup",
+                               QString("Selected interface '%1' is not connected.").arg(ifaceName));
+        return eNONE;
+    }
+
+    // 3️⃣ Success — valid and connected interface
+    LOG_INFO("[DeviceSetup] Selected and connected interface: %s", Utils::ifaceToCStr(sel));
+    //Log::showStatusMessage(this, "Device Setup", QString("Selected Interface: %1").arg(ifaceName));
+
+    return sel;
+}
+
 void MainWindow::onTimeout()
 {
 
@@ -266,7 +299,7 @@ void MainWindow::updateTransferProgress(qint64 percentage){
 //     LOG_TO_FILE(":Exit==>\n");
 // }
 
-void MainWindow::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir)
+void MainWindow::FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString sFilePath, eXferDir dir)
 {
 
     LOG_INFO("MainWindow::FileReadWriteSetup() <ENTER>");
@@ -326,7 +359,43 @@ void MainWindow::on_PbConnSettings_clicked()
 
 void MainWindow::on_PbDAC1IQFileSend_clicked()
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+    const QString filename = ui->LeDAC1IQFileName->text();
+    QFileInfo fileInfo(filename);
 
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        LOG_ERROR("[WriteRegister] File does not exist: %s", qPrintable(filename));
+        return;
+    }
+
+    // File size in bytes (up to 64-bit)
+    const quint64 fileSize = static_cast<quint64>(fileInfo.size());
+    //Start address
+    Utils::RegWrite(deviceType,0x100, 0x00);
+    Utils::RegWrite(deviceType, 0x104,0x00);
+
+
+    // Split into two 32-bit parts
+    const quint32 size_lo = static_cast<quint32>(fileSize & 0xFFFFFFFFULL);
+    const quint32 size_hi = static_cast<quint32>((fileSize >> 32) & 0xFFFFFFFFULL);
+
+    // Write lower 32 bits to 0x100
+    Utils::RegWrite(deviceType,0x108, size_lo);
+
+    // Write upper 32 bits to 0x128 (0 if file <= 4GB)
+    Utils::RegWrite(deviceType, 0x128, size_hi);
+
+    //Write start pulse
+    quint32 value = (1u << 9);
+    Utils::RegWrite(deviceType, 0x118, value);
+    value = 0;
+    Utils::RegWrite(deviceType, 0x118, value);
+
+    FileReadWriteSetup(deviceType,fileSize,filename,eWrite);
 }
 
 void MainWindow::on_PbDAC2TgrSetup_clicked()
@@ -525,3 +594,19 @@ void MainWindow::on_PbNB_ADC_DDSFCWSet_clicked()
     Utils::RegWrite(eETHPL1G,0x508,3);
     Utils::RegWrite(eETHPL1G,0x508,1);
 }
+
+void MainWindow::on_PbDAC1IQFileBrowse_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(
+        this,
+        tr("Open Binary File"),
+        QString(),
+        tr("Binary Files (*.bin);;All Files (*.*)")
+        );
+
+    if(!filename.isEmpty()){
+        ui->LeDAC1IQFileName->setText(filename);
+    }
+
+}
+

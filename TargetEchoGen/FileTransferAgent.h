@@ -77,7 +77,7 @@ private:
     QString _sFilePath;
     QString _IPAddress;
     quint16 _Port;
-    int _iDataSize;
+    qint64 _iDataSize;
 
     QMutex mutex;
     bool abort;

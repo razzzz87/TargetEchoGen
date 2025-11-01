@@ -45,7 +45,8 @@ public:
     TransferProgressDialog* progressDialog;
     FileTransferAgent  *setupTransferAgent;
     void load_files();
-    void FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFilePath, eXferDir dir);
+    void FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString sFilePath, eXferDir dir);
+    iface getSelectedDeviceType();
     uint64_t ComputeDDSFCW(uint32_t fcw, uint32_t fs);
 
 private slots:
@@ -91,6 +92,8 @@ private slots:
     void on_ChkBoxNBADCDDSEnable_checkStateChanged(const Qt::CheckState &arg1);
 
     void on_PbNB_ADC_DDSFCWSet_clicked();
+    void on_PbDAC1IQFileBrowse_clicked();
+
 signals:
     void resizeEventTriggered();
 

@@ -47,7 +47,7 @@ enum eXferDir {
 };
 
 struct stFileReadWriteConf{
-    uint iFileSize;
+    qint64  iFileSize;
     QString sFilePath;
     iface eInterface;
     eXferDir _Dir;

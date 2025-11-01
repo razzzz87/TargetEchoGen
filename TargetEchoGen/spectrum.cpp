@@ -162,6 +162,9 @@ void Spectrum::applyCustomStyle()
         if (widget)
             widget->setStyleSheet("color: white;");
     }
+    QWidget *widget = this->findChild<QWidget *>("lineEdit_fs");
+    if (widget)
+        widget->setStyleSheet("max-height:10px;");
 }
 
 
