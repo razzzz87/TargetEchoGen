@@ -128,7 +128,7 @@ void MainWindow::TransferDone(eStatus DoneStatus){
     case eReadDone:
         break;
     case eWriteDone:
-
+        SetDAC1ReadSettingAfterFileSend();
         break;
     default:
         break;
@@ -426,7 +426,7 @@ void MainWindow::SetDAC1ReadSettingAfterFileSend()
     Utils::RegWrite(deviceType, 0x210C,0x00); //Start address
     Utils::RegWrite(deviceType, 0x2110,0x00); //Start address
 
-    Utils::RegWrite(deviceType, 0x2114, size_lo);
+    Utils::RegWrite(deviceType, 0x2114,size_lo);
     Utils::RegWrite(deviceType, 0x212C,size_hi);
 
     Utils::RegWrite(deviceType, 0x2118,0x200);
@@ -560,15 +560,23 @@ void MainWindow::on_PbDAC2AMPLBaseValueDncr_clicked()
 
 void MainWindow::on_PbDAC1Apply_clicked()
 {
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+
     int iPwSample = ui->SbDAC1PWSamples->value();
     int iSignalDelay  = ui->SbDAC1SignalDelay->value();
     int iDoplerShiftHz = ui->SbDAC1DopplerShiftHz->value();
 
-    DacHelper::WrIterpolation(eETHPL1G, ui->CbIDAC1InterpSelect->currentText().toInt());
-    DacHelper::WrNCOFrq(eETHPL1G,ui->CbDAC1NOCFrequency->currentText());
-    Utils::RegWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x08,iPwSample);
-    Utils::RegWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x6C,iSignalDelay);
-    Utils::RegWrite(eETHPL1G,AVR_DAC3_BASE_ADDR+0x40,iDoplerShiftHz);
+    DacHelper::WrIterpolation(deviceType, ui->CbIDAC1InterpSelect->currentText().toInt());
+    DacHelper::WrNCOFrq(deviceType,ui->CbDAC1NOCFrequency->currentText());
+
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x08,iPwSample);
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x6C,iSignalDelay);
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x40,iDoplerShiftHz);
+
 
 }
 
@@ -642,5 +650,51 @@ void MainWindow::on_PbDAC1IQFileBrowse_clicked()
         ui->LeDAC1IQFileName->setText(filename);
     }
 
+}
+
+
+void MainWindow::on_PbDAC1Start_clicked()
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x018,0x1);
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x010,0x1);
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x1);
+}
+
+
+void MainWindow::on_PbDAC1Stop_clicked()
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x1);
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x0);
+    Utils::RegWrite(deviceType,0x2118,0x0);
+    Utils::RegWrite(deviceType,0x2158,0x0);
+    Utils::RegWrite(deviceType,0x5000,0x8);
+    Utils::RegWrite(deviceType,0x5000,0xC);
+    Utils::RegWrite(deviceType,0x5000,0x4);
+    Utils::RegWrite(deviceType,0x5000,0x0);
+    Utils::RegWrite(deviceType,0x2118,0x200);
+    Utils::RegWrite(deviceType,0x2158,0x200);
+}
+
+
+void MainWindow::on_PbDAC1Restart_clicked()
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x018,0x1);
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x010,0x1);
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x1);
 }
 

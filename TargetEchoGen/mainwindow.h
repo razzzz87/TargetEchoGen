@@ -96,6 +96,12 @@ private slots:
     void on_PbNB_ADC_DDSFCWSet_clicked();
     void on_PbDAC1IQFileBrowse_clicked();
 
+    void on_PbDAC1Start_clicked();
+
+    void on_PbDAC1Stop_clicked();
+
+    void on_PbDAC1Restart_clicked();
+
 signals:
     void resizeEventTriggered();
 
