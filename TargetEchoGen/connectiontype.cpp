@@ -14,7 +14,7 @@ ConnectionType::ConnectionType(QWidget *parent)
     ui->LeConn10GIP->setText("192.168.30.245");
     ui->LeConnPS1GPort->setText("12345");
     ui->LeConnPL1GPort->setText("50002");
-    ui->LeConn10GPort->setText("12345");
+    ui->LeConn10GPort->setText("50000");
 
     ui->LblConnPS1GStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
     ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-circle-grey.png"));
@@ -122,16 +122,16 @@ void ConnectionType::on_PbConnPL1GConn_clicked()
 void ConnectionType::on_PbConn10GConn_clicked()
 {
     LOG_INFO("ConnectionType::on_PbConn10GConn_clicked() <ENTER>");
-    if(ui->PbConnPL1GConn->text() == "Connect")
+    if(ui->PbConn10GConn->text() == "Connect")
     {
-        QString TargetIP = ui->LeConnPL1GPort->text();
-        _pEthPL10G = EthernetSocket10G::Create("192.168.30.240",0,TargetIP,ui->LeConnPL1GPort->text().toInt());
+        QString TargetIP = ui->LeConn10GIP->text();
+        _pEthPL10G = EthernetSocket10G::Create("192.168.30.240",0,TargetIP,ui->LeConn10GPort->text().toInt());
         if(_pEthPL10G != nullptr)
         {
             ConnInfo info;
             info.connected = true;
-            info.ip = ui->LeConnPL1GIP->text();
-            info.port = ui->LeConnPL1GPort->text().toInt();
+            info.ip = ui->LeConn10GIP->text();
+            info.port = ui->LeConn10GPort->text().toInt();
             ConnectionHelper::instance().setConnected(eETH10G, true, info);
             ConnectionHelper::instance().setActive(eETH10G);     // make it the active TX path
 
@@ -142,8 +142,8 @@ void ConnectionType::on_PbConn10GConn_clicked()
         else
         {
             ConnectionHelper::instance().setConnected(eETH10G, false);
-            ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-            ui->PbConnPL1GConn->setText("Connect");
+            ui->LblConn10GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
+            ui->PbConn10GConn->setText("Connect");
             emit connectionFailed(eETH10G);
         }
     }
@@ -153,10 +153,10 @@ void ConnectionType::on_PbConn10GConn_clicked()
         {
             EthernetSocket10G::destroyInstance();
             ui->LblConnPL1GStatusLed->setPixmap(QPixmap(":/images/led-icon-red.jpg"));
-            ui->PbConnPL1GConn->setText("Connect");
+            ui->PbConn10GConn->setText("Connect");
             emit connectionFailed(eETH10G);
         }
     }
-    LOG_INFO("ConnectionType::on_PbConnPL1GConn_clicked() <EXIT>");
+    LOG_INFO("ConnectionType::on_PbConn10GConn_clicked() <EXIT>");
 }
 

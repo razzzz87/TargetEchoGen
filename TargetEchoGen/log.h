@@ -50,6 +50,8 @@ public:
 
 private:
     static void logWithLevel(const char* levelTag, const char* format, va_list args);
+    static void rolloverIfNeeded();
+    static void cleanupOldLogs();
     static QMutex mutex;
 };
 

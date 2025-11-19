@@ -566,6 +566,9 @@ void MainWindow::on_PbDAC1Apply_clicked()
         return;
     }
 
+    Utils::RegWrite(deviceType,0x5000,0x4);// ddr3 reset
+    Utils::RegWrite(deviceType,0x5000,0x0);
+
     int iPwSample = ui->SbDAC1PWSamples->value();
     int iSignalDelay  = ui->SbDAC1SignalDelay->value();
     int iDoplerShiftHz = ui->SbDAC1DopplerShiftHz->value();
@@ -577,6 +580,10 @@ void MainWindow::on_PbDAC1Apply_clicked()
     Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x6C,iSignalDelay);
     Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x40,iDoplerShiftHz);
 
+    Utils::RegWrite(deviceType,0x534,0x1);  // trigger start
+    Utils::RegWrite(deviceType,0x534,0x0);
+    Utils::RegWrite(deviceType,0x2018,0x1);// trigger enable
+    Utils::RegWrite(deviceType,0x2200,0x2);// DAC selection
 
 }
 
@@ -673,7 +680,21 @@ void MainWindow::on_PbDAC1Stop_clicked()
         LOG_ERROR("[WriteRegister] Interface not selected");
         return;
     }
-    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x1);
+    // Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x1);
+    // Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x0);
+    // Utils::RegWrite(deviceType,0x2118,0x0);
+    // Utils::RegWrite(deviceType,0x2158,0x0);
+    // Utils::RegWrite(deviceType,0x5000,0x8);
+    // Utils::RegWrite(deviceType,0x5000,0xC);
+    // Utils::RegWrite(deviceType,0x5000,0x4);
+    // Utils::RegWrite(deviceType,0x5000,0x0);
+    // Utils::RegWrite(deviceType,0x2118,0x200);
+    // Utils::RegWrite(deviceType,0x2158,0x200);
+
+
+
+
+    Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x010,0x0);
     Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x0);
     Utils::RegWrite(deviceType,0x2118,0x0);
     Utils::RegWrite(deviceType,0x2158,0x0);
@@ -697,4 +718,36 @@ void MainWindow::on_PbDAC1Restart_clicked()
     Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x010,0x1);
     Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x014,0x1);
 }
+
+
+void MainWindow::on_PbDAC1FIFOEntryErrorUpdate_clicked()
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+    Utils::RegWrite(deviceType,0x5000,0x80);
+    Utils::RegWrite(deviceType,0x5000,0x00);
+    Utils::RegWrite(deviceType,0x5004,0xF000);
+    Utils::RegWrite(deviceType,0x5000,0x100);
+    Utils::RegWrite(deviceType,0x5000,0x00);
+    Utils::RegWrite(deviceType,0x5000,0x80);
+    Utils::RegWrite(deviceType,0x5000,0x00);
+    Utils::RegWrite(deviceType,0x5004,0xF000);
+    Utils::RegWrite(deviceType,0x5000,0x100);
+    Utils::RegWrite(deviceType,0x5000,0x00);
+
+
+
+
+
+    uint32_t ReadVal = Utils::SpiDacRead(deviceType,0x05,0x02);
+    LOG_INFO("PbDAC1FIFOEntryErrorUpdate:Read Val %d",ReadVal);
+    Utils::SpiDacWrite(deviceType,0x05,0x00,0x2);
+    ReadVal = Utils::SpiDacRead(deviceType,0x05,0x02);
+    LOG_INFO("PbDAC1FIFOEntryErrorUpdate : After write Read Val %d",ReadVal);
+}
+
+
 

@@ -24,8 +24,8 @@ QString DeviceTypeToQStringDirect(DeviceType d)
 void LmkDefault60MhzSetting(iface deviceType)
 {
     // WR1 register write (as your WR1 example)
-    //Utils::SpiCtrlWriteReg(deviceType,0x5014, 0x00010000);
-    Utils::SpiCtrlWriteReg(deviceType, 0x530, 0x1); // old reg addr 51C
+    Utils::SpiCtrlWriteReg(deviceType,0x5014, 0x00010000);
+    // Utils::SpiCtrlWriteReg(deviceType, 0x530, 0x1); // old reg addr 51C
 
     // SPI synth register writes
     Utils::WriteSpiSynth(deviceType, 0x00, 0x0000010);
@@ -56,8 +56,8 @@ void LmkDefault60MhzSetting(iface deviceType)
 void LmkDefault120MhzSetting(iface deviceType)
 {
     // WR1 register write
-    //Utils::SpiCtrlWriteReg(deviceType,0x5014, 0x00010000);
-    Utils::SpiCtrlWriteReg(deviceType, 0x530, 0x0); // old reg addr 51C
+    Utils::SpiCtrlWriteReg(deviceType,0x5014, 0x00010000);
+    // Utils::SpiCtrlWriteReg(deviceType, 0x530, 0x0); // old reg addr 51C
 
     // SPI synth register writes (explicit and ordered for traceability)
     Utils::WriteSpiSynth(deviceType, 0x00, 0x0000010);
@@ -93,8 +93,10 @@ void Dac3DefaultSetting(iface deviceType)
     Utils::SpiDacWrite(deviceType, 0x01, 0x100E,0x2);
     Utils::SpiDacWrite(deviceType, 0x03, 0xF000,0x2);
     Utils::SpiDacWrite(deviceType, 0x04, 0xFDFD,0x2);
-    Utils::SpiDacWrite(deviceType, 0x05, 0x3900,0x2);
-    Utils::SpiDacWrite(deviceType, 0x06, 0x3D00,0x2);
+    // Utils::SpiDacWrite(deviceType, 0x05, 0x3900,0x2);
+    Utils::SpiDacWrite(deviceType, 0x05, 0x3E40,0x2);
+    // Utils::SpiDacWrite(deviceType, 0x06, 0x3D00,0x2);
+    Utils::SpiDacWrite(deviceType, 0x06, 0x2E00,0x2);
     Utils::SpiDacWrite(deviceType, 0x07, 0x0000,0x2);
     Utils::SpiDacWrite(deviceType, 0x08, 0x0000,0x2);
     Utils::SpiDacWrite(deviceType, 0x09, 0x8000,0x2);
@@ -112,7 +114,8 @@ void Dac3DefaultSetting(iface deviceType)
     Utils::SpiDacWrite(deviceType, 0x15, 0x0000,0x2);
     Utils::SpiDacWrite(deviceType, 0x16, 0x0000,0x2);
     Utils::SpiDacWrite(deviceType, 0x17, 0x0000,0x2);
-    Utils::SpiDacWrite(deviceType, 0x18, 0x2456,0x2);
+    // Utils::SpiDacWrite(deviceType, 0x18, 0x2456,0x2);
+    Utils::SpiDacWrite(deviceType, 0x18, 0x245C,0x2);
     Utils::SpiDacWrite(deviceType, 0x19, 0x0804,0x2);
     Utils::SpiDacWrite(deviceType, 0x1A, 0x7000,0x2);
     Utils::SpiDacWrite(deviceType, 0x1B, 0x0000,0x2);
@@ -136,7 +139,8 @@ void Dac3DefaultSetting(iface deviceType)
     Utils::SpiDacWrite(deviceType, 0x2E, 0x0000,0x2);
     Utils::SpiDacWrite(deviceType, 0x2F, 0x0000,0x2);
     Utils::SpiDacWrite(deviceType, 0x30, 0x0000,0x2);
-    Utils::SpiDacWrite(deviceType, 0x7F, 0x540C,0x2);
+    // Utils::SpiDacWrite(deviceType, 0x7F, 0x540C,0x2);
+    Utils::SpiDacWrite(deviceType, 0x7F, 0x0004,0x2);
 }
 
 

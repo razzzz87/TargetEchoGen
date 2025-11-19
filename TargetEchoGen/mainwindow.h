@@ -102,6 +102,10 @@ private slots:
 
     void on_PbDAC1Restart_clicked();
 
+    void on_PbDAC1FIFOEntryErrorUpdate_clicked();
+
+    // void on_LeDAC1TgrPulseWidthSample_cursorPositionChanged(int arg1, int arg2);
+
 signals:
     void resizeEventTriggered();
 
