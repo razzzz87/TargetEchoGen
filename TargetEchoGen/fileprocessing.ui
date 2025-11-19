@@ -17,15 +17,18 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>File processing</string>
+      <string>User Input</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
      <widget class="QGroupBox" name="groupBox_2">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>26</y>
-        <width>715</width>
-        <height>241</height>
+        <width>1111</width>
+        <height>261</height>
        </rect>
       </property>
       <property name="title">
@@ -52,10 +55,20 @@
             <item row="1" column="1">
              <widget class="QLineEdit" name="lineEdit_3"/>
             </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="lineEdit_2"/>
+            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label">
               <property name="text">
                <string>X-Axis</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Z-Axis</string>
               </property>
              </widget>
             </item>
@@ -66,13 +79,10 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="lineEdit_2"/>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_3">
+            <item row="3" column="1">
+             <widget class="QPushButton" name="pushButton_5">
               <property name="text">
-               <string>Z-Axis</string>
+               <string>Set</string>
               </property>
              </widget>
             </item>
@@ -84,11 +94,21 @@
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>Target Velocity</string>
+          <string>Target Velocty</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEdit_4"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Z-Axis</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_5">
               <property name="text">
@@ -103,21 +123,18 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_4"/>
-            </item>
             <item row="1" column="1">
              <widget class="QLineEdit" name="lineEdit_6"/>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Z-Axis</string>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="1">
              <widget class="QLineEdit" name="lineEdit_5"/>
+            </item>
+            <item row="3" column="1">
+             <widget class="QPushButton" name="pushButton_6">
+              <property name="text">
+               <string>Set</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -132,6 +149,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="lineEdit_8"/>
+            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_8">
               <property name="text">
@@ -141,6 +161,13 @@
             </item>
             <item row="1" column="1">
              <widget class="QLineEdit" name="lineEdit_9"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Z-Axis</string>
+              </property>
+             </widget>
             </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="lineEdit_7"/>
@@ -152,13 +179,10 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="lineEdit_8"/>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_9">
+            <item row="3" column="1">
+             <widget class="QPushButton" name="pushButton_7">
               <property name="text">
-               <string>Z-Axis</string>
+               <string>Set</string>
               </property>
              </widget>
             </item>
@@ -167,27 +191,12 @@
          </layout>
         </widget>
        </item>
-      </layout>
-     </widget>
-     <widget class="QGroupBox" name="groupBox_6">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>270</y>
-        <width>271</width>
-        <height>253</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string>Radar Co-ordinates</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
        <item>
-        <widget class="QGroupBox" name="groupBox_7">
+        <widget class="QGroupBox" name="groupBox_6">
          <property name="title">
-          <string>Radar Positions</string>
+          <string>Radar Co-ordinates</string>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="1" column="0">
@@ -235,163 +244,241 @@
          </layout>
         </widget>
        </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_8">
+         <property name="title">
+          <string>File Generation</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_5">
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_17">
+              <property name="text">
+               <string>AMPLITUDE </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>Power Offset</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3">
+             <widget class="QPushButton" name="pushButton_2">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QPushButton" name="pushButton_4">
+              <property name="text">
+               <string>GEN IQ BIN FILE</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="pushButton_3">
+              <property name="text">
+               <string>Apply</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>IQ SWAP</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_15">
+              <property name="text">
+               <string>Visible Zone</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2">
+             <widget class="QComboBox" name="comboBox">
+              <item>
+               <property name="text">
+                <string>SIN</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>COS</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>CONST</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>GAUSSIAN</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>LFM</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WAVEFORM-1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WAVEFORM-2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WAVEFORM-3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WAVEFORM-4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WAVEFORM-5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WAVEFORM-6</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>Waveform Type</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLineEdit" name="lineEdit_14"/>
+            </item>
+            <item row="1" column="2">
+             <widget class="QCheckBox" name="checkBox">
+              <property name="text">
+               <string>ON/OFF</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QCheckBox" name="checkBox_2">
+              <property name="text">
+               <string>ON/OFF</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
      </widget>
-     <widget class="QGroupBox" name="groupBox_8">
+     <widget class="QGroupBox" name="groupBox_9">
       <property name="geometry">
        <rect>
-        <x>290</x>
-        <y>270</y>
-        <width>439</width>
-        <height>252</height>
+        <x>10</x>
+        <y>290</y>
+        <width>1111</width>
+        <height>90</height>
        </rect>
       </property>
       <property name="title">
-       <string>File Generation</string>
+       <string>File input</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_9">
        <item>
-        <layout class="QGridLayout" name="gridLayout_5">
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>AMPLITUDE </string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>Power Offset</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="3">
-          <widget class="QPushButton" name="pushButton_2">
-           <property name="text">
-            <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QPushButton" name="pushButton">
-           <property name="text">
-            <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QPushButton" name="pushButton_4">
-           <property name="text">
-            <string>GEN IQ BIN FILE</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3">
-          <widget class="QPushButton" name="pushButton_3">
-           <property name="text">
-            <string>Apply</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_16">
-           <property name="text">
-            <string>IQ SWAP</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>Visible Zone</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QComboBox" name="comboBox">
-           <item>
-            <property name="text">
-             <string>SIN</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>COS</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>CONST</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>GAUSSIAN</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>LFM</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>WAVEFORM-1</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>WAVEFORM-2</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>WAVEFORM-3</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>WAVEFORM-4</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>WAVEFORM-5</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>WAVEFORM-6</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>Waveform Type</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLineEdit" name="lineEdit_14"/>
-         </item>
-         <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox">
-           <property name="text">
-            <string>ON/OFF</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QCheckBox" name="checkBox_2">
-           <property name="text">
-            <string>ON/OFF</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>CSV File</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_15"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_8">
+         <property name="text">
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_9">
+         <property name="text">
+          <string>Send</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_10">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>390</y>
+        <width>1109</width>
+        <height>87</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string> Real time Input</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <item>
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>CSV File</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_16"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_10">
+         <property name="text">
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_11">
+         <property name="text">
+          <string>Send</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

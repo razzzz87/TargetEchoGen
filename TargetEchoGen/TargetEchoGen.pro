@@ -9,6 +9,15 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 win32:LIBS += -lws2_32
 QMAKE_CXXFLAGS += -Wa,-mbig-obj
+
+# ------------ NPCAP SDK (LOCAL COPY) ----------------
+
+NPCAP_PATH = $$PWD/3rdparty/npcap
+INCLUDEPATH += $$NPCAP_PATH/Include
+LIBS += -L$$NPCAP_PATH/Lib/x64 -lwpcap -lPacket -lws2_32
+
+# -----------------------------------------------------
+
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -30,6 +39,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     matfileprocessing.cpp \
+    packetforwarder.cpp \
     playbackhelper.cpp \
     proto.cpp \
     qcustomplot.cpp \
@@ -61,6 +71,7 @@ HEADERS += \
     log.h \
     mainwindow.h \
     matfileprocessing.h \
+    packetforwarder.h \
     playbackhelper.h \
     proto.h \
     qcustomplot.h \
@@ -113,3 +124,10 @@ LIBS += -L$$QWTLIB_PATH -lqwt
 
 INCLUDEPATH += $$PWD/qwtlib/qwt-6.3.0/include
 DEPENDPATH += $$PWD/qwtlib/qwt-6.3.0/include
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/3rdparty/npcap/Lib/release/ -lPacket
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/3rdparty/npcap/Lib/debug/ -lPacket
+else:unix:!macx: LIBS += -L$$PWD/3rdparty/npcap/Lib/ -lPacket
+
+INCLUDEPATH += $$PWD/3rdparty/npcap/Include
+DEPENDPATH += $$PWD/3rdparty/npcap/Include
