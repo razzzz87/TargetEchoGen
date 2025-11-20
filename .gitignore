@@ -1,2 +1,5 @@
 TargetEchoGen/build
 TargetEchoGen/data
+3rdparty/npcap/docs/
+TargetEchoGen/3rdparty/npcap/docs/wpcap/
+
