@@ -1,9 +1,8 @@
 #include "packetforwarder.h"
 #include "log.h"
-#include <pcap.h>
+
 #include <cstdint>
 #include <cstring>
-#include <cstdio>
 #include <string>
 
 #ifdef _WIN32
@@ -15,144 +14,15 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <errno.h>
 #endif
+
 static constexpr size_t STRUCT_SIZE = sizeof(UdpPayload);
-// ---------------------------------------------------------------------
-// Constructor / Destructor
-// ---------------------------------------------------------------------
-PacketForwarder::PacketForwarder(const QString &interfaceName,
-                                 quint16 listenUdpPort,
-                                 const QString &forwardIp,
-                                 quint16 forwardUdpPort,
-                                 const QString &dumpFilePath,
-                                 QObject *parent)
-    : QThread(parent),
-    m_interfaceName(interfaceName),
-    m_listenUdpPort(listenUdpPort),
-    m_forwardIp(forwardIp),
-    m_forwardUdpPort(forwardUdpPort),
-    m_dumpFilePath(dumpFilePath),
-    m_stopRequested(false),
-    m_pcapHandle(nullptr),
-    m_pcapDumper(nullptr),
-    m_udpSock(-1)
-#ifdef _WIN32
-    , m_wsaInitialized(false)
-#endif
-{
-    Xtp = 0.0;
-    Ytp = 0.0;
-    Ztp = 0.0;
-}
-
-PacketForwarder::~PacketForwarder()
-{
-    stop();
-    wait();     // wait for thread to exit cleanly
-}
 
 // ---------------------------------------------------------------------
-// Public API
+// Small helper for ISO8601 timestamps
 // ---------------------------------------------------------------------
-void PacketForwarder::stop()
-{
-    m_stopRequested.store(true, std::memory_order_relaxed);
-}
-
-// ---------------------------------------------------------------------
-// Thread entry
-// ---------------------------------------------------------------------
-void PacketForwarder::run()
-{
-    if (!initialize()) {
-        LOG_ERROR("PacketForwarder: initialization failed, exiting thread.");
-        cleanup();  // in case of partial init
-        return;
-    }
-
-    LOG_INFO("PacketForwarder: initialization OK, entering capture loop.");
-    captureLoop();
-    cleanup();
-    LOG_INFO("PacketForwarder: thread exited.");
-}
-
-bool PacketForwarder::applyFilter(const QString &filterString)
-{
-    if (!m_pcapHandle)
-        return false;
-
-    QByteArray filterBA = filterString.toLocal8Bit();
-
-    struct bpf_program fp;
-    bpf_u_int32 netmask = PCAP_NETMASK_UNKNOWN;
-
-    if (pcap_compile(m_pcapHandle, &fp, filterBA.constData(), 1, netmask) == -1) {
-        LOG_ERROR("pcap_compile failed: %s", pcap_geterr(m_pcapHandle));
-        return false;
-    }
-
-    if (pcap_setfilter(m_pcapHandle, &fp) == -1) {
-        LOG_ERROR("pcap_setfilter failed: %s", pcap_geterr(m_pcapHandle));
-        pcap_freecode(&fp);
-        return false;
-    }
-
-    pcap_freecode(&fp);
-    return true;
-}
-bool PacketForwarder::openLogFile(const std::string &path)
-{
-    g_logFile.open(path, std::ios::out | std::ios::app | std::ios::binary);
-    return g_logFile.is_open();
-}
-
-void PacketForwarder::LogPacket(const std::string &ts, uint32_t msg_num, uint32_t id_field, double x, double y, double z,double dist, double delay_us)
-{
-    if (!g_logFile.is_open())
-        return;
-
-    char buffer[256];
-    int n = snprintf(buffer, sizeof(buffer),
-                     "[%s] msg#%u id=0x%08X -> "
-                     "x=%.3f, y=%.3f, z=%.3f | "
-                     "dist=%.3f m | delay=%.3f us\n",
-                     ts.c_str(),
-                     msg_num,
-                     id_field,
-                     x, y, z,
-                     dist,
-                     delay_us);
-
-    if (n > 0)
-        g_logFile.write(buffer, n);   // no flush: VERY FAST
-}
-void PacketForwarder::LogCSV(const std::string &ts,
-                uint32_t msg_num,
-                uint32_t id_field,
-                double x, double y, double z,
-                double Xtp, double Ytp, double Ztp,
-                double dist, double delay)
-{
-    if (!g_logFile.is_open())
-        return;
-
-    char buffer[256];
-
-    int n = snprintf(buffer, sizeof(buffer),
-                     "%s,%u,0x%08X,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.12f\n",
-                     ts.c_str(),
-                     msg_num,
-                     id_field,
-                     x, y, z,
-                     Xtp, Ytp, Ztp,
-                     dist,
-                     delay);   // delay IN SECONDS to match Python
-
-    if (n > 0)
-        g_logFile.write(buffer, n);
-}
-// Simple UTC ISO8601 timestamp like Python's datetime.utcnow().isoformat() + "Z"
-std::string PacketForwarder::now_utc_iso8601()
+static std::string utc_iso8601_now()
 {
     using namespace std::chrono;
     auto now = system_clock::now();
@@ -171,404 +41,413 @@ std::string PacketForwarder::now_utc_iso8601()
     oss << '.' << std::setw(6) << std::setfill('0') << us.count() << 'Z';
     return oss.str();
 }
-// ---------------------------------------------------------------------
-// initialize() – handles:
-//  - Winsock (Windows)
-//  - pcap device open
-//  - BPF filter
-//  - pcap dumper
-//  - UDP socket creation
-// ---------------------------------------------------------------------
-bool PacketForwarder::initialize()
-{
-    char errbuf[PCAP_ERRBUF_SIZE] = {0};
 
+// =====================================================================
+// PacketForwarder implementation
+// =====================================================================
+
+PacketForwarder::PacketForwarder(const QString &srcIp,
+                                 quint16 srcPort,
+                                 const QString &dstIp,
+                                 quint16 dstPort,
+                                 const QString &csvPath,
+                                 QObject *parent)
+    : QThread(parent),
+    m_srcIp(srcIp),
+    m_srcPort(srcPort),
+    m_dstIp(dstIp),
+    m_dstPort(dstPort),
+    m_csvPath(csvPath),
+    m_stopRequested(false),
+    m_srcSock(-1),
+    m_dstSock(-1)
 #ifdef _WIN32
-    // Initialize Winsock
-    WSADATA wsaData;
-    int wsaRes = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (wsaRes != 0) {
-        LOG_ERROR("WSAStartup failed: %d", wsaRes);
-        return false;
-    }
-    m_wsaInitialized = true;
+    , m_wsaInitialized(false)
 #endif
+{
+}
 
-    // -------------------------------------------------------------
-    // 1. Find capture interface
-    // -------------------------------------------------------------
-    pcap_if_t *alldevs = nullptr;
-    if (pcap_findalldevs(&alldevs, errbuf) == -1) {
-        LOG_ERROR("pcap_findalldevs failed: %s", errbuf);
-        return false;
-    }
+PacketForwarder::~PacketForwarder()
+{
+    stop();
+    wait();
+}
 
-    pcap_if_t *chosenDev = nullptr;
+void PacketForwarder::stop()
+{
+    m_stopRequested.store(true, std::memory_order_relaxed);
+}
 
-    if (!m_interfaceName.isEmpty()) {
-        for (pcap_if_t *d = alldevs; d != nullptr; d = d->next) {
-            if (QString::fromLocal8Bit(d->name) == m_interfaceName) {
-                chosenDev = d;
-                break;
-            }
-        }
-    }
+void PacketForwarder::setTarget(double Xtp, double Ytp, double Ztp)
+{
+    m_Xtp = Xtp;
+    m_Ytp = Ytp;
+    m_Ztp = Ztp;
+}
 
-    // If no match, fall back to first device
-    if (!chosenDev) {
-        chosenDev = alldevs;
-    }
-
-    if (!chosenDev) {
-        LOG_ERROR("No capture interfaces found.");
-        pcap_freealldevs(alldevs);
-        return false;
-    }
+// ---------------------------------------------------------------------
+// CSV helpers
+// ---------------------------------------------------------------------
+bool PacketForwarder::openCsv(const std::string &path)
+{
+    bool first = false;
 
     {
-        std::string name = chosenDev->name ? chosenDev->name : "<null>";
-        LOG_INFO("Using capture interface: %s", name.c_str());
+        std::ifstream test(path, std::ios::in | std::ios::binary);
+        first = !test.good();
     }
 
-    // -------------------------------------------------------------
-    // 2. Open device for live capture
-    // -------------------------------------------------------------
-    m_pcapHandle = pcap_open_live(chosenDev->name,
-                                  65535,  // snaplen
-                                  1,      // promiscuous
-                                  1000,   // timeout (ms)
-                                  errbuf);
-
-    pcap_freealldevs(alldevs);
-    if (!m_pcapHandle) {
-        LOG_ERROR("pcap_open_live failed: %s", errbuf);
+    m_csv.open(path, std::ios::out | std::ios::app);
+    if (!m_csv.is_open()) {
+        LOG_ERROR("PacketForwarder: Failed to open CSV file: %s", path.c_str());
         return false;
     }
 
-    // -------------------------------------------------------------
-    // 3. Compile & set BPF filter: "udp and dst port <listenPort>"
-    // -------------------------------------------------------------
-    QString filterStr = QString(
-                            "udp and src host %1 and dst host %2 and dst port %3"
-                            ).arg("10.0.0.5")
-                            .arg("192.168.1.10")
-                            .arg(5000);
-
-    if (!applyFilter(filterStr)) {
-        LOG_ERROR("Failed to apply filter: %s", filterStr.toStdString().c_str());
-        return false;
+    if (first) {
+        m_csv << "timestamp_utc,msg_number,id_hex,"
+              << "x,y,z,Xtp,Ytp,Ztp,distance_m,delay_s\n";
+        m_csv.flush();
     }
-
-    // -------------------------------------------------------------
-    // 4. Open pcap dumper (full Ethernet frames to file)
-    // -------------------------------------------------------------
-    QByteArray dumpFileBA = m_dumpFilePath.toLocal8Bit();
-    m_pcapDumper = pcap_dump_open(m_pcapHandle, dumpFileBA.constData());
-    if (!m_pcapDumper) {
-        LOG_ERROR("pcap_dump_open failed: %s", pcap_geterr(m_pcapHandle));
-        return false;
-    }
-
-    // -------------------------------------------------------------
-    // 5. Create UDP socket for forwarding
-    // -------------------------------------------------------------
-    m_udpSock = ::socket(AF_INET, SOCK_DGRAM, 0);
-    if (m_udpSock < 0) {
-        LOG_ERROR("socket() failed for UDP forwarder.");
-        return false;
-    }
-
-    std::string ipStr = m_forwardIp.toStdString();
-    LOG_INFO("PacketForwarder config: listen UDP dst=%u, forward=%s:%u, dump=%s", static_cast<unsigned>(m_listenUdpPort), ipStr.c_str(), static_cast<unsigned>(m_forwardUdpPort), m_dumpFilePath.toStdString().c_str());
 
     return true;
 }
 
-void PacketForwarder::captureLoop()
+void PacketForwarder::writeCsvRow(const std::string &ts,
+                                  uint32_t msg_num,
+                                  uint32_t id_field,
+                                  double x, double y, double z,
+                                  double dist, double delay_s)
 {
-    // Pre-build destination address (for forwarding if you still want it)
-    sockaddr_in destAddr{};
-    destAddr.sin_family = AF_INET;
-    destAddr.sin_port   = htons(m_forwardUdpPort);
+    if (!m_csv.is_open())
+        return;
 
-    std::string ipStr = m_forwardIp.toStdString();
+    char id_hex[16];
+    std::snprintf(id_hex, sizeof(id_hex), "0x%08X", id_field);
 
-#ifdef _WIN32
-    if (InetPtonA(AF_INET, ipStr.c_str(), &destAddr.sin_addr) != 1) {
-        LOG_ERROR("InetPtonA failed for IP %s, forwarding may fail.", ipStr.c_str());
-    }
-#else
-    if (::inet_pton(AF_INET, ipStr.c_str(), &destAddr.sin_addr) != 1) {
-        LOG_ERROR("inet_pton failed for IP %s, forwarding may fail.", ipStr.c_str());
-    }
-#endif
+    m_csv << ts << ","
+          << msg_num << ","
+          << id_hex << ","
+          << std::fixed << std::setprecision(6)
+          << x << "," << y << "," << z << ","
+          << m_Xtp << "," << m_Ytp << "," << m_Ztp << ","
+          << dist << ","
+          << std::setprecision(12) << delay_s
+          << "\n";
 
-    while (!m_stopRequested.load(std::memory_order_relaxed)) {
-        struct pcap_pkthdr *header = nullptr;
-        const u_char *data = nullptr;
-
-        int res = pcap_next_ex(m_pcapHandle, &header, &data);
-
-        if (res == 0) {
-            // timeout; no packet
-            // (Python: socket.timeout => "waiting for packet... (timeout)")
-            // You can log periodically if you want.
-            continue;
-        }
-        if (res == -1) {
-            LOG_ERROR("pcap_next_ex error: %s", pcap_geterr(m_pcapHandle));
-            break;
-        }
-        if (res == -2) {
-            LOG_INFO("pcap_next_ex returned EOF (offline capture?).");
-            break;
-        }
-
-        // 1) Dump full Ethernet frame (like saving raw packets)
-        pcap_dump(reinterpret_cast<u_char *>(m_pcapDumper), header, data);
-
-        // 2) Parse Ethernet + IPv4 + UDP to get payload (same as before)
-        if (header->caplen < 14 + 20 + 8)
-            continue;   // too short
-
-        const u_char *eth = data;
-        uint16_t etherType = static_cast<uint16_t>((eth[12] << 8) | eth[13]);
-
-        // Only IPv4
-        if (etherType != 0x0800)
-            continue;
-
-        const u_char *ip = eth + 14;
-        uint8_t versionIhl = ip[0];
-        uint8_t ihl = versionIhl & 0x0F;
-        int ipHeaderLen = ihl * 4;
-
-        if (header->caplen < 14 + ipHeaderLen + 8)
-            continue;
-
-        uint8_t protocol = ip[9];
-        if (protocol != 17)   // UDP = 17
-            continue;
-
-        const u_char *udp = ip + ipHeaderLen;
-
-        uint16_t dstPort = static_cast<uint16_t>((udp[2] << 8) | udp[3]);
-        uint16_t udpLen  = static_cast<uint16_t>((udp[4] << 8) | udp[5]);
-
-        if (dstPort != m_listenUdpPort)
-            continue;
-
-        if (udpLen <= 8)
-            continue;
-
-        int payloadLen = udpLen - 8;
-        const char *payload = reinterpret_cast<const char *>(udp + 8);
-
-        if (header->caplen < 14 + ipHeaderLen + 8 + payloadLen)
-            continue;
-
-        // -----------------------------------------------------------------
-        // 3) Now replicate the Python UDP client logic on THIS payload
-        // -----------------------------------------------------------------
-
-        if (payloadLen < static_cast<int>(STRUCT_SIZE)) {
-            LOG_ERROR("[CLIENT] Received packet too small: %d bytes", payloadLen);
-            continue;
-        }
-
-        UdpPayload up{};
-        std::memcpy(&up, payload, STRUCT_SIZE);
-
-        // If your struct is in network byte order, convert integers:
-        // up.id_field = ntohl(up.id_field);
-        // up.msg_num  = ntohl(up.msg_num);
-        // up.reserved = ntohl(up.reserved);
-
-        double x = up.x;
-        double y = up.y;
-        double z = up.z;
-
-        double dist = 0.0;
-        double delay = 0.0;
-        compute_delay(Xtp, Ytp, Ztp, x, y, z, dist, delay);
-
-        std::string ts = now_utc_iso8601();
-
-        // Log similar to Python:
-        // f"[{ts}] msg#{msg_num} id=0x{id_field:08X} -> x=... | dist=... | delay=... µs"
-        LOG_INFO("[%s] msg#%u id=0x%08X -> x=%.3f, y=%.3f, z=%.3f | dist=%.3f m | delay=%.3f us",ts.c_str(),up.msg_num,up.id_field,x, y, z,dist,delay * 1e6);
-
-        // -----------------------------------------------------------------
-        // 4) Forward UDP payload (if you still want to relay it)
-        // -----------------------------------------------------------------
-        int sent = ::sendto(m_udpSock,
-                            payload,
-                            payloadLen,
-                            0,
-                            reinterpret_cast<sockaddr *>(&destAddr),
-                            sizeof(destAddr));
-
-        if (sent != payloadLen) {
-            LOG_ERROR("sendto() failed or partial send. Sent=%d, expected=%d",
-                      sent, payloadLen);
-        }
-
-        // CSV file writing is intentionally omitted (as you requested).
-    }
+    m_csv.flush();
 }
-#if 0
+
 // ---------------------------------------------------------------------
-// captureLoop() – continuous:
-//   - pcap_next_ex()
-//   - dump full Ethernet frame to .pcap
-//   - parse Ethernet + IPv4 + UDP
-//   - send UDP payload via socket
+// Time + delay
 // ---------------------------------------------------------------------
-void PacketForwarder::captureLoop()
+std::string PacketForwarder::now_utc_iso8601()
 {
-    // Pre-build destination address
-    sockaddr_in destAddr{};
-    destAddr.sin_family = AF_INET;
-    destAddr.sin_port = htons(m_forwardUdpPort);
-
-    std::string ipStr = m_forwardIp.toStdString();
-
-#ifdef _WIN32
-    if (InetPtonA(AF_INET, ipStr.c_str(), &destAddr.sin_addr) != 1) {
-        LOG_ERROR("InetPtonA failed for IP %s, forwarding may fail.", ipStr.c_str());
-    }
-#else
-    if (::inet_pton(AF_INET, ipStr.c_str(), &destAddr.sin_addr) != 1) {
-        LOG_ERROR("inet_pton failed for IP %s, forwarding may fail.", ipStr.c_str());
-    }
-#endif
-
-    while (!m_stopRequested.load(std::memory_order_relaxed)) {
-        struct pcap_pkthdr *header = nullptr;
-        const u_char *data = nullptr;
-
-        int res = pcap_next_ex(m_pcapHandle, &header, &data);
-
-        if (res == 0) {
-            // timeout; no packet
-            continue;
-        }
-        if (res == -1) {
-            LOG_ERROR("pcap_next_ex error: %s", pcap_geterr(m_pcapHandle));
-            break;
-        }
-        if (res == -2) {
-            LOG_INFO("pcap_next_ex returned EOF (offline capture?).");
-            break;
-        }
-
-        // 1) Dump full Ethernet frame
-        pcap_dump(reinterpret_cast<u_char *>(m_pcapDumper), header, data);
-
-        // 2) Parse Ethernet + IPv4 + UDP to get payload
-        if (header->caplen < 14 + 20 + 8)
-            continue;   // too short
-
-        const u_char *eth = data;
-        uint16_t etherType = static_cast<uint16_t>((eth[12] << 8) | eth[13]);
-
-        // Only IPv4
-        if (etherType != 0x0800)
-            continue;
-
-        const u_char *ip = eth + 14;
-        uint8_t versionIhl = ip[0];
-        uint8_t ihl = versionIhl & 0x0F;
-        int ipHeaderLen = ihl * 4;
-
-        if (header->caplen < 14 + ipHeaderLen + 8)
-            continue;
-
-        uint8_t protocol = ip[9];
-        if (protocol != 17)   // UDP = 17
-            continue;
-
-        const u_char *udp = ip + ipHeaderLen;
-
-        uint16_t dstPort = static_cast<uint16_t>((udp[2] << 8) | udp[3]);
-        uint16_t udpLen  = static_cast<uint16_t>((udp[4] << 8) | udp[5]);
-
-        if (dstPort != m_listenUdpPort)
-            continue;
-
-        if (udpLen <= 8)
-            continue;
-
-        int payloadLen = udpLen - 8;
-        const char *payload = reinterpret_cast<const char *>(udp + 8);
-
-        if (header->caplen < 14 + ipHeaderLen + 8 + payloadLen)
-            continue;
-
-        // 3) Forward UDP payload via socket
-        int sent = ::sendto(m_udpSock, payload, payloadLen, 0, reinterpret_cast<sockaddr *>(&destAddr), sizeof(destAddr));
-        if (sent != payloadLen) {
-            LOG_ERROR("sendto() failed or partial send. Sent=%d, expected=%d",
-                      sent, payloadLen);
-        }
-    }
-}
-#endif
-
-double PacketForwarder::random_uniform(double a, double b)
-{
-    static std::mt19937 rng(std::random_device{}());
-    std::uniform_real_distribution<double> dist(a, b);
-    return dist(rng);
-}
-
-Position PacketForwarder::generate_position(double t)
-{
-    Position p;
-
-    // Synthetic circular motion + noise
-    p.x = 100.0 * std::cos(0.5 * t) + 0.5 * random_uniform(-1.0, 1.0);
-    p.y = 100.0 * std::sin(0.5 * t) + 0.5 * random_uniform(-1.0, 1.0);
-    p.z = 50.0 + 0.1 * t + 0.2 * random_uniform(-1.0, 1.0);
-
-    return p;
+    return utc_iso8601_now();
 }
 
 void PacketForwarder::compute_delay(double Xtp, double Ytp, double Ztp,
-                   double x, double y, double z,
-                   double &dist, double &delay)
+                                    double x, double y, double z,
+                                    double &dist, double &delay)
 {
     double dx = Xtp - x;
     double dy = Ytp - y;
     double dz = Ztp - z;
 
     dist = std::sqrt(dx*dx + dy*dy + dz*dz);
-
-    // round trip delay
     delay = 2.0 * dist / SPEED_OF_LIGHT;
 }
+
 // ---------------------------------------------------------------------
-// cleanup() – release all resources
+// Thread entry
+// ---------------------------------------------------------------------
+void PacketForwarder::run()
+{
+    if (!initialize()) {
+        LOG_ERROR("PacketForwarder: initialization failed, exiting thread.");
+        cleanup();
+        return;
+    }
+
+    if (!m_csvPath.isEmpty()) {
+        openCsv(m_csvPath.toStdString());
+    }
+
+    LOG_INFO("PacketForwarder: initialization OK, entering relay loop.");
+    relayLoop();
+    cleanup();
+    LOG_INFO("PacketForwarder: thread exited.");
+}
+
+// ---------------------------------------------------------------------
+// initialize() – create two client sockets:
+//  - m_srcSock: talk to IMS server (send READY, recv)
+//  - m_dstSock: forward packets to other server
+// ---------------------------------------------------------------------
+bool PacketForwarder::initialize()
+{
+#ifdef _WIN32
+    WSADATA wsaData;
+    int wsaRes = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (wsaRes != 0) {
+        LOG_ERROR("PacketForwarder: WSAStartup failed: %d", wsaRes);
+        return false;
+    }
+    m_wsaInitialized = true;
+#endif
+
+    // 1) SRC socket: this is the "client" to the IMS server (server.py style)
+    m_srcSock = ::socket(AF_INET, SOCK_DGRAM, 0);
+#ifdef _WIN32
+    if (m_srcSock == INVALID_SOCKET) {
+        LOG_ERROR("PacketForwarder: src socket() failed: %d", WSAGetLastError());
+        return false;
+    }
+#else
+    if (m_srcSock < 0) {
+        LOG_ERROR("PacketForwarder: src socket() failed: %s", strerror(errno));
+        return false;
+    }
+#endif
+
+    // Bind to local ephemeral port (like Python LOCAL_BIND = ('',0))
+    sockaddr_in localAddr{};
+    localAddr.sin_family = AF_INET;
+    localAddr.sin_port   = htons(0);  // 0 => ephemeral
+
+    localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if (::bind(m_srcSock,
+               reinterpret_cast<sockaddr*>(&localAddr),
+               sizeof(localAddr)) < 0) {
+#ifdef _WIN32
+        LOG_ERROR("PacketForwarder: bind(srcSock) failed: %d", WSAGetLastError());
+#else
+        LOG_ERROR("PacketForwarder: bind(srcSock) failed: %s", strerror(errno));
+#endif
+        return false;
+    }
+
+// Optional timeout on recv
+#ifdef _WIN32
+    {
+        DWORD timeoutMs = 2000;
+        setsockopt(m_srcSock, SOL_SOCKET, SO_RCVTIMEO,
+                   reinterpret_cast<const char*>(&timeoutMs), sizeof(timeoutMs));
+    }
+#else
+    {
+        timeval tv{};
+        tv.tv_sec  = 2;
+        tv.tv_usec = 0;
+        setsockopt(m_srcSock, SOL_SOCKET, SO_RCVTIMEO,
+                   &tv, sizeof(tv));
+    }
+#endif
+
+    // Build IMS server address
+    sockaddr_in srcServer{};
+    srcServer.sin_family = AF_INET;
+    srcServer.sin_port   = htons(m_srcPort);
+
+    std::string srcIpStr = m_srcIp.toStdString();
+#ifdef _WIN32
+    if (InetPtonA(AF_INET, srcIpStr.c_str(), &srcServer.sin_addr) != 1) {
+        LOG_ERROR("PacketForwarder: InetPtonA failed for src IP %s", srcIpStr.c_str());
+        return false;
+    }
+#else
+    if (::inet_pton(AF_INET, srcIpStr.c_str(), &srcServer.sin_addr) != 1) {
+        LOG_ERROR("PacketForwarder: inet_pton failed for src IP %s", srcIpStr.c_str());
+        return false;
+    }
+#endif
+
+    // Print local address
+    {
+        sockaddr_in actualLocal{};
+        socklen_t   len = sizeof(actualLocal);
+        if (getsockname(m_srcSock, reinterpret_cast<sockaddr*>(&actualLocal), &len) == 0) {
+            char addrBuf[64];
+#ifdef _WIN32
+            InetNtopA(AF_INET, &actualLocal.sin_addr, addrBuf, sizeof(addrBuf));
+#else
+            inet_ntop(AF_INET, &actualLocal.sin_addr, addrBuf, sizeof(addrBuf));
+#endif
+            LOG_INFO("[CLIENT] srcSock bound to %s:%u, sending READY to %s:%u",
+                     addrBuf,
+                     ntohs(actualLocal.sin_port),
+                     srcIpStr.c_str(),
+                     static_cast<unsigned>(m_srcPort));
+        }
+    }
+
+    // Send READY to IMS server (like Python client)
+    {
+        const char readyPayload[] = "READY";
+        int sent = ::sendto(m_srcSock,
+                            readyPayload,
+                            sizeof(readyPayload) - 1,
+                            0,
+                            reinterpret_cast<sockaddr*>(&srcServer),
+                            sizeof(srcServer));
+        if (sent <= 0) {
+            LOG_ERROR("[CLIENT] Failed to send READY to IMS server");
+            return false;
+        }
+    }
+
+    // 2) DST socket: used only to forward packets to another server
+    m_dstSock = ::socket(AF_INET, SOCK_DGRAM, 0);
+#ifdef _WIN32
+    if (m_dstSock == INVALID_SOCKET) {
+        LOG_ERROR("PacketForwarder: dst socket() failed: %d", WSAGetLastError());
+        return false;
+    }
+#else
+    if (m_dstSock < 0) {
+        LOG_ERROR("PacketForwarder: dst socket() failed: %s", strerror(errno));
+        return false;
+    }
+#endif
+
+    // That's it; we build dst address on every send in relayLoop.
+    LOG_INFO("PacketForwarder SRC server=%s:%u, DST server=%s:%u",
+             srcIpStr.c_str(),
+             static_cast<unsigned>(m_srcPort),
+             m_dstIp.toStdString().c_str(),
+             static_cast<unsigned>(m_dstPort));
+
+    return true;
+}
+
+// ---------------------------------------------------------------------
+// relayLoop() – recv from m_srcSock, process, forward via m_dstSock
+// ---------------------------------------------------------------------
+void PacketForwarder::relayLoop()
+{
+    char buf[2048];
+
+    // Pre-build destination address for forwarding
+    sockaddr_in dstAddr{};
+    dstAddr.sin_family = AF_INET;
+    dstAddr.sin_port   = htons(m_dstPort);
+
+    std::string dstIpStr = m_dstIp.toStdString();
+#ifdef _WIN32
+    if (InetPtonA(AF_INET, dstIpStr.c_str(), &dstAddr.sin_addr) != 1) {
+        LOG_ERROR("PacketForwarder: InetPtonA failed for dst IP %s", dstIpStr.c_str());
+        // we still run, but forwarding will fail
+    }
+#else
+    if (::inet_pton(AF_INET, dstIpStr.c_str(), &dstAddr.sin_addr) != 1) {
+        LOG_ERROR("PacketForwarder: inet_pton failed for dst IP %s", dstIpStr.c_str());
+    }
+#endif
+
+    while (!m_stopRequested.load(std::memory_order_relaxed)) {
+        sockaddr_in srcAddr{};
+        socklen_t   addrLen = sizeof(srcAddr);
+
+        int n = ::recvfrom(m_srcSock,
+                           buf,
+                           static_cast<int>(sizeof(buf)),
+                           0,
+                           reinterpret_cast<sockaddr*>(&srcAddr),
+                           &addrLen);
+        if (n < 0) {
+#ifdef _WIN32
+            int err = WSAGetLastError();
+            if (err == WSAETIMEDOUT) {
+                LOG_INFO("[CLIENT] waiting for packet... (timeout)");
+                continue;
+            }
+            if (err == WSAEINTR)
+                continue;
+            LOG_ERROR("PacketForwarder: recvfrom() failed: %d", err);
+#else
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                LOG_INFO("[CLIENT] waiting for packet... (timeout)");
+                continue;
+            }
+            if (errno == EINTR)
+                continue;
+            LOG_ERROR("PacketForwarder: recvfrom() failed: %s", strerror(errno));
+#endif
+            break;
+        }
+        if (n == 0)
+            continue;
+
+        if (n < static_cast<int>(STRUCT_SIZE)) {
+            LOG_ERROR("[CLIENT] Received packet too small: %d bytes", n);
+            continue;
+        }
+
+        UdpPayload up{};
+        std::memcpy(&up, buf, STRUCT_SIZE);
+
+        // If server sends big-endian ints, convert here (depends on server impl)
+        // up.id_field = ntohl(up.id_field);
+        // up.msg_num  = ntohl(up.msg_num);
+
+        double x = up.x;
+        double y = up.y;
+        double z = up.z;
+
+        double dist  = 0.0;
+        double delay = 0.0;
+        compute_delay(m_Xtp, m_Ytp, m_Ztp, x, y, z, dist, delay);
+
+        std::string ts = now_utc_iso8601();
+
+        LOG_INFO("[%s] msg#%u id=0x%08X -> x=%.3f, y=%.3f, z=%.3f | "
+                 "dist=%.3f m | delay=%.3f us",
+                 ts.c_str(),
+                 up.msg_num,
+                 up.id_field,
+                 x, y, z,
+                 dist,
+                 delay * 1e6);
+
+        writeCsvRow(ts, up.msg_num, up.id_field, x, y, z, dist, delay);
+
+        // Forward the *same* payload to other server via m_dstSock
+        if (m_dstPort != 0 && !dstIpStr.empty()) {
+            int sent = ::sendto(m_dstSock,
+                                buf,
+                                n,
+                                0,
+                                reinterpret_cast<sockaddr*>(&dstAddr),
+                                sizeof(dstAddr));
+            if (sent != n) {
+                LOG_ERROR("PacketForwarder: sendto(dst) failed or partial send. Sent=%d, expected=%d",
+                          sent, n);
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------
+// cleanup()
 // ---------------------------------------------------------------------
 void PacketForwarder::cleanup()
 {
-    if (m_pcapDumper) {
-        pcap_dump_close(m_pcapDumper);
-        m_pcapDumper = nullptr;
-    }
-
-    if (m_pcapHandle) {
-        pcap_close(m_pcapHandle);
-        m_pcapHandle = nullptr;
-    }
-
-    if (m_udpSock >= 0) {
+    if (m_srcSock >= 0) {
 #ifdef _WIN32
-        ::closesocket(m_udpSock);
+        ::closesocket(m_srcSock);
 #else
-        ::close(m_udpSock);
+        ::close(m_srcSock);
 #endif
-        m_udpSock = -1;
+        m_srcSock = -1;
+    }
+
+    if (m_dstSock >= 0) {
+#ifdef _WIN32
+        ::closesocket(m_dstSock);
+#else
+        ::close(m_dstSock);
+#endif
+        m_dstSock = -1;
     }
 
 #ifdef _WIN32
@@ -577,4 +456,19 @@ void PacketForwarder::cleanup()
         m_wsaInitialized = false;
     }
 #endif
+
+    if (m_csv.is_open())
+        m_csv.close();
 }
+
+// auto relay = new PacketForwarder(
+//     "127.0.0.1",      // src server IP (IMS server / server.py)
+//     0xD407,           // src server port
+//     "192.168.1.50",   // dst server IP (where you forward)
+//     6000,             // dst server port
+//     "relay_log.csv",  // CSV log
+//     this
+//     );
+
+// relay->setTarget(10.0, 10.0, 10.0);   // Xtp, Ytp, Ztp
+// relay->start();

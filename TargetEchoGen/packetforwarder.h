@@ -3,15 +3,15 @@
 #include <QThread>
 #include <QString>
 #include <atomic>
-#include <cmath>
-#include <random>
 #include <fstream>
+#include <sstream>
+#include <chrono>
+#include <iomanip>
+#include <cmath>
+
 static constexpr double SPEED_OF_LIGHT = 299792458.0;
-struct Position {
-    double x;
-    double y;
-    double z;
-};
+
+// IMS payload: matches Python FORMAT = '!I I d d d 76s'
 #pragma pack(push, 1)
 struct UdpPayload
 {
@@ -20,70 +20,78 @@ struct UdpPayload
     double   x;
     double   y;
     double   z;
-    uint32_t reserved;
+    char     reserved[76];   // 76 bytes like Python '76s'
 };
 #pragma pack(pop)
-// Forward declarations for libpcap types (so header doesn't need pcap.h)
-struct pcap;
-struct pcap_dumper;
-typedef struct pcap pcap_t;
-typedef struct pcap_dumper pcap_dumper_t;
+
+static_assert(sizeof(UdpPayload) == 108, "UdpPayload must be 108 bytes");
 
 class PacketForwarder : public QThread
 {
     Q_OBJECT
 
 public:
-    explicit PacketForwarder(const QString &interfaceName,
-                             quint16 listenUdpPort,
-                             const QString &forwardIp,
-                             quint16 forwardUdpPort,
-                             const QString &dumpFilePath,
+    // srcIp/srcPort: IMS server you talk to (client mode, send READY, then recv)
+    // dstIp/dstPort: destination server where you forward packets (client mode)
+    // csvPath: log file for received packets
+    explicit PacketForwarder(const QString &srcIp,
+                             quint16 srcPort,
+                             const QString &dstIp,
+                             quint16 dstPort,
+                             const QString &csvPath,
                              QObject *parent = nullptr);
 
     ~PacketForwarder() override;
 
-    // Request the thread to stop (captureLoop will exit)
     void stop();
-    bool applyFilter(const QString &filterString);
-    // Generate synthetic position (equivalent to your Python function)
-    Position generate_position(double t);
-    // Compute distance + delay
-    void compute_delay(double Xtp, double Ytp, double Ztp,double x, double y, double z,double &dist, double &delay);
-    double random_uniform(double a, double b);
-    std::string now_utc_iso8601();
-    bool openLogFile(const std::string &path);
-    void LogPacket(const std::string &ts, uint32_t msg_num, uint32_t id_field, double x, double y, double z,double dist, double delay_us);
-    void LogCSV(const std::string &ts, uint32_t msg_num, uint32_t id_field, double x, double y, double z, double Xtp, double Ytp, double Ztp, double dist, double delay);
+
+    // Target coordinates (like Xtp/Ytp/Ztp in Python client)
+    void setTarget(double Xtp, double Ytp, double Ztp);
 
 protected:
     void run() override;
 
 private:
-    // Configuration
-    QString        m_interfaceName;   // pcap device name
-    quint16        m_listenUdpPort;   // UDP destination port to capture
-    QString        m_forwardIp;       // IP to forward UDP payloads to
-    quint16        m_forwardUdpPort;  // UDP destination port to forward to
-    QString        m_dumpFilePath;    // .pcap dump file
+    // Upstream IMS server (where we receive from)
+    QString m_srcIp;
+    quint16 m_srcPort;
 
-    // Runtime state
+    // Downstream forward server (where we send to)
+    QString m_dstIp;
+    quint16 m_dstPort;
+
+    QString m_csvPath;
+
     std::atomic<bool> m_stopRequested;
-    pcap_t           *m_pcapHandle;
-    pcap_dumper_t    *m_pcapDumper;
-    int               m_udpSock;
-    std::ofstream g_logFile;
+
+    int m_srcSock;   // socket A: send READY + recv packets
+    int m_dstSock;   // socket B: forward packets
 
 #ifdef _WIN32
-    bool              m_wsaInitialized;
+    bool m_wsaInitialized;
 #endif
 
-    // Helpers
-    bool initialize();      // one-time setup
-    void captureLoop();     // continuous pcap read + forward
-    void cleanup();         // release all resources
+    // Target position used to compute distance & delay
+    double m_Xtp = 10.0;
+    double m_Ytp = 10.0;
+    double m_Ztp = 10.0;
 
-    double Xtp = 0.0;
-    double Ytp = 0.0;
-    double Ztp = 0.0;
+    std::ofstream m_csv;
+
+    // Helpers
+    bool initialize();
+    void relayLoop();
+    void cleanup();
+
+    bool openCsv(const std::string &path);
+    void writeCsvRow(const std::string &ts,
+                     uint32_t msg_num,
+                     uint32_t id_field,
+                     double x, double y, double z,
+                     double dist, double delay_s);
+
+    std::string now_utc_iso8601();
+    void compute_delay(double Xtp, double Ytp, double Ztp,
+                       double x, double y, double z,
+                       double &dist, double &delay);
 };
