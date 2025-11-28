@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1157</width>
+    <width>1297</width>
     <height>771</height>
    </rect>
   </property>
@@ -32,9 +32,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>26</y>
-        <width>1111</width>
-        <height>258</height>
+        <y>20</y>
+        <width>1261</width>
+        <height>270</height>
        </rect>
       </property>
       <property name="title">
@@ -42,7 +42,10 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <property name="topMargin">
-        <number>9</number>
+        <number>2</number>
+       </property>
+       <property name="bottomMargin">
+        <number>2</number>
        </property>
        <item>
         <widget class="QGroupBox" name="GrpBoxFPTargetPosition">
@@ -50,6 +53,12 @@
           <string>Target Position</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <layout class="QGridLayout" name="gridLayout">
             <item row="1" column="1">
@@ -85,7 +94,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="PbFPTargetPostion">
+           <widget class="QPushButton" name="PbFPTargetPostionSet">
             <property name="text">
              <string>Set</string>
             </property>
@@ -100,6 +109,12 @@
           <string>Target Velocity</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="1" column="1">
@@ -135,7 +150,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="PbFPTargetVelocity">
+           <widget class="QPushButton" name="PbFPTargetVelocitySet">
             <property name="text">
              <string>Set</string>
             </property>
@@ -150,6 +165,12 @@
           <string>Target Angle</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
             <item row="0" column="1">
@@ -185,7 +206,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_7">
+           <widget class="QPushButton" name="PbFPTargetAngleSet">
             <property name="text">
              <string>Set</string>
             </property>
@@ -200,6 +221,12 @@
           <string>Radar Co-ordinates</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <layout class="QGridLayout" name="gridLayout_4">
             <item row="1" column="0">
@@ -245,7 +272,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_12">
+           <widget class="QPushButton" name="PbFPCoOrdinatesSet">
             <property name="text">
              <string>Set</string>
             </property>
@@ -260,6 +287,12 @@
           <string>File Generation</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="3" column="0">

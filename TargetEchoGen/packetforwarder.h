@@ -47,6 +47,8 @@ public:
 
     // Target coordinates (like Xtp/Ytp/Ztp in Python client)
     void setTarget(double Xtp, double Ytp, double Ztp);
+    void setTargetCoordinates(double x, double y, double z);
+    void rotateCsvIfNeeded();
 
 protected:
     void run() override;

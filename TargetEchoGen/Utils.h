@@ -17,9 +17,19 @@
 #include "proto.h"
 #include "AvrRegAddrDef.h"
 
+
 enum eStatus{eSNONE,eReadDone,eWriteDone};
 enum iface { eNONE,eETHPS1G,eETHPL1G, eETH10G, eSERIAL,ePLSERIAL, ePCIe };
 enum TransferMode { SendBulk, ReceiveBulk, Streaming };
+
+enum class DeviceStatus {
+    Active,
+    Inactive,
+    Connected,
+    Disconnected,
+    Selected,
+    Idle
+};
 
 struct ConnParams {
     // common fields (extend as needed)
@@ -191,6 +201,10 @@ uint32_t ClkRstReadReg  (iface deviceType, uint32_t offset);
 //Log helper funcation
 QString ifaceToQString(iface type);
 const char* ifaceToCStr(iface type);
+
+
+QString statusToText(DeviceStatus st);
+QString statusToIcon(DeviceStatus st);
 
 }
 

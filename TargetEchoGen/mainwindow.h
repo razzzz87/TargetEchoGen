@@ -106,6 +106,10 @@ private slots:
 
     // void on_LeDAC1TgrPulseWidthSample_cursorPositionChanged(int arg1, int arg2);
 
+    void on_RbPL10GSel_clicked();
+
+    void on_RbPL10GSel_clicked(bool checked);
+
 signals:
     void resizeEventTriggered();
 
@@ -115,4 +119,5 @@ private:
     quint32 size_hi;
     bool transferCanceled = false;
 };
+
 #endif // MAINWINDOW_H

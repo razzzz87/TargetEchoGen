@@ -780,5 +780,35 @@ uint32_t SpiDacRead(iface deviceType, uint32_t Address, uint32_t sel)
     return data;
 }
 
+
+
+
+// Optional: central text lookup
+QString statusToText(DeviceStatus st)
+{
+    switch (st) {
+    case DeviceStatus::Active:       return "Active";
+    case DeviceStatus::Inactive:     return "Inactive";
+    case DeviceStatus::Connected:    return "Connected";
+    case DeviceStatus::Disconnected: return "Disconnected";
+    case DeviceStatus::Selected:     return "Selected";
+    case DeviceStatus::Idle:         return "Idle";
+    }
+    return "Unknown";
+}
+
+// Optional: central icon lookup
+QString statusToIcon(DeviceStatus st)
+{
+    switch (st) {
+    case DeviceStatus::Disconnected: return ":/images/icons8-red-notconn-cross-48.png";
+    case DeviceStatus::Selected:     return ":/images/green-checked-radio-button-48.png";
+    case DeviceStatus::Active:       return ":/images/green-checked-radio-button-48.png";   // same as example
+    case DeviceStatus::Inactive:     return ":/images/led-green_dim.png";
+    case DeviceStatus::Idle:         return ":/images/led-green_dim.png";
+    default:                         return ":/images/led-green_dim.png";
+    }
+}
+
 }
 

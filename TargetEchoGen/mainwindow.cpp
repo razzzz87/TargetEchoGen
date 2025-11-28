@@ -138,18 +138,22 @@ void MainWindow::TransferDone(eStatus DoneStatus){
 void MainWindow::onConnStateChanged(iface which, ConnInfo s)
 {
     QLabel* ledLabel = nullptr;
-
+    QLabel* StatusTextlbl = nullptr;
+    DeviceStatus state;
     // Select which LED to update
     switch (which)
     {
     case eETHPS1G:
         ledLabel = ui->LblConnPS1GStatusLed;
+        StatusTextlbl = ui->LblConStatusPS01G;
         break;
     case eETHPL1G:
         ledLabel = ui->LblConnPL1GStatusLed;
+        StatusTextlbl = ui->LblConStatusPL01G;
         break;
     case eETH10G:
         ledLabel = ui->LblConnPL10GStatusLed;
+        StatusTextlbl = ui->LblConStatusPL10G;
         break;
     default:
         return; // ignore unsupported ones
@@ -163,22 +167,23 @@ void MainWindow::onConnStateChanged(iface which, ConnInfo s)
     const bool isActive   = (ctx.activeInterface() == which);
     const bool isSelected = (ctx.selectedInterface() == which);
 
-    // Pick LED color/icon
-    QString icon;
-    if (!s.connected){
-        Log::showStatusMessage(this,"Connection","Device not connected");
-        icon = ":/images/icons8-red-notconn-cross-48.png";
+    if (!s.connected) {
+        state = DeviceStatus::Disconnected;
     }
-    else if (isSelected){
-        icon = ":/images/green-checked-radio-button-48.png";
+    else if (isSelected) {
+        state = DeviceStatus::Selected;
     }
-    else if (isActive){
-        //icon = ":/images/led-green_dim.png";        // dim green for active but not selected
+    else if (isActive) {
+        state = DeviceStatus::Active;
     }
-    else{
-        //icon = ":/images/led-green_dim.png"; // connected but idle
+    else {
+        state = DeviceStatus::Idle;
     }
-    ledLabel->setPixmap(QPixmap(icon));
+
+    // Now apply UI
+    ledLabel->setPixmap(QPixmap(Utils::statusToIcon(state)));
+    StatusTextlbl->setText(Utils::statusToText(state));
+
 }
 
 void MainWindow::onConnectionSuccess(iface eInterface)
@@ -738,10 +743,6 @@ void MainWindow::on_PbDAC1FIFOEntryErrorUpdate_clicked()
     Utils::RegWrite(deviceType,0x5000,0x100);
     Utils::RegWrite(deviceType,0x5000,0x00);
 
-
-
-
-
     uint32_t ReadVal = Utils::SpiDacRead(deviceType,0x05,0x02);
     LOG_INFO("PbDAC1FIFOEntryErrorUpdate:Read Val %d",ReadVal);
     Utils::SpiDacWrite(deviceType,0x05,0x00,0x2);
@@ -750,4 +751,16 @@ void MainWindow::on_PbDAC1FIFOEntryErrorUpdate_clicked()
 }
 
 
+
+
+void MainWindow::on_RbPL10GSel_clicked()
+{
+
+}
+
+
+void MainWindow::on_RbPL10GSel_clicked(bool checked)
+{
+
+}
 

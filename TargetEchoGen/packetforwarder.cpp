@@ -1,9 +1,13 @@
 #include "packetforwarder.h"
 #include "log.h"
+#include "proto.h"
 
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <filesystem>
+#include <QFileInfo>
+#include <QFile>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -16,6 +20,9 @@
 #include <unistd.h>
 #include <errno.h>
 #endif
+
+// 10 MB limit
+static const qint64 MAX_CSV_SIZE = 10LL * 1024LL * 1024LL;
 
 static constexpr size_t STRUCT_SIZE = sizeof(UdpPayload);
 
@@ -112,14 +119,50 @@ bool PacketForwarder::openCsv(const std::string &path)
     return true;
 }
 
-void PacketForwarder::writeCsvRow(const std::string &ts,
-                                  uint32_t msg_num,
-                                  uint32_t id_field,
-                                  double x, double y, double z,
-                                  double dist, double delay_s)
+void PacketForwarder::rotateCsvIfNeeded()
+{
+    if (m_csvPath.isEmpty())
+        return;
+
+    QFileInfo fi(m_csvPath);
+    if (!fi.exists())
+        return;
+
+    if (fi.size() < MAX_CSV_SIZE)
+        return;    // below limit, no rotation
+
+    // Close current stream before renaming
+    if (m_csv.is_open()) {
+        m_csv.close();
+    }
+
+    // Build backup file name: "<original>.bak"
+    QString backupPath = m_csvPath + ".bak";
+
+    // Remove old backup if it exists
+    QFile::remove(backupPath);
+
+    // Rename current file -> backup
+    if (!QFile::rename(m_csvPath, backupPath)) {
+        LOG_ERROR("PacketForwarder: failed to rotate CSV. Rename %s -> %s failed", m_csvPath.toStdString().c_str(), backupPath.toStdString().c_str());
+        // You can return here or still try to reopen
+        return;
+    }
+
+    // Reopen fresh CSV file; openCsv will write header if needed
+    openCsv(m_csvPath.toStdString());
+}
+
+void PacketForwarder::writeCsvRow(const std::string &ts, uint32_t msg_num,  uint32_t id_field, double x, double y, double z, double dist, double delay_s)
 {
     if (!m_csv.is_open())
         return;
+
+    // Check and rotate if file > 10 MB
+    rotateCsvIfNeeded();
+
+    if (!m_csv.is_open())
+        return; // rotation might have failed to reopen, be safe
 
     char id_hex[16];
     std::snprintf(id_hex, sizeof(id_hex), "0x%08X", id_field);
@@ -231,8 +274,7 @@ bool PacketForwarder::initialize()
 #ifdef _WIN32
     {
         DWORD timeoutMs = 2000;
-        setsockopt(m_srcSock, SOL_SOCKET, SO_RCVTIMEO,
-                   reinterpret_cast<const char*>(&timeoutMs), sizeof(timeoutMs));
+        setsockopt(m_srcSock, SOL_SOCKET, SO_RCVTIMEO,reinterpret_cast<const char*>(&timeoutMs), sizeof(timeoutMs));
     }
 #else
     {
@@ -281,20 +323,20 @@ bool PacketForwarder::initialize()
         }
     }
 
-    // Send READY to IMS server (like Python client)
-    {
-        const char readyPayload[] = "READY";
-        int sent = ::sendto(m_srcSock,
-                            readyPayload,
-                            sizeof(readyPayload) - 1,
-                            0,
-                            reinterpret_cast<sockaddr*>(&srcServer),
-                            sizeof(srcServer));
-        if (sent <= 0) {
-            LOG_ERROR("[CLIENT] Failed to send READY to IMS server");
-            return false;
-        }
-    }
+    // // Send READY to IMS server (like Python client)
+    // {
+    //     const char readyPayload[] = "READY";
+    //     int sent = ::sendto(m_srcSock,
+    //                         readyPayload,
+    //                         sizeof(readyPayload) - 1,
+    //                         0,
+    //                         reinterpret_cast<sockaddr*>(&srcServer),
+    //                         sizeof(srcServer));
+    //     if (sent <= 0) {
+    //         LOG_ERROR("[CLIENT] Failed to send READY to IMS server");
+    //         return false;
+    //     }
+    // }
 
     // 2) DST socket: used only to forward packets to another server
     m_dstSock = ::socket(AF_INET, SOCK_DGRAM, 0);
@@ -311,13 +353,15 @@ bool PacketForwarder::initialize()
 #endif
 
     // That's it; we build dst address on every send in relayLoop.
-    LOG_INFO("PacketForwarder SRC server=%s:%u, DST server=%s:%u",
-             srcIpStr.c_str(),
-             static_cast<unsigned>(m_srcPort),
-             m_dstIp.toStdString().c_str(),
-             static_cast<unsigned>(m_dstPort));
+    LOG_INFO("PacketForwarder SRC server=%s:%u, DST server=%s:%u", srcIpStr.c_str(), static_cast<unsigned>(m_srcPort), m_dstIp.toStdString().c_str(), static_cast<unsigned>(m_dstPort));
 
     return true;
+}
+void PacketForwarder::setTargetCoordinates(double x, double y, double z)
+{
+    m_Xtp = x;
+    m_Ytp = y;
+    m_Ztp = z;
 }
 
 // ---------------------------------------------------------------------
@@ -348,12 +392,7 @@ void PacketForwarder::relayLoop()
         sockaddr_in srcAddr{};
         socklen_t   addrLen = sizeof(srcAddr);
 
-        int n = ::recvfrom(m_srcSock,
-                           buf,
-                           static_cast<int>(sizeof(buf)),
-                           0,
-                           reinterpret_cast<sockaddr*>(&srcAddr),
-                           &addrLen);
+        int n = ::recvfrom(m_srcSock,buf,static_cast<int>(sizeof(buf)),0,reinterpret_cast<sockaddr*>(&srcAddr),&addrLen);
         if (n < 0) {
 #ifdef _WIN32
             int err = WSAGetLastError();
@@ -400,28 +439,21 @@ void PacketForwarder::relayLoop()
 
         std::string ts = now_utc_iso8601();
 
-        LOG_INFO("[%s] msg#%u id=0x%08X -> x=%.3f, y=%.3f, z=%.3f | "
-                 "dist=%.3f m | delay=%.3f us",
-                 ts.c_str(),
-                 up.msg_num,
-                 up.id_field,
-                 x, y, z,
-                 dist,
-                 delay * 1e6);
+        //LOG_INFO("[%s] msg#%u id=0x%08X -> x=%.3f, y=%.3f, z=%.3f | " "dist=%.3f m | delay=%.3f us",ts.c_str(), up.msg_num,up.id_field,x, y, z, dist, delay * 1e6);
 
         writeCsvRow(ts, up.msg_num, up.id_field, x, y, z, dist, delay);
 
         // Forward the *same* payload to other server via m_dstSock
         if (m_dstPort != 0 && !dstIpStr.empty()) {
-            int sent = ::sendto(m_dstSock,
-                                buf,
-                                n,
-                                0,
-                                reinterpret_cast<sockaddr*>(&dstAddr),
-                                sizeof(dstAddr));
-            if (sent != n) {
-                LOG_ERROR("PacketForwarder: sendto(dst) failed or partial send. Sent=%d, expected=%d",
-                          sent, n);
+
+            Proto ProtoObj;
+            char* byArrPkt = nullptr;
+            uint iaddr = 0x1234;
+            int pktLen = ProtoObj.mPktRegWrite(iaddr, delay, &byArrPkt);
+
+            int sent = ::sendto(m_dstSock,byArrPkt,n, pktLen,reinterpret_cast<sockaddr*>(&dstAddr), sizeof(dstAddr));
+            if (sent != pktLen) {
+                LOG_ERROR("PacketForwarder: sendto(dst) failed or partial send. Sent=%d, expected=%d",sent, n);
             }
         }
     }
