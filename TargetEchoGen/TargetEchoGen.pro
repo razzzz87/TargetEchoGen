@@ -1,6 +1,6 @@
 QT  += core gui
 QT  += network
-QT  += serialport
+#QT  += serialport
 QT  += printsupport
 CONFIG += c++11
 

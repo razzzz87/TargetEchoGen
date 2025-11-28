@@ -8,6 +8,14 @@
 #include <chrono>
 #include <iomanip>
 #include <cmath>
+#include <cstdint>
+#include "Utils.h"
+
+struct Position {
+    double x;
+    double y;
+    double z;
+};
 
 static constexpr double SPEED_OF_LIGHT = 299792458.0;
 
@@ -20,7 +28,7 @@ struct UdpPayload
     double   x;
     double   y;
     double   z;
-    char     reserved[76];   // 76 bytes like Python '76s'
+    char     reserved[76];
 };
 #pragma pack(pop)
 
@@ -31,57 +39,84 @@ class PacketForwarder : public QThread
     Q_OBJECT
 
 public:
-    // srcIp/srcPort: IMS server you talk to (client mode, send READY, then recv)
-    // dstIp/dstPort: destination server where you forward packets (client mode)
-    // csvPath: log file for received packets
+    // Constructor:
+    //   UDP receive (IMS/source): srcIp/srcPort   -> m_udpRecvSock (bind here)
+    //   UDP transmit:             txIp/txPort     -> m_udpTxSock (delay + file)
+    //   csvPath:                  CSV log path
     explicit PacketForwarder(const QString &srcIp,
                              quint16 srcPort,
-                             const QString &dstIp,
-                             quint16 dstPort,
+                             const QString &txIp,
+                             quint16 txPort,
                              const QString &csvPath,
                              QObject *parent = nullptr);
 
     ~PacketForwarder() override;
 
     void stop();
-
-    // Target coordinates (like Xtp/Ytp/Ztp in Python client)
+    void SendCoOrdinateOverTcp(iface devieType);
+    // Target coordinates used for distance & delay computation
     void setTarget(double Xtp, double Ytp, double Ztp);
     void setTargetCoordinates(double x, double y, double z);
+
+    // CSV rotation helper
     void rotateCsvIfNeeded();
+
+    // ---- Delay + synthetic motion ----
+    double   rand_uniform();
+    Position generate_position(double t);
+
+    // Distance & delay (µs)
+    void compute_delay(double Xtp, double Ytp, double Ztp,
+                       double x, double y, double z,
+                       double &dist_m, int &delay_us);
+
+    // One-shot delay send (UDP):
+    // Uses synthetic position = generate_position(time_since_initialize)
+    void send_delay_once(double Xtp, double Ytp, double Ztp);
+
+    // Send coordinate/file data over UDP using the same TX socket
+    void sendCoordinateFileUdp(const QString &filePath);
+
+    // Open sockets and prepare state
+    bool initialize();
+    double m_startTime;
 
 protected:
     void run() override;
 
 private:
-    // Upstream IMS server (where we receive from)
+    // UDP receive (IMS/source)
     QString m_srcIp;
     quint16 m_srcPort;
 
-    // Downstream forward server (where we send to)
-    QString m_dstIp;
-    quint16 m_dstPort;
+    // UDP transmit (delay + file)
+    QString m_txIp;
+    quint16 m_txPort;
 
+    // CSV log path
     QString m_csvPath;
 
     std::atomic<bool> m_stopRequested;
 
-    int m_srcSock;   // socket A: send READY + recv packets
-    int m_dstSock;   // socket B: forward packets
+    // Sockets
+    int m_udpRecvSock;   // UDP receive (position packets)
+    int m_udpTxSock;     // UDP transmit (delay packets + file data)
 
 #ifdef _WIN32
     bool m_wsaInitialized;
 #endif
 
-    // Target position used to compute distance & delay
+    // Target coordinates
     double m_Xtp = 10.0;
     double m_Ytp = 10.0;
     double m_Ztp = 10.0;
 
+    // Start time used by generate_position(t) via send_delay_once()
+    //double m_startTime = 0.0;
+
     std::ofstream m_csv;
 
-    // Helpers
-    bool initialize();
+    // Internal helpers
     void relayLoop();
     void cleanup();
 
@@ -93,7 +128,4 @@ private:
                      double dist, double delay_s);
 
     std::string now_utc_iso8601();
-    void compute_delay(double Xtp, double Ytp, double Ztp,
-                       double x, double y, double z,
-                       double &dist, double &delay);
 };

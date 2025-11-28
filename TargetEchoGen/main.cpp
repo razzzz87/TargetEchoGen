@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     w.setGeometry(0, 0, screenWidth, screenHeight);
 
     if(QFile::exists("dark_mode_style_sheet.qss")){
-        //LOG_TO_FILE("width:%d Height:%d",screenWidth ,screenHeight);
+        LOG_INFO("width:%d Height:%d",screenWidth ,screenHeight);
         QFile file("dark_mode_style_sheet.qss");
         if (file.open(QFile::ReadOnly)) {
             QString styleSheet = QLatin1String(file.readAll());
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
         }
     }else{
 
-        //LOG_TO_FILE("Else width:%d Height:%d",screenWidth ,screenHeight);
+        LOG_INFO("Else width:%d Height:%d",screenWidth ,screenHeight);
         QFile file("../../dark_mode_style_sheet.qss");
         if (file.open(QFile::ReadOnly)) {
             QString styleSheet = QLatin1String(file.readAll());

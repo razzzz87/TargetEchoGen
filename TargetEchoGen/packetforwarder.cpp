@@ -1,11 +1,11 @@
 #include "packetforwarder.h"
+#include "Utils.h"
 #include "log.h"
 #include "proto.h"
 
 #include <cstdint>
 #include <cstring>
 #include <string>
-#include <filesystem>
 #include <QFileInfo>
 #include <QFile>
 
@@ -55,23 +55,28 @@ static std::string utc_iso8601_now()
 
 PacketForwarder::PacketForwarder(const QString &srcIp,
                                  quint16 srcPort,
-                                 const QString &dstIp,
-                                 quint16 dstPort,
+                                 const QString &txIp,
+                                 quint16 txPort,
                                  const QString &csvPath,
                                  QObject *parent)
     : QThread(parent),
     m_srcIp(srcIp),
     m_srcPort(srcPort),
-    m_dstIp(dstIp),
-    m_dstPort(dstPort),
+    m_txIp(txIp),
+    m_txPort(txPort),
     m_csvPath(csvPath),
     m_stopRequested(false),
-    m_srcSock(-1),
-    m_dstSock(-1)
+    m_udpRecvSock(-1),
+    m_udpTxSock(-1),
+    m_Xtp(10.0),
+    m_Ytp(10.0),
+    m_Ztp(10.0),
+    m_startTime(0.0)
 #ifdef _WIN32
     , m_wsaInitialized(false)
 #endif
 {
+    LOG_INFO("PacketForwarder constructed (UDP recv + UDP tx)");
 }
 
 PacketForwarder::~PacketForwarder()
@@ -90,6 +95,13 @@ void PacketForwarder::setTarget(double Xtp, double Ytp, double Ztp)
     m_Xtp = Xtp;
     m_Ytp = Ytp;
     m_Ztp = Ztp;
+}
+
+void PacketForwarder::setTargetCoordinates(double x, double y, double z)
+{
+    m_Xtp = x;
+    m_Ytp = y;
+    m_Ztp = z;
 }
 
 // ---------------------------------------------------------------------
@@ -131,38 +143,79 @@ void PacketForwarder::rotateCsvIfNeeded()
     if (fi.size() < MAX_CSV_SIZE)
         return;    // below limit, no rotation
 
-    // Close current stream before renaming
     if (m_csv.is_open()) {
         m_csv.close();
     }
 
-    // Build backup file name: "<original>.bak"
     QString backupPath = m_csvPath + ".bak";
-
-    // Remove old backup if it exists
     QFile::remove(backupPath);
 
-    // Rename current file -> backup
     if (!QFile::rename(m_csvPath, backupPath)) {
-        LOG_ERROR("PacketForwarder: failed to rotate CSV. Rename %s -> %s failed", m_csvPath.toStdString().c_str(), backupPath.toStdString().c_str());
-        // You can return here or still try to reopen
+        LOG_ERROR("PacketForwarder: failed to rotate CSV. Rename %s -> %s failed",
+                  m_csvPath.toStdString().c_str(),
+                  backupPath.toStdString().c_str());
         return;
     }
 
-    // Reopen fresh CSV file; openCsv will write header if needed
     openCsv(m_csvPath.toStdString());
 }
 
-void PacketForwarder::writeCsvRow(const std::string &ts, uint32_t msg_num,  uint32_t id_field, double x, double y, double z, double dist, double delay_s)
+// ---------------------------------------------------------------------
+// Synthetic motion + delay
+// ---------------------------------------------------------------------
+double PacketForwarder::rand_uniform()
+{
+    return 2.0 * (double(rand()) / RAND_MAX) - 1.0;
+}
+
+Position PacketForwarder::generate_position(double t)
+{
+    Position p;
+    p.x = 100.0 * std::cos(0.5 * t) + 0.5 * rand_uniform();
+    p.y = 100.0 * std::sin(0.5 * t) + 0.5 * rand_uniform();
+    p.z = 50.0 + 0.1 * t + 0.2 * rand_uniform();
+    return p;
+}
+
+void PacketForwarder::compute_delay(double Xtp, double Ytp, double Ztp,
+                                    double x,   double y,   double z,
+                                    double &dist_m, int &delay_us)
+{
+    double dx = Xtp - x;
+    double dy = Ytp - y;
+    double dz = Ztp - z;
+
+    dist_m = std::sqrt(dx*dx + dy*dy + dz*dz);
+
+    double delay_sec  = 2.0 * dist_m / SPEED_OF_LIGHT;
+    double delay_us_f = delay_sec * 1e6;
+
+    if (delay_us_f <= 0.0) {
+        delay_us = 0;
+    } else if (delay_us_f < 1.0) {
+        delay_us = 1;
+    } else {
+        delay_us = static_cast<int>(std::lround(delay_us_f));
+    }
+}
+
+// ---------------------------------------------------------------------
+// CSV row writer
+// ---------------------------------------------------------------------
+void PacketForwarder::writeCsvRow(const std::string &ts,
+                                  uint32_t msg_num,
+                                  uint32_t id_field,
+                                  double x, double y, double z,
+                                  double dist,
+                                  double delay_s)
 {
     if (!m_csv.is_open())
         return;
 
-    // Check and rotate if file > 10 MB
     rotateCsvIfNeeded();
 
     if (!m_csv.is_open())
-        return; // rotation might have failed to reopen, be safe
+        return;
 
     char id_hex[16];
     std::snprintf(id_hex, sizeof(id_hex), "0x%08X", id_field);
@@ -181,23 +234,11 @@ void PacketForwarder::writeCsvRow(const std::string &ts, uint32_t msg_num,  uint
 }
 
 // ---------------------------------------------------------------------
-// Time + delay
+// Time helper
 // ---------------------------------------------------------------------
 std::string PacketForwarder::now_utc_iso8601()
 {
     return utc_iso8601_now();
-}
-
-void PacketForwarder::compute_delay(double Xtp, double Ytp, double Ztp,
-                                    double x, double y, double z,
-                                    double &dist, double &delay)
-{
-    double dx = Xtp - x;
-    double dy = Ytp - y;
-    double dz = Ztp - z;
-
-    dist = std::sqrt(dx*dx + dy*dy + dz*dz);
-    delay = 2.0 * dist / SPEED_OF_LIGHT;
 }
 
 // ---------------------------------------------------------------------
@@ -205,9 +246,8 @@ void PacketForwarder::compute_delay(double Xtp, double Ytp, double Ztp,
 // ---------------------------------------------------------------------
 void PacketForwarder::run()
 {
-    if (!initialize()) {
-        LOG_ERROR("PacketForwarder: initialization failed, exiting thread.");
-        cleanup();
+    if (m_udpRecvSock < 0) {
+        LOG_ERROR("PacketForwarder: run() called without initialization!");
         return;
     }
 
@@ -222,9 +262,9 @@ void PacketForwarder::run()
 }
 
 // ---------------------------------------------------------------------
-// initialize() – create two client sockets:
-//  - m_srcSock: talk to IMS server (send READY, recv)
-//  - m_dstSock: forward packets to other server
+// initialize() – create sockets
+//  - m_udpRecvSock: UDP receive (bind to srcPort)
+//  - m_udpTxSock:   UDP transmit (delay + file)
 // ---------------------------------------------------------------------
 bool PacketForwarder::initialize()
 {
@@ -238,161 +278,116 @@ bool PacketForwarder::initialize()
     m_wsaInitialized = true;
 #endif
 
-    // 1) SRC socket: this is the "client" to the IMS server (server.py style)
-    m_srcSock = ::socket(AF_INET, SOCK_DGRAM, 0);
+    // 1) UDP RECEIVE SOCKET
+    m_udpRecvSock = ::socket(AF_INET, SOCK_DGRAM, 0);
 #ifdef _WIN32
-    if (m_srcSock == INVALID_SOCKET) {
-        LOG_ERROR("PacketForwarder: src socket() failed: %d", WSAGetLastError());
+    if (m_udpRecvSock == INVALID_SOCKET) {
+        LOG_ERROR("PacketForwarder: udpRecv socket() failed: %d", WSAGetLastError());
         return false;
     }
 #else
-    if (m_srcSock < 0) {
-        LOG_ERROR("PacketForwarder: src socket() failed: %s", strerror(errno));
+    if (m_udpRecvSock < 0) {
+        LOG_ERROR("PacketForwarder: udpRecv socket() failed: %s", strerror(errno));
         return false;
     }
 #endif
 
-    // Bind to local ephemeral port (like Python LOCAL_BIND = ('',0))
-    sockaddr_in localAddr{};
-    localAddr.sin_family = AF_INET;
-    localAddr.sin_port   = htons(0);  // 0 => ephemeral
+    {
+        sockaddr_in localAddr{};
+        localAddr.sin_family      = AF_INET;
+        localAddr.sin_port        = htons(m_srcPort);   // bind to given port
+        localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    if (::bind(m_srcSock,
-               reinterpret_cast<sockaddr*>(&localAddr),
-               sizeof(localAddr)) < 0) {
+        if (::bind(m_udpRecvSock,
+                   reinterpret_cast<sockaddr*>(&localAddr),
+                   sizeof(localAddr)) < 0) {
 #ifdef _WIN32
-        LOG_ERROR("PacketForwarder: bind(srcSock) failed: %d", WSAGetLastError());
+            LOG_ERROR("PacketForwarder: bind(udpRecv) failed: %d", WSAGetLastError());
 #else
-        LOG_ERROR("PacketForwarder: bind(srcSock) failed: %s", strerror(errno));
+            LOG_ERROR("PacketForwarder: bind(udpRecv) failed: %s", strerror(errno));
 #endif
-        return false;
+            return false;
+        }
     }
 
-// Optional timeout on recv
 #ifdef _WIN32
     {
         DWORD timeoutMs = 2000;
-        setsockopt(m_srcSock, SOL_SOCKET, SO_RCVTIMEO,reinterpret_cast<const char*>(&timeoutMs), sizeof(timeoutMs));
+        setsockopt(m_udpRecvSock, SOL_SOCKET, SO_RCVTIMEO,
+                   reinterpret_cast<const char*>(&timeoutMs),
+                   sizeof(timeoutMs));
     }
 #else
     {
         timeval tv{};
         tv.tv_sec  = 2;
         tv.tv_usec = 0;
-        setsockopt(m_srcSock, SOL_SOCKET, SO_RCVTIMEO,
+        setsockopt(m_udpRecvSock, SOL_SOCKET, SO_RCVTIMEO,
                    &tv, sizeof(tv));
     }
 #endif
 
-    // Build IMS server address
-    sockaddr_in srcServer{};
-    srcServer.sin_family = AF_INET;
-    srcServer.sin_port   = htons(m_srcPort);
-
-    std::string srcIpStr = m_srcIp.toStdString();
-#ifdef _WIN32
-    if (InetPtonA(AF_INET, srcIpStr.c_str(), &srcServer.sin_addr) != 1) {
-        LOG_ERROR("PacketForwarder: InetPtonA failed for src IP %s", srcIpStr.c_str());
-        return false;
-    }
-#else
-    if (::inet_pton(AF_INET, srcIpStr.c_str(), &srcServer.sin_addr) != 1) {
-        LOG_ERROR("PacketForwarder: inet_pton failed for src IP %s", srcIpStr.c_str());
-        return false;
-    }
-#endif
-
-    // Print local address
     {
         sockaddr_in actualLocal{};
         socklen_t   len = sizeof(actualLocal);
-        if (getsockname(m_srcSock, reinterpret_cast<sockaddr*>(&actualLocal), &len) == 0) {
+        if (getsockname(m_udpRecvSock,
+                        reinterpret_cast<sockaddr*>(&actualLocal),
+                        &len) == 0) {
             char addrBuf[64];
 #ifdef _WIN32
             InetNtopA(AF_INET, &actualLocal.sin_addr, addrBuf, sizeof(addrBuf));
 #else
             inet_ntop(AF_INET, &actualLocal.sin_addr, addrBuf, sizeof(addrBuf));
 #endif
-            LOG_INFO("[CLIENT] srcSock bound to %s:%u, sending READY to %s:%u",
+            LOG_INFO("[CLIENT] UDP recv socket bound to %s:%u",
                      addrBuf,
-                     ntohs(actualLocal.sin_port),
-                     srcIpStr.c_str(),
-                     static_cast<unsigned>(m_srcPort));
+                     ntohs(actualLocal.sin_port));
         }
     }
 
-    // // Send READY to IMS server (like Python client)
-    // {
-    //     const char readyPayload[] = "READY";
-    //     int sent = ::sendto(m_srcSock,
-    //                         readyPayload,
-    //                         sizeof(readyPayload) - 1,
-    //                         0,
-    //                         reinterpret_cast<sockaddr*>(&srcServer),
-    //                         sizeof(srcServer));
-    //     if (sent <= 0) {
-    //         LOG_ERROR("[CLIENT] Failed to send READY to IMS server");
-    //         return false;
-    //     }
-    // }
-
-    // 2) DST socket: used only to forward packets to another server
-    m_dstSock = ::socket(AF_INET, SOCK_DGRAM, 0);
+    // 2) UDP TX SOCKET (used for delay + file packets)
+    m_udpTxSock = ::socket(AF_INET, SOCK_DGRAM, 0);
 #ifdef _WIN32
-    if (m_dstSock == INVALID_SOCKET) {
-        LOG_ERROR("PacketForwarder: dst socket() failed: %d", WSAGetLastError());
+    if (m_udpTxSock == INVALID_SOCKET) {
+        LOG_ERROR("PacketForwarder: udpTx socket() failed: %d", WSAGetLastError());
         return false;
     }
 #else
-    if (m_dstSock < 0) {
-        LOG_ERROR("PacketForwarder: dst socket() failed: %s", strerror(errno));
+    if (m_udpTxSock < 0) {
+        LOG_ERROR("PacketForwarder: udpTx socket() failed: %s", strerror(errno));
         return false;
     }
 #endif
 
-    // That's it; we build dst address on every send in relayLoop.
-    LOG_INFO("PacketForwarder SRC server=%s:%u, DST server=%s:%u", srcIpStr.c_str(), static_cast<unsigned>(m_srcPort), m_dstIp.toStdString().c_str(), static_cast<unsigned>(m_dstPort));
+    // capture start time for synthetic motion used in send_delay_once()
+    m_startTime = std::chrono::duration<double>(
+                      std::chrono::system_clock::now().time_since_epoch()
+                      ).count();
 
+    LOG_INFO("PacketForwarder: INIT OK – UDP recv + UDP tx sockets created.");
     return true;
-}
-void PacketForwarder::setTargetCoordinates(double x, double y, double z)
-{
-    m_Xtp = x;
-    m_Ytp = y;
-    m_Ztp = z;
 }
 
 // ---------------------------------------------------------------------
-// relayLoop() – recv from m_srcSock, process, forward via m_dstSock
+// relayLoop() – UDP recv -> compute delay/log
 // ---------------------------------------------------------------------
 void PacketForwarder::relayLoop()
 {
     char buf[2048];
 
-    // Pre-build destination address for forwarding
-    sockaddr_in dstAddr{};
-    dstAddr.sin_family = AF_INET;
-    dstAddr.sin_port   = htons(m_dstPort);
-
-    std::string dstIpStr = m_dstIp.toStdString();
-#ifdef _WIN32
-    if (InetPtonA(AF_INET, dstIpStr.c_str(), &dstAddr.sin_addr) != 1) {
-        LOG_ERROR("PacketForwarder: InetPtonA failed for dst IP %s", dstIpStr.c_str());
-        // we still run, but forwarding will fail
-    }
-#else
-    if (::inet_pton(AF_INET, dstIpStr.c_str(), &dstAddr.sin_addr) != 1) {
-        LOG_ERROR("PacketForwarder: inet_pton failed for dst IP %s", dstIpStr.c_str());
-    }
-#endif
-
     while (!m_stopRequested.load(std::memory_order_relaxed)) {
         sockaddr_in srcAddr{};
         socklen_t   addrLen = sizeof(srcAddr);
 
-        int n = ::recvfrom(m_srcSock,buf,static_cast<int>(sizeof(buf)),0,reinterpret_cast<sockaddr*>(&srcAddr),&addrLen);
+        int n = ::recvfrom(
+            m_udpRecvSock,
+            buf,
+            static_cast<int>(sizeof(buf)),
+            0,
+            reinterpret_cast<sockaddr*>(&srcAddr),
+            &addrLen
+            );
+
         if (n < 0) {
 #ifdef _WIN32
             int err = WSAGetLastError();
@@ -402,7 +397,7 @@ void PacketForwarder::relayLoop()
             }
             if (err == WSAEINTR)
                 continue;
-            LOG_ERROR("PacketForwarder: recvfrom() failed: %d", err);
+            LOG_ERROR("PacketForwarder: recvfrom(udpRecv) failed: %d", err);
 #else
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 LOG_INFO("[CLIENT] waiting for packet... (timeout)");
@@ -410,10 +405,11 @@ void PacketForwarder::relayLoop()
             }
             if (errno == EINTR)
                 continue;
-            LOG_ERROR("PacketForwarder: recvfrom() failed: %s", strerror(errno));
+            LOG_ERROR("PacketForwarder: recvfrom(udpRecv) failed: %s", strerror(errno));
 #endif
             break;
         }
+
         if (n == 0)
             continue;
 
@@ -425,37 +421,30 @@ void PacketForwarder::relayLoop()
         UdpPayload up{};
         std::memcpy(&up, buf, STRUCT_SIZE);
 
-        // If server sends big-endian ints, convert here (depends on server impl)
-        // up.id_field = ntohl(up.id_field);
-        // up.msg_num  = ntohl(up.msg_num);
-
         double x = up.x;
         double y = up.y;
         double z = up.z;
 
-        double dist  = 0.0;
-        double delay = 0.0;
-        compute_delay(m_Xtp, m_Ytp, m_Ztp, x, y, z, dist, delay);
+        double dist_m = 0.0;
+        int    delay_us = 0;
+        compute_delay(m_Xtp, m_Ytp, m_Ztp, x, y, z, dist_m, delay_us);
 
+        double delay_s = static_cast<double>(delay_us) * 1e-6;
         std::string ts = now_utc_iso8601();
 
-        //LOG_INFO("[%s] msg#%u id=0x%08X -> x=%.3f, y=%.3f, z=%.3f | " "dist=%.3f m | delay=%.3f us",ts.c_str(), up.msg_num,up.id_field,x, y, z, dist, delay * 1e6);
+        LOG_INFO("relayLoop: Pos(%.3f, %.3f, %.3f) -> TP(%.3f, %.3f, %.3f) | dist=%.3f m | delay_us=%d",
+                 x, y, z,
+                 m_Xtp, m_Ytp, m_Ztp,
+                 dist_m,
+                 delay_us);
 
-        writeCsvRow(ts, up.msg_num, up.id_field, x, y, z, dist, delay);
+        writeCsvRow(ts, up.msg_num, up.id_field,
+                    x, y, z,
+                    dist_m,
+                    delay_s);
 
-        // Forward the *same* payload to other server via m_dstSock
-        if (m_dstPort != 0 && !dstIpStr.empty()) {
-
-            Proto ProtoObj;
-            char* byArrPkt = nullptr;
-            uint iaddr = 0x1234;
-            int pktLen = ProtoObj.mPktRegWrite(iaddr, delay, &byArrPkt);
-
-            int sent = ::sendto(m_dstSock,byArrPkt,n, pktLen,reinterpret_cast<sockaddr*>(&dstAddr), sizeof(dstAddr));
-            if (sent != pktLen) {
-                LOG_ERROR("PacketForwarder: sendto(dst) failed or partial send. Sent=%d, expected=%d",sent, n);
-            }
-        }
+        // NOTE: we do NOT call send_delay_once() automatically here.
+        // You call send_delay_once() from outside (e.g. timer / button).
     }
 }
 
@@ -464,22 +453,22 @@ void PacketForwarder::relayLoop()
 // ---------------------------------------------------------------------
 void PacketForwarder::cleanup()
 {
-    if (m_srcSock >= 0) {
+    if (m_udpRecvSock >= 0) {
 #ifdef _WIN32
-        ::closesocket(m_srcSock);
+        ::closesocket(m_udpRecvSock);
 #else
-        ::close(m_srcSock);
+        ::close(m_udpRecvSock);
 #endif
-        m_srcSock = -1;
+        m_udpRecvSock = -1;
     }
 
-    if (m_dstSock >= 0) {
+    if (m_udpTxSock >= 0) {
 #ifdef _WIN32
-        ::closesocket(m_dstSock);
+        ::closesocket(m_udpTxSock);
 #else
-        ::close(m_dstSock);
+        ::close(m_udpTxSock);
 #endif
-        m_dstSock = -1;
+        m_udpTxSock = -1;
     }
 
 #ifdef _WIN32
@@ -493,14 +482,241 @@ void PacketForwarder::cleanup()
         m_csv.close();
 }
 
-// auto relay = new PacketForwarder(
-//     "127.0.0.1",      // src server IP (IMS server / server.py)
-//     0xD407,           // src server port
-//     "192.168.1.50",   // dst server IP (where you forward)
-//     6000,             // dst server port
-//     "relay_log.csv",  // CSV log
-//     this
-//     );
+// ---------------------------------------------------------------------
+// UDP file send (coordinate/file) using m_udpTxSock
+// ---------------------------------------------------------------------
+void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
+{
+    if (m_udpTxSock < 0) {
+        LOG_ERROR("sendCoordinateFileUdp: m_udpTxSock not initialized (call initialize() first)");
+        return;
+    }
 
-// relay->setTarget(10.0, 10.0, 10.0);   // Xtp, Ytp, Ztp
-// relay->start();
+    if (m_txIp.isEmpty() || m_txPort == 0) {
+        LOG_ERROR("sendCoordinateFileUdp: invalid UDP TX destination IP/port");
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.exists()) {
+        LOG_ERROR("sendCoordinateFileUdp: file does not exist: %s",
+                  filePath.toStdString().c_str());
+        return;
+    }
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        LOG_ERROR("sendCoordinateFileUdp: failed to open file: %s (error: %s)",
+                  filePath.toStdString().c_str(),
+                  file.errorString().toStdString().c_str());
+        return;
+    }
+
+    sockaddr_in txAddr{};
+    txAddr.sin_family = AF_INET;
+    txAddr.sin_port   = htons(m_txPort);
+
+    std::string txIpStr = m_txIp.toStdString();
+#ifdef _WIN32
+    if (InetPtonA(AF_INET, txIpStr.c_str(), &txAddr.sin_addr) != 1) {
+        LOG_ERROR("sendCoordinateFileUdp: InetPtonA failed for TX IP %s",
+                  txIpStr.c_str());
+        return;
+    }
+#else
+    if (::inet_pton(AF_INET, txIpStr.c_str(), &txAddr.sin_addr) != 1) {
+        LOG_ERROR("sendCoordinateFileUdp: inet_pton failed for TX IP %s",
+                  txIpStr.c_str());
+        return;
+    }
+#endif
+
+    LOG_INFO("sendCoordinateFileUdp: sending file %s to %s:%u over UDP",
+             filePath.toStdString().c_str(),
+             txIpStr.c_str(),
+             static_cast<unsigned>(m_txPort));
+
+    const int MAX_UDP_PAYLOAD = 1400;
+    QByteArray buf;
+
+    qint64 totalSent = 0;
+    int    packetIdx = 0;
+
+    while (true) {
+        buf = file.read(MAX_UDP_PAYLOAD);
+        if (buf.isEmpty()) {
+            if (file.atEnd()) {
+                break;
+            } else {
+                LOG_ERROR("sendCoordinateFileUdp: file read error on %s",
+                          filePath.toStdString().c_str());
+                break;
+            }
+        }
+
+        int len = static_cast<int>(buf.size());
+        int sent = ::sendto(
+            m_udpTxSock,
+            buf.constData(),
+            len,
+            0,
+            reinterpret_cast<sockaddr*>(&txAddr),
+            sizeof(txAddr)
+            );
+
+        if (sent != len) {
+#ifdef _WIN32
+            int wsaErr = WSAGetLastError();
+            if (sent == SOCKET_ERROR) {
+                LOG_ERROR("sendCoordinateFileUdp: sendto() FAILED on packet %d, WSAError=%d, expected=%d",
+                          packetIdx, wsaErr, len);
+                break;
+            } else {
+                LOG_ERROR("sendCoordinateFileUdp: partial send on packet %d, Sent=%d, expected=%d, WSAError=%d",
+                          packetIdx, sent, len, wsaErr);
+            }
+#else
+            int err = errno;
+            if (sent < 0) {
+                LOG_ERROR("sendCoordinateFileUdp: sendto() FAILED on packet %d, errno=%d (%s), expected=%d",
+                          packetIdx, err, strerror(err), len);
+                break;
+            } else {
+                LOG_ERROR("sendCoordinateFileUdp: partial send on packet %d, Sent=%d, expected=%d, errno=%d (%s)",
+                          packetIdx, sent, len, err, strerror(err));
+            }
+#endif
+        } else {
+            totalSent += sent;
+            packetIdx++;
+        }
+    }
+
+    LOG_INFO("sendCoordinateFileUdp: finished sending %d packets, total %lld bytes",
+             packetIdx,
+             static_cast<long long>(totalSent));
+}
+
+// ---------------------------------------------------------------------
+// send_delay_once() – synthetic motion -> delay_us -> UDP send via m_udpTxSock
+// ---------------------------------------------------------------------
+void PacketForwarder::send_delay_once(double Xtp, double Ytp, double Ztp)
+{
+    if (m_udpTxSock < 0) {
+        LOG_ERROR("PacketForwarder::send_delay_once: m_udpTxSock not initialized (call initialize() first)");
+        return;
+    }
+
+    if (m_txIp.isEmpty() || m_txPort == 0) {
+        LOG_ERROR("PacketForwarder::send_delay_once: invalid TX destination IP/port");
+        return;
+    }
+
+    double now = std::chrono::duration<double>(
+                     std::chrono::system_clock::now().time_since_epoch()
+                     ).count();
+    double t = now - m_startTime;
+
+    Position p = generate_position(t);
+
+    double dist_m = 0.0;
+    int    delay_us = 0;
+    compute_delay(Xtp, Ytp, Ztp, p.x, p.y, p.z, dist_m, delay_us);
+
+    LOG_INFO("send_delay_once: m_startTime=%.6f, now=%.6f, t=%.6f | Pos(%.3f, %.3f, %.3f) -> TP(%.3f, %.3f, %.3f) | dist=%.3f m | delay_us=%d",
+             m_startTime,
+             now,
+             t,
+             p.x, p.y, p.z,
+             Xtp, Ytp, Ztp,
+             dist_m,
+             delay_us);
+
+    Proto ProtoObj;
+    char* byArrPkt = nullptr;
+    uint  iaddr    = 0x206C;  // example register for delay
+
+    int pktLen = ProtoObj.mPktRegWrite(iaddr, delay_us, &byArrPkt);
+    if (pktLen <= 0 || byArrPkt == nullptr) {
+        LOG_ERROR("PacketForwarder::send_delay_once: mPktRegWrite failed, pktLen=%d, buf=%p",
+                  pktLen, static_cast<void*>(byArrPkt));
+        return;
+    }
+
+    sockaddr_in txAddr{};
+    txAddr.sin_family = AF_INET;
+    txAddr.sin_port   = htons(m_txPort);
+
+    std::string txIpStr = m_txIp.toStdString();
+#ifdef _WIN32
+    if (InetPtonA(AF_INET, txIpStr.c_str(), &txAddr.sin_addr) != 1) {
+        LOG_ERROR("PacketForwarder::send_delay_once: InetPtonA failed for TX IP %s",
+                  txIpStr.c_str());
+        return;
+    }
+#else
+    if (::inet_pton(AF_INET, txIpStr.c_str(), &txAddr.sin_addr) != 1) {
+        LOG_ERROR("PacketForwarder::send_delay_once: inet_pton failed for TX IP %s",
+                  txIpStr.c_str());
+        return;
+    }
+#endif
+
+    int sent = ::sendto(
+        m_udpTxSock,
+        byArrPkt,
+        pktLen,
+        0,
+        reinterpret_cast<sockaddr*>(&txAddr),
+        sizeof(txAddr)
+        );
+
+    if (sent != pktLen) {
+#ifdef _WIN32
+        int wsaErr = WSAGetLastError();
+        if (sent == SOCKET_ERROR) {
+            LOG_ERROR("PacketForwarder::send_delay_once: sendto() FAILED, WSAError=%d, expected=%d",
+                      wsaErr, pktLen);
+        } else {
+            LOG_ERROR("PacketForwarder::send_delay_once: partial send, Sent=%d, expected=%d, WSAError=%d",
+                      sent, pktLen, wsaErr);
+        }
+#else
+        int err = errno;
+        if (sent < 0) {
+            LOG_ERROR("PacketForwarder::send_delay_once: sendto() FAILED, errno=%d (%s), expected=%d",
+                      err, strerror(err), pktLen);
+        } else {
+            LOG_ERROR("PacketForwarder::send_delay_once: partial send, Sent=%d, expected=%d, errno=%d (%s)",
+                      sent, pktLen, err, strerror(err));
+        }
+#endif
+    }
+
+    // If Proto allocates byArrPkt dynamically, free it here if needed:
+    // delete[] byArrPkt;
+}
+
+void PacketForwarder::SendCoOrdinateOverTcp(iface devieType)
+{
+    uint iaddr=0x206C;
+    double now = std::chrono::duration<double>( std::chrono::system_clock::now().time_since_epoch()).count();
+    double t = now - m_startTime;
+
+    Position p = generate_position(t);
+
+    double dist_m = 0.0;
+    int    delay_us = 0;
+
+    compute_delay(m_Xtp, m_Ytp, m_Ztp, p.x, p.y, p.z, dist_m, delay_us);
+
+    LOG_INFO("send_delay_once: m_startTime=%.6f, now=%.6f, t=%.6f | Pos(%.3f, %.3f, %.3f) -> TP(%.3f, %.3f, %.3f) | dist=%.3f m | delay_us=%d",
+             m_startTime,
+             now,
+             t,
+             p.x, p.y, p.z,
+             m_Xtp, m_Ytp, m_Ztp,
+             dist_m,
+             delay_us);
+
+    Utils::RegWrite(devieType,iaddr,delay_us);
+}

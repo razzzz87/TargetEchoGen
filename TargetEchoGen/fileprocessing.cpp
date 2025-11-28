@@ -16,15 +16,28 @@ FileProcessing::FileProcessing(QWidget *parent)
 
 
     relay = new PacketForwarder(
-    "127.0.0.1",      // src server IP (IMS server / server.py)
-    0xD407,           // src server port
-    "192.168.1.50",   // dst server IP (where you forward)
-    6000,             // dst server port
-    "relay_log.csv",  // CSV log
-    this
-    );
+        "0.0.0.0",    // UDP receive (IMS) bind IP (any)
+        0xD407,       // UDP receive port
+        "10.0.0.80",  // UDP TX target IP (FPGA / delay receiver)
+        4660,         // UDP TX target port
+        "relay_log.csv",
+        this
+        );
+
+    LOG_INFO("FILE PROCESSING CALLED");
+    if (!relay->initialize()) {
+        LOG_ERROR("[FileProcessing] Socket creation failed");
+    }
+    relay->m_startTime = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
+
     //relay->setTarget(10.0, 10.0, 10.0);   // Xtp, Ytp, Ztp
     // relay->start();
+
+    // if (!relay->initialize()) {
+    //     LOG_ERROR("[FileProcessing] Socket creation failed");
+    // }
+
+    // relay->start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 FileProcessing::~FileProcessing()
@@ -67,6 +80,12 @@ void FileProcessing::on_PbFPTargetPostionSet_clicked()
 {
     bool okX = false, okY = false, okZ = false;
 
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+    //relay->m_startTime = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
     double Xtp = ui->LeFPTPXAxis->text().toDouble(&okX);
     double Ytp = ui->LeFPTPYAxis->text().toDouble(&okY);
     double Ztp = ui->LeFPTPZAxis->text().toDouble(&okZ);
@@ -75,7 +94,8 @@ void FileProcessing::on_PbFPTargetPostionSet_clicked()
         Log::showStatusMessage(this, "Invalid Input","Please enter valid numeric values for X, Y, Z.");
         return;
     }
-
     relay->setTarget(Xtp, Ytp, Ztp);
+    relay->SendCoOrdinateOverTcp(deviceType);
+    //relay->send_delay_once(Xtp, Ytp, Ztp);
 }
 
