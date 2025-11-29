@@ -1810,7 +1810,7 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
         serial = UartSerial::getInstance();
         if (!serial)
         {
-            LOG_TO_FILE("ERROR: Serial pointer is null.");
+            LOG_INFO("Serial pointer is null.");
             return;
         }
         break;
@@ -1822,7 +1822,6 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
         Cnf.sFilePath = sFilePath;
         Cnf.eInterface = deviceType;
         Cnf._Dir = dir;
-        LOG_INFO("eETHPL1G: iFileSize:%d,sFilePath:%s",iFileSize,sFilePath.toStdString().c_str());
         setupTransferAgent->configure(Cnf);
         setupTransferAgent->start();
 
@@ -1837,7 +1836,6 @@ void Spectrum::FileReadWriteSetup(iface deviceType, uint iFileSize, QString sFil
         Cnf.sFilePath = sFilePath;
         Cnf.eInterface = deviceType;
         Cnf._Dir = dir;
-        LOG_INFO("eETH10G: iFileSize:%d,sFilePath:%s",iFileSize,sFilePath.toStdString().c_str());
         setupTransferAgent->configure(Cnf);
         setupTransferAgent->start();
     }
@@ -1862,13 +1860,13 @@ void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
     {
         serial = UartSerial::getInstance();
         if (!serial) {
-            LOG_ERROR("ERROR: Serial pointer is null.");
+            LOG_ERROR("[Spectrum] Serial pointer is null.");
             if (byArrPkt) delete[] byArrPkt;
             LOG_INFO("Spectrum::handleRegisterWrite EXIT (serial null)");
             return;
         }
         if(!serial->sendData(byArrPkt, pktLen)){
-            LOG_ERROR("Serial sendData failed");
+            LOG_ERROR("[Spectrum] Serial sendData failed");
         }
         break;
     }
@@ -1880,7 +1878,7 @@ void Spectrum::handleRegisterWrite(iface deviceType, uint iaddr, uint ival)
     case eETH10G:
         eth10G = EthernetSocket10G::getInstance();
         if (!eth10G) {
-            LOG_ERROR("ERROR: Ethernet pointer is null.");
+            LOG_ERROR("[Spectrum]Ethernet pointer is null.");
             if (byArrPkt) delete[] byArrPkt;
             LOG_INFO("Spectrum::handleRegisterWrite EXIT (eth10G null)");
             return;
