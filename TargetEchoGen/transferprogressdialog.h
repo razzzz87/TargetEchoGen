@@ -18,27 +18,15 @@ public:
 
         label = new QLabel("Transferring file...", this);
         progressBar = new QProgressBar(this);
-        progressBar->setRange(0, 100);
-        progressBar->setValue(0);
-
-        cancelButton = new QPushButton("Cancel", this);
-        cancelButton->setStyleSheet(
-            "QPushButton {"
-            "  background-color: #d9534f;"       // Bootstrap-style red
-            "  color: white;"
-            "  border: none;"
-            "  padding: 6px 12px;"
-            "  border-radius: 4px;"
-            "  font-weight: bold;"
-            "}"
-            "QPushButton:hover {"
-            "  background-color: #c9302c;"       // Darker red on hover
-            "}"
-            "QPushButton:pressed {"
-            "  background-color: #ac2925;"       // Even darker when pressed
+        progressBar->setStyleSheet(
+            "QProgressBar {"
+            "    min-height: 30px;"
+            "    max-height: 50px;"
             "}"
             );
-
+        progressBar->setRange(0, 100);
+        progressBar->setValue(0);
+        cancelButton = new QPushButton("Cancel", this);
         connect(cancelButton, &QPushButton::clicked, this, &TransferProgressDialog::onCancelClicked);
 
         QVBoxLayout* layout = new QVBoxLayout(this);

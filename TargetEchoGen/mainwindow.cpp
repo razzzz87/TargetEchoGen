@@ -300,26 +300,6 @@ void MainWindow::close_Progress_pop(void){
     //transferProgress->reset();
    // transferProgress->close();
 }
-void MainWindow::updateTransferProgress(qint64 percentage){
-
-    //transferProgress->setValue(qBound(0, percentage, 100));
-}
-
-// void MainWindow::on_pb_ddr_dac_iq_file_browse_clicked()
-// {
-//     LOG_TO_FILE(":Entry==>");
-//     QString fileName = QFileDialog::getOpenFileName(this,
-//                                                     "Open File",
-//                                                     ".",
-//                                                     "Text Files (*.bin);;All Files (*)");
-//     if (!fileName.isEmpty())
-//     {
-//         qDebug() << "FileName" << fileName;
-//         LOG_TO_FILE("Filename:%s",fileName.toStdString().c_str());
-//         //ui->lineEdit_ddr_dac_iq_file_name_path->setText(fileName);
-//     }
-//     LOG_TO_FILE(":Exit==>\n");
-// }
 
 void MainWindow::FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString sFilePath, eXferDir dir)
 {
@@ -334,7 +314,7 @@ void MainWindow::FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString 
         serial = UartSerial::getInstance();
         if (!serial)
         {
-            LOG_TO_FILE("ERROR: Serial pointer is null.");
+            LOG_ERROR("Serial pointer is null.");
             return;
         }
         break;
@@ -348,6 +328,7 @@ void MainWindow::FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString 
         Cnf._Dir = dir;
         setupTransferAgent->configure(Cnf);
         setupTransferAgent->start();
+        progressDialog->show();
 
     }
     break;
@@ -360,7 +341,6 @@ void MainWindow::FileReadWriteSetup(iface deviceType, qint64 iFileSize, QString 
         Cnf.sFilePath = sFilePath;
         Cnf.eInterface = iface::eETH10G;
         Cnf._Dir = dir;
-        LOG_INFO("eETH10G: iFileSize:%d,sFilePath:%s",iFileSize,sFilePath.toStdString().c_str());
         setupTransferAgent->configure(Cnf);
         setupTransferAgent->start();
         progressDialog->show();

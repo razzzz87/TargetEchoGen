@@ -438,6 +438,7 @@ void DeviceSetup::on_PbLMKInitDefault_clicked()
     } else {
 
     }
+    Log::showStatusMessage(this,"Device setup","LMK Default setting done");
     LOG_INFO("DeviceSetup::on_PbLMKInitDefault_clicked() <EXIT>\n");
 }
 
@@ -460,6 +461,7 @@ void DeviceSetup::on_PbDACInitDefault_clicked()
         DeviceSetupHelper::Dac3DefaultSetting(deviceType);
     }
     else {}
+    Log::showStatusMessage(this,"Device setup","DAC Init Default setting done");
     LOG_INFO("DeviceSetup::on_PbDACInitDefault_clicked() <EXIT>\n");
 }
 
