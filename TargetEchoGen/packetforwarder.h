@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstdint>
 #include "Utils.h"
+#include "connectionctx.h"
 
 struct Position {
     double x;
@@ -76,6 +77,7 @@ public:
 
     // Send coordinate/file data over UDP using the same TX socket
     void sendCoordinateFileUdp(const QString &filePath);
+    iface getSelectedDeviceType();
 
     // Open sockets and prepare state
     bool initialize();

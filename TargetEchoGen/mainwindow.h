@@ -54,7 +54,6 @@ private slots:
     void onConnStateChanged(iface which, ConnInfo s);
     void TransferDone(eStatus DoneStatus);
     void onTimeout();
-    void updateTransferProgress(qint64 percentage);
     void close_Progress_pop(void);
     void on_PbConnSettings_clicked();
     void onConnectionSuccess(iface eInterface);

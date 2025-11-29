@@ -49,6 +49,34 @@ static std::string utc_iso8601_now()
     return oss.str();
 }
 
+iface PacketForwarder::getSelectedDeviceType()
+{
+    auto& ctx = ConnectionHelper::instance();
+    iface sel = ctx.selectedInterface();
+
+    const QString ifaceName = Utils::ifaceToQString(sel);
+
+    // 1️⃣ Check if no interface selected
+    if (sel == eNONE)
+    {
+        LOG_ERROR("[FileProcessing] No interface selected (iface=%s)", Utils::ifaceToCStr(sel));
+        return eNONE;
+    }
+
+    // 2️⃣ Check if selected interface is connected
+    ConnInfo info = ctx.info(sel);
+    if (!info.connected)
+    {
+        LOG_ERROR("[FileProcessing] Selected interface '%s' is NOT connected.", Utils::ifaceToCStr(sel));
+        return eNONE;
+    }
+
+    // 3️⃣ Success — valid and connected interface
+    LOG_INFO("[FileProcessing] Selected and connected interface: %s", Utils::ifaceToCStr(sel));
+
+    return sel;
+}
+
 // =====================================================================
 // PacketForwarder implementation
 // =====================================================================
@@ -151,9 +179,7 @@ void PacketForwarder::rotateCsvIfNeeded()
     QFile::remove(backupPath);
 
     if (!QFile::rename(m_csvPath, backupPath)) {
-        LOG_ERROR("PacketForwarder: failed to rotate CSV. Rename %s -> %s failed",
-                  m_csvPath.toStdString().c_str(),
-                  backupPath.toStdString().c_str());
+        LOG_ERROR("PacketForwarder: failed to rotate CSV. Rename %s -> %s failed", m_csvPath.toStdString().c_str(), backupPath.toStdString().c_str());
         return;
     }
 
@@ -339,9 +365,7 @@ bool PacketForwarder::initialize()
 #else
             inet_ntop(AF_INET, &actualLocal.sin_addr, addrBuf, sizeof(addrBuf));
 #endif
-            LOG_INFO("[CLIENT] UDP recv socket bound to %s:%u",
-                     addrBuf,
-                     ntohs(actualLocal.sin_port));
+            LOG_INFO("[CLIENT] UDP recv socket bound to %s:%u", addrBuf, ntohs(actualLocal.sin_port));
         }
     }
 
@@ -360,9 +384,7 @@ bool PacketForwarder::initialize()
 #endif
 
     // capture start time for synthetic motion used in send_delay_once()
-    m_startTime = std::chrono::duration<double>(
-                      std::chrono::system_clock::now().time_since_epoch()
-                      ).count();
+    m_startTime = std::chrono::duration<double>( std::chrono::system_clock::now().time_since_epoch()).count();
 
     LOG_INFO("PacketForwarder: INIT OK – UDP recv + UDP tx sockets created.");
     return true;
@@ -375,19 +397,17 @@ void PacketForwarder::relayLoop()
 {
     char buf[2048];
 
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+
     while (!m_stopRequested.load(std::memory_order_relaxed)) {
         sockaddr_in srcAddr{};
         socklen_t   addrLen = sizeof(srcAddr);
 
-        int n = ::recvfrom(
-            m_udpRecvSock,
-            buf,
-            static_cast<int>(sizeof(buf)),
-            0,
-            reinterpret_cast<sockaddr*>(&srcAddr),
-            &addrLen
-            );
-
+        int n = ::recvfrom(m_udpRecvSock, buf, static_cast<int>(sizeof(buf)), 0, reinterpret_cast<sockaddr*>(&srcAddr), &addrLen);
         if (n < 0) {
 #ifdef _WIN32
             int err = WSAGetLastError();
@@ -432,19 +452,12 @@ void PacketForwarder::relayLoop()
         double delay_s = static_cast<double>(delay_us) * 1e-6;
         std::string ts = now_utc_iso8601();
 
-        LOG_INFO("relayLoop: Pos(%.3f, %.3f, %.3f) -> TP(%.3f, %.3f, %.3f) | dist=%.3f m | delay_us=%d",
-                 x, y, z,
-                 m_Xtp, m_Ytp, m_Ztp,
-                 dist_m,
-                 delay_us);
+        LOG_INFO("relayLoop: Pos(%.3f, %.3f, %.3f) -> TP(%.3f, %.3f, %.3f) | dist=%.3f m | delay_us=%d", x, y, z, m_Xtp, m_Ytp, m_Ztp, dist_m, delay_us);
+        writeCsvRow(ts, up.msg_num, up.id_field, x, y, z, dist_m, delay_s);
 
-        writeCsvRow(ts, up.msg_num, up.id_field,
-                    x, y, z,
-                    dist_m,
-                    delay_s);
+        uint iaddr=0x206C;
+        Utils::RegWrite(deviceType,iaddr,delay_us);
 
-        // NOTE: we do NOT call send_delay_once() automatically here.
-        // You call send_delay_once() from outside (e.g. timer / button).
     }
 }
 
@@ -499,15 +512,12 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
 
     QFile file(filePath);
     if (!file.exists()) {
-        LOG_ERROR("sendCoordinateFileUdp: file does not exist: %s",
-                  filePath.toStdString().c_str());
+        LOG_ERROR("sendCoordinateFileUdp: file does not exist: %s",filePath.toStdString().c_str());
         return;
     }
 
     if (!file.open(QIODevice::ReadOnly)) {
-        LOG_ERROR("sendCoordinateFileUdp: failed to open file: %s (error: %s)",
-                  filePath.toStdString().c_str(),
-                  file.errorString().toStdString().c_str());
+        LOG_ERROR("sendCoordinateFileUdp: failed to open file: %s (error: %s)", filePath.toStdString().c_str(), file.errorString().toStdString().c_str());
         return;
     }
 
@@ -518,8 +528,7 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
     std::string txIpStr = m_txIp.toStdString();
 #ifdef _WIN32
     if (InetPtonA(AF_INET, txIpStr.c_str(), &txAddr.sin_addr) != 1) {
-        LOG_ERROR("sendCoordinateFileUdp: InetPtonA failed for TX IP %s",
-                  txIpStr.c_str());
+        LOG_ERROR("sendCoordinateFileUdp: InetPtonA failed for TX IP %s", txIpStr.c_str());
         return;
     }
 #else
@@ -530,10 +539,7 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
     }
 #endif
 
-    LOG_INFO("sendCoordinateFileUdp: sending file %s to %s:%u over UDP",
-             filePath.toStdString().c_str(),
-             txIpStr.c_str(),
-             static_cast<unsigned>(m_txPort));
+    LOG_INFO("sendCoordinateFileUdp: sending file %s to %s:%u over UDP", filePath.toStdString().c_str(), txIpStr.c_str(), static_cast<unsigned>(m_txPort));
 
     const int MAX_UDP_PAYLOAD = 1400;
     QByteArray buf;
@@ -547,32 +553,22 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
             if (file.atEnd()) {
                 break;
             } else {
-                LOG_ERROR("sendCoordinateFileUdp: file read error on %s",
-                          filePath.toStdString().c_str());
+                LOG_ERROR("sendCoordinateFileUdp: file read error on %s", filePath.toStdString().c_str());
                 break;
             }
         }
 
         int len = static_cast<int>(buf.size());
-        int sent = ::sendto(
-            m_udpTxSock,
-            buf.constData(),
-            len,
-            0,
-            reinterpret_cast<sockaddr*>(&txAddr),
-            sizeof(txAddr)
-            );
+        int sent = ::sendto(m_udpTxSock, buf.constData(), len, 0, reinterpret_cast<sockaddr*>(&txAddr), sizeof(txAddr));
 
         if (sent != len) {
 #ifdef _WIN32
             int wsaErr = WSAGetLastError();
             if (sent == SOCKET_ERROR) {
-                LOG_ERROR("sendCoordinateFileUdp: sendto() FAILED on packet %d, WSAError=%d, expected=%d",
-                          packetIdx, wsaErr, len);
+                LOG_ERROR("sendCoordinateFileUdp: sendto() FAILED on packet %d, WSAError=%d, expected=%d", packetIdx, wsaErr, len);
                 break;
             } else {
-                LOG_ERROR("sendCoordinateFileUdp: partial send on packet %d, Sent=%d, expected=%d, WSAError=%d",
-                          packetIdx, sent, len, wsaErr);
+                LOG_ERROR("sendCoordinateFileUdp: partial send on packet %d, Sent=%d, expected=%d, WSAError=%d", packetIdx, sent, len, wsaErr);
             }
 #else
             int err = errno;
@@ -591,9 +587,7 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
         }
     }
 
-    LOG_INFO("sendCoordinateFileUdp: finished sending %d packets, total %lld bytes",
-             packetIdx,
-             static_cast<long long>(totalSent));
+    LOG_INFO("sendCoordinateFileUdp: finished sending %d packets, total %lld bytes", packetIdx, static_cast<long long>(totalSent));
 }
 
 // ---------------------------------------------------------------------

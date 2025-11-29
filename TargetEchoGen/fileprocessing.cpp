@@ -24,20 +24,9 @@ FileProcessing::FileProcessing(QWidget *parent)
         this
         );
 
-    LOG_INFO("FILE PROCESSING CALLED");
     if (!relay->initialize()) {
         LOG_ERROR("[FileProcessing] Socket creation failed");
     }
-    relay->m_startTime = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-    //relay->setTarget(10.0, 10.0, 10.0);   // Xtp, Ytp, Ztp
-    // relay->start();
-
-    // if (!relay->initialize()) {
-    //     LOG_ERROR("[FileProcessing] Socket creation failed");
-    // }
-
-    // relay->start_time = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 FileProcessing::~FileProcessing()
@@ -65,8 +54,7 @@ iface FileProcessing::getSelectedDeviceType()
     if (!info.connected)
     {
         LOG_ERROR("[FileProcessing] Selected interface '%s' is NOT connected.", Utils::ifaceToCStr(sel));
-        Log::showStatusMessage(this, "Device Setup",
-                               QString("Selected interface '%1' is not connected.").arg(ifaceName));
+        Log::showStatusMessage(this, "Device Setup", QString("Selected interface '%1' is not connected.").arg(ifaceName));
         return eNONE;
     }
 
