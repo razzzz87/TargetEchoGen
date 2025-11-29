@@ -402,7 +402,7 @@ void PacketForwarder::relayLoop()
         LOG_ERROR("[WriteRegister] Interface not selected");
         return;
     }
-
+    m_startTime = std::chrono::duration<double>( std::chrono::system_clock::now().time_since_epoch()).count();
     while (!m_stopRequested.load(std::memory_order_relaxed)) {
         sockaddr_in srcAddr{};
         socklen_t   addrLen = sizeof(srcAddr);
@@ -449,11 +449,8 @@ void PacketForwarder::relayLoop()
         int    delay_us = 0;
         compute_delay(m_Xtp, m_Ytp, m_Ztp, x, y, z, dist_m, delay_us);
 
-        double delay_s = static_cast<double>(delay_us) * 1e-6;
-        std::string ts = now_utc_iso8601();
-
         LOG_INFO("relayLoop: Pos(%.3f, %.3f, %.3f) -> TP(%.3f, %.3f, %.3f) | dist=%.3f m | delay_us=%d", x, y, z, m_Xtp, m_Ytp, m_Ztp, dist_m, delay_us);
-        writeCsvRow(ts, up.msg_num, up.id_field, x, y, z, dist_m, delay_s);
+        writeCsvRow(std::to_string(m_startTime), up.msg_num, up.id_field, x, y, z, dist_m, delay_us);
 
         uint iaddr=0x206C;
         Utils::RegWrite(deviceType,iaddr,delay_us);
