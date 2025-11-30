@@ -25,6 +25,12 @@ private slots:
 
     void on_PbFPCSVFileSend_clicked();
 
+    void on_GRpBoxUserInput_clicked(bool checked);
+
+    void on_GrpBoxFPRealTime_clicked(bool checked);
+
+    void on_GrpBoxFPCsvFileSend_clicked(bool checked);
+
 private:
     Ui::FileProcessing *ui;
 };

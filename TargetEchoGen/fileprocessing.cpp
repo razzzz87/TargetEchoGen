@@ -112,11 +112,69 @@ void FileProcessing::on_PbFPCSVFileSend_clicked()
         return;
     }
 
-    if(!ui->LePFCSVFilePath->text().isEmpty())
+    if(!ui->LePFCSVFilePath->text().isEmpty()){
         relay->sendCoordinateFileUdp(ui->LePFCSVFilePath->text());
+        Utils::RegWrite(deviceType,0x2078,0x01);
+        Utils::RegWrite(deviceType,0x2074,0x01);
+    }
     else{
         Log::showStatusMessage(this,"File Processing","Please select CSV File");
     }
 
+}
+
+
+void FileProcessing::on_GRpBoxUserInput_clicked(bool checked)
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+
+    if(checked){
+
+        ui->GrpBoxFPCsvFileSend->setChecked(false);
+        ui->GrpBoxFPRealTime->setChecked(false);
+        Utils::RegWrite(deviceType,0x2078,0x00);
+        Utils::RegWrite(deviceType,0x2074,0x00);
+    }
+
+}
+
+
+void FileProcessing::on_GrpBoxFPRealTime_clicked(bool checked)
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+
+    if(checked){
+
+        ui->GrpBoxFPCsvFileSend->setChecked(false);
+        ui->GRpBoxUserInput->setChecked(false);
+        Utils::RegWrite(deviceType,0x2078,0x00);
+        Utils::RegWrite(deviceType,0x2074,0x00);
+    }
+}
+
+
+void FileProcessing::on_GrpBoxFPCsvFileSend_clicked(bool checked)
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+
+    if(checked){
+
+        ui->GrpBoxFPRealTime->setChecked(false);
+        ui->GRpBoxUserInput->setChecked(false);
+        Utils::RegWrite(deviceType,0x2078,0x00);
+        Utils::RegWrite(deviceType,0x2074,0x00);
+    }
 }
 
