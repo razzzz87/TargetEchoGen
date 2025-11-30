@@ -402,6 +402,9 @@ void MainWindow::on_PbDAC1IQFileSend_clicked()
 }
 void MainWindow::SetDAC1ReadSettingAfterFileSend()
 {
+    uint32_t val;
+    int retries = 5000;
+
     iface deviceType = getSelectedDeviceType();
     if (deviceType == eNONE) {
         LOG_ERROR("[WriteRegister] Interface not selected");
@@ -415,6 +418,17 @@ void MainWindow::SetDAC1ReadSettingAfterFileSend()
     Utils::RegWrite(deviceType, 0x212C,size_hi);
 
     Utils::RegWrite(deviceType, 0x2118,0x200);
+
+    do {
+        val = Utils::RegRead(deviceType, 0x11C);
+        QThread::msleep(1);
+        LOG_INFO("Verifying write done %d",retries);
+    } while (val != 0x03 && retries-- > 0);
+
+    if (val == 0x03)
+        Log::showStatusMessage(this, "Write status", "Write successful");
+    else
+        Log::showStatusMessage(this, "Write status", "Write failed");
 
 }
 void MainWindow::on_PbDAC2TgrSetup_clicked()
