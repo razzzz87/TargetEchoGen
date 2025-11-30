@@ -78,7 +78,7 @@ public:
     // Send coordinate/file data over UDP using the same TX socket
     void sendCoordinateFileUdp(const QString &filePath);
     iface getSelectedDeviceType();
-
+    bool sendCoordinateChunk(QByteArray &chunk, uint32_t &startAddress, const sockaddr_in &txAddr);
     // Open sockets and prepare state
     bool initialize();
     double m_startTime;

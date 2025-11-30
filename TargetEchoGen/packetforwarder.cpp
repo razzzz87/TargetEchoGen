@@ -8,6 +8,8 @@
 #include <string>
 #include <QFileInfo>
 #include <QFile>
+#include <QRegularExpression>   // REQUIRED
+#include <QStringList>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -492,6 +494,44 @@ void PacketForwarder::cleanup()
         m_csv.close();
 }
 
+bool PacketForwarder::sendCoordinateChunk(QByteArray &chunk, uint32_t &startAddress, const sockaddr_in &txAddr)
+{
+    if (chunk.isEmpty())
+        return true;   // nothing to do
+
+    Proto protocol;
+    char *packetData = nullptr;
+
+    int packetLen = protocol.mPktBulkWrite(startAddress, chunk.data(), static_cast<unsigned>(chunk.size()),  &packetData);
+    if (!packetData || packetLen <= 0) {
+        LOG_ERROR("sendCoordinateChunk: mPktBulkWrite failed at addr 0x%08X", startAddress);
+        if (packetData)
+            delete[] packetData;
+        chunk.clear();
+        return false;
+    }
+
+    int sent = ::sendto(m_udpTxSock, packetData, packetLen, 0, reinterpret_cast<const sockaddr*>(&txAddr), sizeof(txAddr));
+    bool ok = (sent == packetLen);
+    if (!ok) {
+#ifdef _WIN32
+        int wsaErr = WSAGetLastError();
+        LOG_ERROR("sendCoordinateChunk: sendto() failed/partial (sent=%d, expected=%d, WSAError=%d)", sent, packetLen, wsaErr);
+#else
+        int err = errno;
+        LOG_ERROR("sendCoordinateChunk: sendto() failed/partial (sent=%d, expected=%d, errno=%d %s)",
+                  sent, packetLen, err, strerror(err));
+#endif
+    } else {
+        LOG_INFO("sendCoordinateChunk: sent Proto bulk-write packet: addr=0x%08X, bytes=%d", startAddress, packetLen);
+        // advance address by data bytes if HW expects linear addressing
+        startAddress += static_cast<uint32_t>(chunk.size());
+    }
+    delete[] packetData;
+    chunk.clear();
+    return ok;
+}
+
 // ---------------------------------------------------------------------
 // UDP file send (coordinate/file) using m_udpTxSock
 // ---------------------------------------------------------------------
@@ -509,11 +549,11 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
 
     QFile file(filePath);
     if (!file.exists()) {
-        LOG_ERROR("sendCoordinateFileUdp: file does not exist: %s",filePath.toStdString().c_str());
+        LOG_ERROR("sendCoordinateFileUdp: file does not exist: %s", filePath.toStdString().c_str());
         return;
     }
 
-    if (!file.open(QIODevice::ReadOnly)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         LOG_ERROR("sendCoordinateFileUdp: failed to open file: %s (error: %s)", filePath.toStdString().c_str(), file.errorString().toStdString().c_str());
         return;
     }
@@ -536,55 +576,83 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
     }
 #endif
 
-    LOG_INFO("sendCoordinateFileUdp: sending file %s to %s:%u over UDP", filePath.toStdString().c_str(), txIpStr.c_str(), static_cast<unsigned>(m_txPort));
+    LOG_INFO("sendCoordinateFileUdp: sending CSV %s to %s:%u over UDP (Proto bulk-write)", filePath.toStdString().c_str(), txIpStr.c_str(), static_cast<unsigned>(m_txPort));
 
-    const int MAX_UDP_PAYLOAD = 1400;
-    QByteArray buf;
+    QTextStream in(&file);
 
-    qint64 totalSent = 0;
-    int    packetIdx = 0;
+    const int   MAX_DATA_BYTES = 1024 * 10;      // payload bytes per Proto packet
+    QByteArray  dataChunk;
+    dataChunk.reserve(MAX_DATA_BYTES);
 
-    while (true) {
-        buf = file.read(MAX_UDP_PAYLOAD);
-        if (buf.isEmpty()) {
-            if (file.atEnd()) {
-                break;
-            } else {
-                LOG_ERROR("sendCoordinateFileUdp: file read error on %s", filePath.toStdString().c_str());
-                break;
-            }
+    qint64   lineNo     = 0;
+    qint64   totalWords = 0;
+    uint32_t startAddress = 0x00000000;     // TODO: set real base addr if needed
+
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        ++lineNo;
+        line = line.trimmed();
+        if (line.isEmpty())
+            continue;
+        if (line.startsWith('#'))
+            continue;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        QStringList tokens = line.split(QRegularExpression("[,\\s]+"), Qt::SkipEmptyParts);
+#else
+        QStringList tokens = line.split(QRegExp("[,\\s]+"), QString::SkipEmptyParts);
+#endif
+
+        if (tokens.size() < 4) {
+            LOG_ERROR("sendCoordinateFileUdp: line %lld: expected 4 columns, got %d: '%s'", static_cast<long long>(lineNo), tokens.size(),line.toStdString().c_str());
+            continue;
         }
 
-        int len = static_cast<int>(buf.size());
-        int sent = ::sendto(m_udpTxSock, buf.constData(), len, 0, reinterpret_cast<sockaddr*>(&txAddr), sizeof(txAddr));
+        bool ok0=false, ok1=false, ok2=false, ok3=false;
+        quint32 onOff = tokens[0].toUInt(&ok0, 10);   // 0/1 decimal
+        quint32 b1    = tokens[1].toUInt(&ok1, 16);   // hex
+        quint32 b2    = tokens[2].toUInt(&ok2, 16);   // hex
+        quint32 b3    = tokens[3].toUInt(&ok3, 16);   // hex
 
-        if (sent != len) {
-#ifdef _WIN32
-            int wsaErr = WSAGetLastError();
-            if (sent == SOCKET_ERROR) {
-                LOG_ERROR("sendCoordinateFileUdp: sendto() FAILED on packet %d, WSAError=%d, expected=%d", packetIdx, wsaErr, len);
+        if (!(ok0 && ok1 && ok2 && ok3)) {
+            LOG_ERROR("sendCoordinateFileUdp: line %lld parse error: '%s'", static_cast<long long>(lineNo), line.toStdString().c_str());
+            continue;
+        }
+
+        onOff &= 0xFF;
+        b1    &= 0xFF;
+        b2    &= 0xFF;
+        b3    &= 0xFF;
+
+        // 32-bit word: [31:24]=onOff, [23:16]=b1, [15:8]=b2, [7:0]=b3
+        uint32_t word =
+            (onOff << 24) |
+            (b1    << 16) |
+            (b2    << 8)  |
+            (b3);
+
+        uint32_t netWord = htonl(word);     // big-endian
+
+        dataChunk.append(reinterpret_cast<const char*>(&netWord), sizeof(netWord));
+        ++totalWords;
+
+        if (dataChunk.size() >= MAX_DATA_BYTES) {
+            if (!sendCoordinateChunk(dataChunk, startAddress, txAddr)) {
+                LOG_ERROR("sendCoordinateFileUdp: sendCoordinateChunk failed, aborting");
                 break;
-            } else {
-                LOG_ERROR("sendCoordinateFileUdp: partial send on packet %d, Sent=%d, expected=%d, WSAError=%d", packetIdx, sent, len, wsaErr);
             }
-#else
-            int err = errno;
-            if (sent < 0) {
-                LOG_ERROR("sendCoordinateFileUdp: sendto() FAILED on packet %d, errno=%d (%s), expected=%d",
-                          packetIdx, err, strerror(err), len);
-                break;
-            } else {
-                LOG_ERROR("sendCoordinateFileUdp: partial send on packet %d, Sent=%d, expected=%d, errno=%d (%s)",
-                          packetIdx, sent, len, err, strerror(err));
-            }
-#endif
-        } else {
-            totalSent += sent;
-            packetIdx++;
         }
     }
 
-    LOG_INFO("sendCoordinateFileUdp: finished sending %d packets, total %lld bytes", packetIdx, static_cast<long long>(totalSent));
+    // send remaining
+    if (!dataChunk.isEmpty()) {
+        if (!sendCoordinateChunk(dataChunk, startAddress, txAddr)) {
+            LOG_ERROR("sendCoordinateFileUdp: sendCoordinateChunk (final) failed");
+        }
+    }
+
+    LOG_INFO("sendCoordinateFileUdp: finished. lines=%lld, words=%lld", static_cast<long long>(lineNo),  static_cast<long long>(totalWords));
 }
 
 // ---------------------------------------------------------------------
@@ -652,15 +720,7 @@ void PacketForwarder::send_delay_once(double Xtp, double Ytp, double Ztp)
     }
 #endif
 
-    int sent = ::sendto(
-        m_udpTxSock,
-        byArrPkt,
-        pktLen,
-        0,
-        reinterpret_cast<sockaddr*>(&txAddr),
-        sizeof(txAddr)
-        );
-
+    int sent = ::sendto( m_udpTxSock, byArrPkt, pktLen, 0, reinterpret_cast<sockaddr*>(&txAddr), sizeof(txAddr));
     if (sent != pktLen) {
 #ifdef _WIN32
         int wsaErr = WSAGetLastError();
@@ -684,7 +744,7 @@ void PacketForwarder::send_delay_once(double Xtp, double Ytp, double Ztp)
     }
 
     // If Proto allocates byArrPkt dynamically, free it here if needed:
-    // delete[] byArrPkt;
+    delete[] byArrPkt;
 }
 
 void PacketForwarder::SendCoOrdinateOverTcp(iface devieType)

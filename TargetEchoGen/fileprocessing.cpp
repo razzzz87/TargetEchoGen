@@ -3,6 +3,7 @@
 #include "ui_fileprocessing.h"
 #include "connectionctx.h"
 #include "log.h"
+#include "QFileDialog"
 
 FileProcessing::FileProcessing(QWidget *parent)
     : QWidget(parent)
@@ -85,5 +86,37 @@ void FileProcessing::on_PbFPTargetPostionSet_clicked()
     relay->setTarget(Xtp, Ytp, Ztp);
     relay->SendCoOrdinateOverTcp(deviceType);
     //relay->send_delay_once(Xtp, Ytp, Ztp);
+}
+
+
+void FileProcessing::on_PbFPFileBrowse_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(
+        this,
+        tr("Open Binary File"),
+        QString(),
+        tr("Binary Files (*.bin);;All Files (*.*)")
+        );
+
+    if(!filename.isEmpty()){
+        ui->LePFCSVFilePath->setText(filename);
+    }
+}
+
+
+void FileProcessing::on_PbFPCSVFileSend_clicked()
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+
+    if(!ui->LePFCSVFilePath->text().isEmpty())
+        relay->sendCoordinateFileUdp(ui->LePFCSVFilePath->text());
+    else{
+        Log::showStatusMessage(this,"File Processing","Please select CSV File");
+    }
+
 }
 
