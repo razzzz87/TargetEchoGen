@@ -460,17 +460,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_15"/>
+       <widget class="QLineEdit" name="LePFCSVFilePath"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_8">
+       <widget class="QPushButton" name="PbFPFileBrowse">
         <property name="text">
          <string>Browse</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_9">
+       <widget class="QPushButton" name="PbFPCSVFileSend">
         <property name="text">
          <string>Send</string>
         </property>

@@ -21,6 +21,10 @@ public:
 private slots:
     void on_PbFPTargetPostionSet_clicked();
 
+    void on_PbFPFileBrowse_clicked();
+
+    void on_PbFPCSVFileSend_clicked();
+
 private:
     Ui::FileProcessing *ui;
 };
