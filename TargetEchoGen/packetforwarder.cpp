@@ -458,6 +458,22 @@ void PacketForwarder::relayLoop()
         uint iaddr=0x206C;
         Utils::RegWrite(deviceType,iaddr,delay_us);
 
+        // 🔹 Fill struct and emit to GUI
+        RelayMeasurement m;
+        m.Xtp      = m_Xtp;
+        m.Ytp      = m_Ytp;
+        m.Ztp      = m_Ztp;
+        m.x        = x;
+        m.y        = y;
+        m.z        = z;
+        m.dist_m   = dist_m;
+        m.delay_us = delay_us;
+        m.msg_num  = up.msg_num;
+        m.id_field = up.id_field;
+        m.startTime = m_startTime;
+
+        emit measurementUpdated(m);
+
     }
     LOG_INFO("PacketForwarder::relayLoop() <EXIT>");
 }

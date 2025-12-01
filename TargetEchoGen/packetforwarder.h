@@ -11,6 +11,29 @@
 #include <cstdint>
 #include "Utils.h"
 #include "connectionctx.h"
+#include <QtGlobal>
+
+// 1) Struct to carry all measurement info
+struct RelayMeasurement
+{
+    double Xtp;
+    double Ytp;
+    double Ztp;
+
+    double x;
+    double y;
+    double z;
+
+    double dist_m;
+    int    delay_us;
+
+    quint32 msg_num;
+    quint32 id_field;
+
+    double startTime;   // optional: timestamp as double
+};
+// 2) Make it known to Qt meta-object system
+Q_DECLARE_METATYPE(RelayMeasurement)
 
 struct Position {
     double x;
@@ -85,6 +108,9 @@ public:
 
 protected:
     void run() override;
+
+signals:
+    void measurementUpdated(const RelayMeasurement &m);
 
 private:
     // UDP receive (IMS/source)

@@ -48,6 +48,37 @@ void LxTriggerSetup(iface deviceType,
 }
 
 
+void NCO_FRQ70Mhz(iface deviceType)
+{
+    LOG_INFO("[NCO_FRQ70Mhz] <ENTER>: deviceType=%d", static_cast<int>(deviceType));
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF0C0, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF0D0, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x14, 0xEEEF, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x15, 0x0EEE, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8182, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x03, 0xF000, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x819C, 0x00);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x819C, 0x01);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x019C, 0x02);
+
+}
+void NCO_FRQ180Mhz(iface deviceType){
+    LOG_INFO("[NCO_FRQ180Mhz] <ENTER>: deviceType=%d", static_cast<int>(deviceType));
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF0C0, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF0D0, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x14, 0x6666, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x15, 0x2666, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8182, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x03, 0xF000, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x819C, 0x00);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x819C, 0x01);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x019C, 0x02);
+}
+
 void Enable_nco(iface deviceType)
 {
     LOG_INFO("[Enable_nco] <ENTER>: deviceType=%d", static_cast<int>(deviceType));
@@ -75,6 +106,7 @@ void Disable_nco(iface deviceType)
     LOG_INFO("clearBit: bit=4 -> data=0x%08X", data);
 
     Utils::SpiDacWrite(deviceType, 0x02, data, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF080, 0x02);
     LOG_INFO("SpiDacWrite: addr=0x02, data=0x%08X, page=0x02", data);
 
     LOG_INFO("[Disable_nco] <EXIT>: deviceType=%d", static_cast<int>(deviceType));

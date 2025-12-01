@@ -109,6 +109,10 @@ private slots:
 
     void on_RbPL10GSel_clicked(bool checked);
 
+    void on_CbDAC1NOCFrequency_currentTextChanged(const QString &arg1);
+
+    void on_CbDAC1NOCFrequency_currentIndexChanged(int index);
+
 signals:
     void resizeEventTriggered();
 

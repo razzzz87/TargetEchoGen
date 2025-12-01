@@ -16,13 +16,15 @@
 #include "ui_mainwindow.h"
 #include "dachelper.h"
 #include "connectionctx.h"
+#include <QMetaType>
+#include "packetforwarder.h"   // for RelayMeasurement
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    qRegisterMetaType<RelayMeasurement>("RelayMeasurement");
     ui->scrollArea->setWidgetResizable(false);
     ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -756,5 +758,31 @@ void MainWindow::on_RbPL10GSel_clicked()
 void MainWindow::on_RbPL10GSel_clicked(bool checked)
 {
 
+}
+
+
+void MainWindow::on_CbDAC1NOCFrequency_currentTextChanged(const QString &arg1)
+{
+
+}
+
+
+void MainWindow::on_CbDAC1NOCFrequency_currentIndexChanged(int index)
+{
+    iface deviceType = getSelectedDeviceType();
+    if (deviceType == eNONE) {
+        LOG_ERROR("[WriteRegister] Interface not selected");
+        return;
+    }
+
+    if(ui->ChkBoxDAC1NOCEnable->isChecked())
+    {
+        if( index == 0){
+            DacHelper::NCO_FRQ70Mhz(deviceType);
+        }
+        else if( index == 1){
+            DacHelper::NCO_FRQ180Mhz(deviceType);
+        }
+    }
 }
 

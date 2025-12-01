@@ -14,11 +14,11 @@ FileProcessing::FileProcessing(QWidget *parent)
     ui->LeFPTPXAxis->setValidator(new QDoubleValidator(-5000, 5000, 6, this));
     ui->LeFPTPYAxis->setValidator(new QDoubleValidator(-5000, 5000, 6, this));
     ui->LeFPTPZAxis->setValidator(new QDoubleValidator(-5000, 5000, 6, this));
-
+    ui->GrpBoxFPRealTime->setChecked(false);
 
     relay = new PacketForwarder(
         "0.0.0.0",    // UDP receive (IMS) bind IP (any)
-        0xD407,       // UDP receive port
+        54279,        // UDP receive port
         "10.0.0.80",  // UDP TX target IP (FPGA / delay receiver)
         4660,         // UDP TX target port
         "relay_log.csv",
@@ -35,6 +35,26 @@ FileProcessing::~FileProcessing()
     delete ui;
 }
 
+void FileProcessing::onMeasurementUpdated(const RelayMeasurement &m)
+{
+    // // Example field names – adjust to your actual UI names
+    // ui->LeXtpX->setText(QString::number(m.Xtp, 'f', 3));
+    // ui->LeXtpY->setText(QString::number(m.Ytp, 'f', 3));
+    // ui->LeXtpZ->setText(QString::number(m.Ztp, 'f', 3));
+
+    // ui->LePosX->setText(QString::number(m.x, 'f', 3));
+    // ui->LePosY->setText(QString::number(m.y, 'f', 3));
+    // ui->LePosZ->setText(QString::number(m.z, 'f', 3));
+
+    // ui->LeDistance->setText(QString::number(m.dist_m, 'f', 3));
+    // ui->LeDelayUs->setText(QString::number(m.delay_us));
+
+    // ui->LeMsgNum->setText(QString::number(m.msg_num));
+    // ui->LeIdField->setText(QString("0x%1").arg(m.id_field, 8, 16, QLatin1Char('0')).toUpper());
+
+    // if you want to show startTime:
+    // ui->LeStartTime->setText(QString::number(m.startTime, 'f', 6));
+}
 iface FileProcessing::getSelectedDeviceType()
 {
     auto& ctx = ConnectionHelper::instance();

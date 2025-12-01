@@ -31,6 +31,9 @@ private slots:
 
     void on_GrpBoxFPCsvFileSend_clicked(bool checked);
 
+private slots:
+    void onMeasurementUpdated(const RelayMeasurement &m);
+
 private:
     Ui::FileProcessing *ui;
 };
