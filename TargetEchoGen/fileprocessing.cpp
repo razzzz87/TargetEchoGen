@@ -157,6 +157,10 @@ void FileProcessing::on_GrpBoxFPRealTime_clicked(bool checked)
         ui->GRpBoxUserInput->setChecked(false);
         Utils::RegWrite(deviceType,0x2078,0x00);
         Utils::RegWrite(deviceType,0x2074,0x00);
+        relay->start();
+
+    }else{
+        relay->stop();
     }
 }
 

@@ -489,28 +489,44 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_10">
       <item>
-       <widget class="QLabel" name="label_20">
+       <widget class="QLabel" name="LblFPRTXAxis">
         <property name="text">
-         <string>CSV File</string>
+         <string>Xtp</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_16"/>
+       <widget class="QLineEdit" name="LelFPRTXAxis"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_10">
+       <widget class="QLabel" name="LblFPRTYAxis">
         <property name="text">
-         <string>Browse</string>
+         <string>Ytp</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_11">
+       <widget class="QLineEdit" name="LelFRTYAxis"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="LblFPRTZAxis">
         <property name="text">
-         <string>Send</string>
+         <string>Ztp</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="LelFPRTZAxis"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="LblFPRTDelay">
+        <property name="text">
+         <string>Delay</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="LelFPRTDelay"/>
       </item>
      </layout>
     </widget>

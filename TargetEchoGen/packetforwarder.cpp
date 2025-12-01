@@ -404,6 +404,7 @@ void PacketForwarder::relayLoop()
         LOG_ERROR("[WriteRegister] Interface not selected");
         return;
     }
+    LOG_INFO("PacketForwarder::relayLoop() <ENTER>");
     m_startTime = std::chrono::duration<double>( std::chrono::system_clock::now().time_since_epoch()).count();
     while (!m_stopRequested.load(std::memory_order_relaxed)) {
         sockaddr_in srcAddr{};
@@ -458,6 +459,7 @@ void PacketForwarder::relayLoop()
         Utils::RegWrite(deviceType,iaddr,delay_us);
 
     }
+    LOG_INFO("PacketForwarder::relayLoop() <EXIT>");
 }
 
 // ---------------------------------------------------------------------
