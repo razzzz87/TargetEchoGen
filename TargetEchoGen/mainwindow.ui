@@ -674,6 +674,11 @@
                      <widget class="QComboBox" name="CbDAC1NOCFrequency">
                       <item>
                        <property name="text">
+                        <string>60MHz</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
                         <string>70MHz</string>
                        </property>
                       </item>

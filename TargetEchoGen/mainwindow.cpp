@@ -781,9 +781,12 @@ void MainWindow::on_CbDAC1NOCFrequency_currentIndexChanged(int index)
     if(ui->ChkBoxDAC1NOCEnable->isChecked())
     {
         if( index == 0){
-            DacHelper::NCO_FRQ70Mhz(deviceType);
+            DacHelper::NCO_FRQ60Mhz(deviceType);
         }
         else if( index == 1){
+            DacHelper::NCO_FRQ70Mhz(deviceType);
+        }
+        else if( index == 2){
             DacHelper::NCO_FRQ180Mhz(deviceType);
         }
     }

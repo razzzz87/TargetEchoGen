@@ -22,6 +22,7 @@ void WrIterpolation(iface deviceType, int interpoval);
 void WrNCOFrq(iface deviceType,QString sNCOFrq);
 void NCO_FRQ180Mhz(iface deviceType);
 void NCO_FRQ70Mhz(iface deviceType);
+void NCO_FRQ60Mhz(iface deviceType);
 
 }
 #endif // DACHELPER_H

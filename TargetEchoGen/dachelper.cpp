@@ -48,6 +48,22 @@ void LxTriggerSetup(iface deviceType,
 }
 
 
+void NCO_FRQ60Mhz(iface deviceType)
+{
+    LOG_INFO("[NCO_FRQ60Mhz] <ENTER>: deviceType=%d", static_cast<int>(deviceType));
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF0C0, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x02, 0xF0D0, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x14, 0xCCCD, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x15, 0x0CCC, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8182, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x03, 0xF000, 0x02);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x819C, 0x00);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x819C, 0x01);
+    Utils::SpiDacWrite(deviceType, 0x00, 0x019C, 0x02);
+}
+
 void NCO_FRQ70Mhz(iface deviceType)
 {
     LOG_INFO("[NCO_FRQ70Mhz] <ENTER>: deviceType=%d", static_cast<int>(deviceType));
