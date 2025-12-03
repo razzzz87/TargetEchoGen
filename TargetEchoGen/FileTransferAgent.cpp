@@ -436,6 +436,7 @@ int FileTransferAgent::GetTransferBbyte(){
     return bytesTransferred;
 }
 
+#if 0
 int FileTransferAgent::WriteFileBulk01G(unsigned startAddress, qint64* numBytesRdSuccess)
 {
     LOG_TO_FILE("FileTransferAgent::WriteFileBulk01G <ENTER>");
@@ -476,16 +477,21 @@ int FileTransferAgent::WriteFileBulk01G(unsigned startAddress, qint64* numBytesR
     // ------------------------------------------------------------------------
     // Decide how many bytes to send this call
     // ------------------------------------------------------------------------
-    const qint64 fileSize = file.size();
+    qint64 fileSize = file.size();
 
+    qint64 paddedSize = ((fileSize + 4095) / 4096) * 4096;   // round UP to next 4096 boundary
+    qint64 paddingNeeded = paddedSize - fileSize;
     // If _iDataSize is 0 or larger than actual file, just send full fileSize
     const qint64 totalSize =   (_iDataSize > 0 && _iDataSize <= fileSize) ? _iDataSize : fileSize;
 
-    qint64 remainingSize = totalSize;
-    TransferReqSize      = totalSize;    // for UI / logging
+    qint64 remainingSize = paddedSize;
+    TransferReqSize      = paddedSize;    // for UI / logging
 
     LOG_INFO("=========================================================================");
     LOG_INFO("FileWrite01G:: startAddress:%u size:%lld Filename:%s",  startAddress,  static_cast<long long>(totalSize), _sFilePath.toUtf8().constData());
+    LOG_INFO("FileWrite01G:: paddingNeeded:%ld ",paddingNeeded);
+    LOG_INFO("FileWrite01G:: fileSize:%ld ",fileSize);
+    LOG_INFO("FileWrite01G:: paddedSize:%ld ",paddedSize);
     LOG_INFO("=========================================================================");
 
     // ------------------------------------------------------------------------
@@ -507,11 +513,18 @@ int FileTransferAgent::WriteFileBulk01G(unsigned startAddress, qint64* numBytesR
                 // numBytesRdSuccess already 0 or partial
                 return -4;
             }
-
             LOG_INFO("End of file reached earlier than expected. " "remainingSize=%lld", static_cast<long long>(remainingSize));
             // Safety: stop outer loop as well so we don't spin forever
             remainingSize = 0;
-            break;
+            //break;
+        }
+        // If file ended before chunkSize, pad with zeros
+        if ((chunk.size() < chunkSize ) && (paddingNeeded > 0))
+        {
+            int pad = chunkSize - chunk.size();
+            chunk.append(QByteArray(pad, '\0'));
+            paddingNeeded = paddingNeeded - pad;
+            LOG_INFO("paded %d bytes of zero, paddingNeeded %ld", pad,paddingNeeded);
         }
 
         // --------------------------------------------------------------------
@@ -577,6 +590,200 @@ int FileTransferAgent::WriteFileBulk01G(unsigned startAddress, qint64* numBytesR
 
     // Return error code only if aborted or other error occurred
     return abort ? -6 : 0;
+}
+#endif
+
+int FileTransferAgent::WriteFileBulk01G(unsigned startAddress, qint64* numBytesRdSuccess)
+{
+    LOG_TO_FILE("FileTransferAgent::WriteFileBulk01G <ENTER>");
+
+    // --------- Per-call state reset ----------
+    if (numBytesRdSuccess)
+        *numBytesRdSuccess = 0;
+
+    bytesTransferred       = 0;
+    TransferReqSize        = 0;
+    abort                  = false;
+    int updateProgressbarCount = 0;
+
+    // ------------------------------------------------------------------------
+    // Validate file
+    // ------------------------------------------------------------------------
+    if (!QFile::exists(_sFilePath)) {
+        LOG_ERROR("File not found: %s", _sFilePath.toUtf8().constData());
+        return -1;
+    }
+
+    QFile file(_sFilePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        LOG_ERROR("File open failed: %s", file.errorString().toUtf8().constData());
+        return -2;
+    }
+
+    // ------------------------------------------------------------------------
+    // Get socket instance
+    // ------------------------------------------------------------------------
+    ethPL01G = EthernetSocketPL1G::getInstance();
+    if (!ethPL01G) {
+        LOG_ERROR("Error: Eth01G unavailable");
+        file.close();
+        return -3;
+    }
+
+    // ------------------------------------------------------------------------
+    // Decide how many "real" bytes to send (before padding)
+    // ------------------------------------------------------------------------
+    const qint64 fileSize = file.size();
+
+    // totalSize = min(_iDataSize, fileSize) if _iDataSize > 0, else full file
+    const qint64 totalSize =
+        (_iDataSize > 0 && _iDataSize <= fileSize) ? _iDataSize : fileSize;
+
+    // Round up totalSize to multiple of 4096
+    const qint64 paddedSize    = ((totalSize + 4095) / 4096) * 4096;
+    qint64       paddingNeeded = paddedSize - totalSize;
+
+    // How many bytes are still allowed to be read from file (do not exceed totalSize)
+    qint64 fileBytesRemaining = totalSize;
+
+    qint64 remainingSize = paddedSize;   // bytes to send including padding
+    TransferReqSize      = paddedSize;   // for UI / logging
+
+    LOG_INFO("=========================================================================");
+    LOG_INFO("FileWrite01G:: startAddress:%u", startAddress);
+    LOG_INFO("  fileSize:     %lld", static_cast<long long>(fileSize));
+    LOG_INFO("  totalSize:    %lld (used for content)", static_cast<long long>(totalSize));
+    LOG_INFO("  paddedSize:   %lld (multiple of 4096)", static_cast<long long>(paddedSize));
+    LOG_INFO("  paddingNeeded:%lld", static_cast<long long>(paddingNeeded));
+    LOG_INFO("  Filename:     %s", _sFilePath.toUtf8().constData());
+    LOG_INFO("=========================================================================");
+
+    // ------------------------------------------------------------------------
+    // Main send loop
+    // ------------------------------------------------------------------------
+    while (remainingSize > 0 && !abort) {
+
+        // How many bytes this packet should carry (including any padding)
+        const qint64 chunkSize64 =  qMin<qint64>(remainingSize, static_cast<qint64>(MAX_BYTES_WRITE_AT_ONCE));
+        const int chunkSize = static_cast<int>(chunkSize64);
+
+        QByteArray chunk;
+        chunk.reserve(chunkSize);
+
+        // -------------------- 1) Read from file (up to totalSize) --------------------
+        int readThisTime = 0;
+        if (fileBytesRemaining > 0)
+        {
+            const qint64 wantedFromFile = qMin<qint64>(chunkSize64, fileBytesRemaining);
+            readThisTime = static_cast<int>(wantedFromFile);
+
+            if (readThisTime > 0) {
+                QByteArray filePart = file.read(readThisTime);
+                if (filePart.size() != readThisTime) {
+                    LOG_ERROR("Read error: expected %d bytes, got %d bytes",  readThisTime, filePart.size());
+                    file.close();
+                    return -4;
+                }
+                chunk.append(filePart);
+                fileBytesRemaining -= filePart.size();
+            }
+        }
+
+        // -------------------- 2) Add zero padding if needed --------------------
+        if (chunk.size() < chunkSize && paddingNeeded > 0) {
+            int pad = chunkSize - chunk.size();
+            // Don't pad more than we planned
+            if (pad > paddingNeeded)
+                pad = static_cast<int>(paddingNeeded);
+
+            chunk.append(QByteArray(pad, '\0'));
+            paddingNeeded -= pad;
+
+            LOG_INFO("padded %d bytes of zero, paddingNeeded now %lld", pad, static_cast<long long>(paddingNeeded));
+        }
+
+        // If still smaller (should only happen if paddingNeeded is exhausted),
+        // we can either just fill with zeros or treat as logic error.
+        if (chunk.size() < chunkSize) {
+            int pad = chunkSize - chunk.size();
+            chunk.append(QByteArray(pad, '\0'));
+            LOG_WARNING("Extra padding %d bytes (paddingNeeded already 0)", pad);
+        }
+
+        // Sanity: chunk must be exactly chunkSize now
+        if (chunk.size() != chunkSize) {
+            LOG_ERROR("Chunk size mismatch: expected %d, got %d", chunkSize, chunk.size());
+            file.close();
+            return -5;
+        }
+
+        // --------------------------------------------------------------------
+        // Build protocol packet
+        // --------------------------------------------------------------------
+        Proto protocol;
+        char* packetData = nullptr;
+
+        int packetLen = protocol.mPktBulkWrite(startAddress,
+                                               chunk.data(),
+                                               chunk.size(),
+                                               &packetData);
+        if (!packetData || packetLen <= 0) {
+            LOG_ERROR("Packet creation failed for chunk at addr: %u", startAddress);
+            delete[] packetData;   // in case protocol allocated but invalid
+            file.close();
+            return -6;
+        }
+
+        // --------------------------------------------------------------------
+        // Send over 01G socket
+        // --------------------------------------------------------------------
+        if (!ethPL01G->sendData(packetData, packetLen)) {
+            LOG_ERROR("sendData(01G) failed, packetLen=%d", packetLen);
+            delete[] packetData;
+            abort = true;
+            break;
+        }
+
+        delete[] packetData;
+
+        // --------------------------------------------------------------------
+        // Bookkeeping
+        // --------------------------------------------------------------------
+        remainingSize    -= chunkSize;     // we always send chunkSize bytes
+        bytesTransferred += chunkSize;
+
+        // If your protocol expects incremental address, do it here
+        // startAddress += chunkSize;
+
+        // Progress every AFTER_NUMBER_OF_PKT packets, based on paddedSize
+        if (++updateProgressbarCount >= AFTER_NUMBER_OF_PKT && !abort) {
+            int percentageComplete =  static_cast<int>((bytesTransferred * 100.0) / paddedSize);
+            LOG_INFO("percentageComplete %d", percentageComplete);
+            emit progressUpdated(percentageComplete);
+            updateProgressbarCount = 0;
+        }
+
+        LOG_INFO("bytesTransferred:%lld remainingSize:%lld", static_cast<long long>(bytesTransferred), static_cast<long long>(remainingSize));
+    }
+
+    file.close();
+
+    // ------------------------------------------------------------------------
+    // Final status & outputs
+    // ------------------------------------------------------------------------
+    if (numBytesRdSuccess)
+        *numBytesRdSuccess = bytesTransferred;
+
+    if (!abort) {
+        LOG_INFO("File transmission complete. Total bytes sent (padded): %lld", static_cast<long long>(bytesTransferred));
+    } else {
+        LOG_INFO("File transmission aborted. Bytes sent: %lld",static_cast<long long>(bytesTransferred));
+    }
+
+    emit transferComplete(eWriteDone);
+    LOG_INFO("FileTransferAgent::WriteFileBulk01G <EXIT>");
+
+    return abort ? -7 : 0;
 }
 
 

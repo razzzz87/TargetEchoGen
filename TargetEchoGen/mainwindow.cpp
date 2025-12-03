@@ -378,15 +378,18 @@ void MainWindow::on_PbDAC1IQFileSend_clicked()
     }
 
     // File size in bytes (up to 64-bit)
-    const quint64 fileSize = static_cast<quint64>(fileInfo.size());
+    quint64 fileSize = static_cast<quint64>(fileInfo.size());
+    if (fileSize % 4096 != 0) {
+        fileSize = ((fileSize + 4095) / 4096) * 4096;
+    }
     //Start address
     Utils::RegWrite(deviceType,0x100, 0x00);
     Utils::RegWrite(deviceType, 0x104,0x00);
 
-
+    quint64 ReadFileSize = static_cast<quint64>(fileInfo.size());
     // Split into two 32-bit parts
-    size_lo = static_cast<quint32>(fileSize & 0xFFFFFFFFULL);
-    size_hi = static_cast<quint32>((fileSize >> 32) & 0xFFFFFFFFULL);
+    size_lo = static_cast<quint32>(ReadFileSize & 0xFFFFFFFFULL);
+    size_hi = static_cast<quint32>((ReadFileSize >> 32) & 0xFFFFFFFFULL);
 
     // Write lower 32 bits to 0x100
     Utils::RegWrite(deviceType,0x108, size_lo);
