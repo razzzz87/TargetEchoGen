@@ -120,6 +120,8 @@ private:
     Ui::MainWindow *ui;
     quint32 size_lo;
     quint32 size_hi;
+    quint32 write_size_lo;
+    quint32 write_size_hi;
     bool transferCanceled = false;
 };
 
