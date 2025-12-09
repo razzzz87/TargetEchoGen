@@ -28,6 +28,7 @@ FileProcessing::FileProcessing(QWidget *parent)
     if (!relay->initialize()) {
         LOG_ERROR("[FileProcessing] Socket creation failed");
     }
+    connect(relay, &PacketForwarder::measurementUpdated,this,  &FileProcessing::onMeasurementUpdated);
 }
 
 FileProcessing::~FileProcessing()
@@ -38,9 +39,10 @@ FileProcessing::~FileProcessing()
 void FileProcessing::onMeasurementUpdated(const RelayMeasurement &m)
 {
     // // Example field names – adjust to your actual UI names
-    // ui->LeXtpX->setText(QString::number(m.Xtp, 'f', 3));
-    // ui->LeXtpY->setText(QString::number(m.Ytp, 'f', 3));
-    // ui->LeXtpZ->setText(QString::number(m.Ztp, 'f', 3));
+     ui->LelFPRTXAxis->setText(QString::number(m.Xtp, 'f', 3));
+     ui->LelFRTYAxis->setText(QString::number(m.Ytp, 'f', 3));
+     ui->LelFPRTZAxis->setText(QString::number(m.Ztp, 'f', 3));
+     ui->LeFPRTDelay->setText(QString::number(m.delay_us, 'f', 3));
 
     // ui->LePosX->setText(QString::number(m.x, 'f', 3));
     // ui->LePosY->setText(QString::number(m.y, 'f', 3));
@@ -200,5 +202,11 @@ void FileProcessing::on_GrpBoxFPCsvFileSend_clicked(bool checked)
         Utils::RegWrite(deviceType,0x2078,0x00);
         Utils::RegWrite(deviceType,0x2074,0x00);
     }
+}
+
+
+void FileProcessing::on_PbFPTargetVelocitySet_clicked()
+{
+
 }
 

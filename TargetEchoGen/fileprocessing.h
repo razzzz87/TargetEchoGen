@@ -34,6 +34,8 @@ private slots:
 private slots:
     void onMeasurementUpdated(const RelayMeasurement &m);
 
+    void on_PbFPTargetVelocitySet_clicked();
+
 private:
     Ui::FileProcessing *ui;
 };

@@ -357,6 +357,19 @@ uint32_t RegRead(iface deviceType, uint uiAddr)
     return result.value;
 }
 
+bool RegWriteDelay(iface deviceType, uint iaddr, uint ival)
+{
+    // Perform the low-level write
+    WriteRegError status = RegisterWrite(deviceType, iaddr, ival);
+    // Log the outcome with descriptive message
+    if (status == WriteRegError::SUCCESS) {
+        //LOG_INFO("[RegWrite] SUCCESS | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
+    } else {
+        LOG_ERROR("[RegWrite] FAILED | Addr: 0x%08X | Val: 0x%08X | Code: %d | Desc: %s", iaddr, ival, static_cast<int>(status),WriteErrorToString(status));
+    }
+    return (status == WriteRegError::SUCCESS);
+}
+
 bool RegWrite(iface deviceType, uint iaddr, uint ival)
 {
     LOG_INFO("[RegWrite] ENTER | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
@@ -385,7 +398,7 @@ bool RegWrite(iface deviceType, uint iaddr, uint ival)
 
 WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival)
 {
-    LOG_INFO("[RegisterWrite] ENTER | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
+    //LOG_INFO("[RegisterWrite] ENTER | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
     char* byArrPkt = nullptr;
     Proto protocolobj;
     int pktLen = protocolobj.mPktRegWrite(iaddr, ival, &byArrPkt);
@@ -453,7 +466,7 @@ WriteRegError RegisterWrite(iface deviceType, uint iaddr, uint ival)
         return WriteRegError::INVALID_INTERFACE;
     }
     delete[] byArrPkt;
-    LOG_INFO("[RegisterWrite] EXIT | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
+    //LOG_INFO("[RegisterWrite] EXIT | Addr: 0x%08X | Val: 0x%08X", iaddr, ival);
     return WriteRegError::SUCCESS;
 }
 

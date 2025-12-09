@@ -107,17 +107,20 @@ PacketForwarder::PacketForwarder(const QString &srcIp,
 #endif
 {
     LOG_INFO("PacketForwarder constructed (UDP recv + UDP tx)");
+    m_stop = false;
 }
 
 PacketForwarder::~PacketForwarder()
 {
     stop();
     wait();
+
 }
 
 void PacketForwarder::stop()
 {
-    m_stopRequested.store(true, std::memory_order_relaxed);
+    m_stop = true;
+    wait();
 }
 
 void PacketForwarder::setTarget(double Xtp, double Ytp, double Ztp)
@@ -284,8 +287,9 @@ void PacketForwarder::run()
     }
 
     LOG_INFO("PacketForwarder: initialization OK, entering relay loop.");
+    m_stop = false;
     relayLoop();
-    cleanup();
+    //cleanup();
     LOG_INFO("PacketForwarder: thread exited.");
 }
 
@@ -392,6 +396,29 @@ bool PacketForwarder::initialize()
     return true;
 }
 
+double PacketForwarder::readDoubleBE(const void* ptr)
+{
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(ptr);
+
+    unsigned char temp[8];
+    for (int i = 0; i < 8; i++)
+        temp[i] = p[7 - i];   // reverse byte order (BE -> LE)
+
+    double value;
+    memcpy(&value, temp, sizeof(double));
+    return value;
+}
+
+uint32_t PacketForwarder::readU32BE(const void* ptr)
+{
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(ptr);
+
+    return (uint32_t(p[0]) << 24) |
+           (uint32_t(p[1]) << 16) |
+           (uint32_t(p[2]) <<  8) |
+           uint32_t(p[3]);
+}
+
 // ---------------------------------------------------------------------
 // relayLoop() – UDP recv -> compute delay/log
 // ---------------------------------------------------------------------
@@ -405,8 +432,9 @@ void PacketForwarder::relayLoop()
         return;
     }
     LOG_INFO("PacketForwarder::relayLoop() <ENTER>");
-    m_startTime = std::chrono::duration<double>( std::chrono::system_clock::now().time_since_epoch()).count();
-    while (!m_stopRequested.load(std::memory_order_relaxed)) {
+    //while (!m_stopRequested.load(std::memory_order_relaxed)) {
+    while (!m_stop){
+
         sockaddr_in srcAddr{};
         socklen_t   addrLen = sizeof(srcAddr);
 
@@ -441,22 +469,23 @@ void PacketForwarder::relayLoop()
             continue;
         }
 
-        UdpPayload up{};
-        std::memcpy(&up, buf, STRUCT_SIZE);
+        uint32_t id_field  = readU32BE(&buf[0]);
+        uint32_t msg_num = readU32BE(&buf[4]);
 
-        double x = up.x;
-        double y = up.y;
-        double z = up.z;
+        double x = readDoubleBE(&buf[8]);
+        double y = readDoubleBE(&buf[16]);
+        double z = readDoubleBE(&buf[24]);
 
         double dist_m = 0.0;
         int    delay_us = 0;
+
         compute_delay(m_Xtp, m_Ytp, m_Ztp, x, y, z, dist_m, delay_us);
 
         LOG_INFO("relayLoop: Pos(%.3f, %.3f, %.3f) -> TP(%.3f, %.3f, %.3f) | dist=%.3f m | delay_us=%d", x, y, z, m_Xtp, m_Ytp, m_Ztp, dist_m, delay_us);
-        writeCsvRow(std::to_string(m_startTime), up.msg_num, up.id_field, x, y, z, dist_m, delay_us);
+        writeCsvRow(std::to_string(m_startTime), msg_num, id_field, x, y, z, dist_m, delay_us);
 
         uint iaddr=0x206C;
-        Utils::RegWrite(deviceType,iaddr,delay_us);
+        Utils::RegWriteDelay(deviceType,iaddr,delay_us);
 
         // 🔹 Fill struct and emit to GUI
         RelayMeasurement m;
@@ -468,12 +497,11 @@ void PacketForwarder::relayLoop()
         m.z        = z;
         m.dist_m   = dist_m;
         m.delay_us = delay_us;
-        m.msg_num  = up.msg_num;
-        m.id_field = up.id_field;
+        m.msg_num  = msg_num;
+        m.id_field = id_field;
         m.startTime = m_startTime;
 
         emit measurementUpdated(m);
-
     }
     LOG_INFO("PacketForwarder::relayLoop() <EXIT>");
 }

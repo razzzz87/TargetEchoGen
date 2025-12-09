@@ -526,7 +526,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="LelFPRTDelay"/>
+       <widget class="QLineEdit" name="LeFPRTDelay"/>
       </item>
      </layout>
     </widget>

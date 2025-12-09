@@ -88,6 +88,8 @@ public:
     // ---- Delay + synthetic motion ----
     double   rand_uniform();
     Position generate_position(double t);
+    double readDoubleBE(const void* ptr);
+    uint32_t readU32BE(const void* ptr);
 
     // Distance & delay (µs)
     void compute_delay(double Xtp, double Ytp, double Ztp,
@@ -125,6 +127,7 @@ private:
     QString m_csvPath;
 
     std::atomic<bool> m_stopRequested;
+    bool m_stop;
 
     // Sockets
     int m_udpRecvSock;   // UDP receive (position packets)
