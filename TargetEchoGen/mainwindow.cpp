@@ -387,21 +387,20 @@ void MainWindow::on_PbDAC1IQFileSend_clicked()
     Utils::RegWrite(deviceType, 0x104,0x00);
 
     quint64 WriteFileSize = fileSize;
+
     // Split into two 32-bit parts
     write_size_lo = static_cast<quint32>(WriteFileSize & 0xFFFFFFFFULL);
     write_size_hi = static_cast<quint32>((WriteFileSize >> 32) & 0xFFFFFFFFULL);
 
+    // Write lower 32 bits to 0x100
+    Utils::RegWrite(deviceType,0x108, write_size_lo);
+    //Write upper 32 bits to 0x128 (0 if file <= 4GB)
+    Utils::RegWrite(deviceType, 0x128, write_size_hi);
+
     quint64 ReadFileSize = static_cast<quint64>(fileInfo.size());
-    // Split into two 32-bit parts
+    //Split into two 32-bit parts
     size_lo = static_cast<quint32>(ReadFileSize & 0xFFFFFFFFULL);
     size_hi = static_cast<quint32>((ReadFileSize >> 32) & 0xFFFFFFFFULL);
-
-    // Write lower 32 bits to 0x100
-    // Utils::RegWrite(deviceType,0x108, size_lo);
-    Utils::RegWrite(deviceType,0x108, write_size_lo);
-
-    // Write upper 32 bits to 0x128 (0 if file <= 4GB)
-    Utils::RegWrite(deviceType, 0x128, size_hi);
 
     //Write start pulse
     quint32 value = (1u << 10);

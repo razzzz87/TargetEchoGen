@@ -36,6 +36,8 @@ private slots:
 
     void on_PbFPTargetVelocitySet_clicked();
 
+    void on_GRpBoxUserInput_clicked();
+
 private:
     Ui::FileProcessing *ui;
 };

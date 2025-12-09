@@ -106,7 +106,7 @@ void FileProcessing::on_PbFPTargetPostionSet_clicked()
         return;
     }
     relay->setTarget(Xtp, Ytp, Ztp);
-    relay->SendCoOrdinateOverTcp(deviceType);
+    //relay->SendCoOrdinateOverTcp(deviceType);
     //relay->send_delay_once(Xtp, Ytp, Ztp);
 }
 
@@ -160,6 +160,7 @@ void FileProcessing::on_GRpBoxUserInput_clicked(bool checked)
         ui->GrpBoxFPRealTime->setChecked(false);
         Utils::RegWrite(deviceType,0x2078,0x00);
         Utils::RegWrite(deviceType,0x2074,0x00);
+        relay->stop();
     }
 
 }
@@ -201,11 +202,18 @@ void FileProcessing::on_GrpBoxFPCsvFileSend_clicked(bool checked)
         ui->GRpBoxUserInput->setChecked(false);
         Utils::RegWrite(deviceType,0x2078,0x00);
         Utils::RegWrite(deviceType,0x2074,0x00);
+        relay->stop();
     }
 }
 
 
 void FileProcessing::on_PbFPTargetVelocitySet_clicked()
+{
+
+}
+
+
+void FileProcessing::on_GRpBoxUserInput_clicked()
 {
 
 }
