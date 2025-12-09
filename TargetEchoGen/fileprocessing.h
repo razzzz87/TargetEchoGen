@@ -17,6 +17,7 @@ public:
     ~FileProcessing();
     iface getSelectedDeviceType();
     PacketForwarder *relay;
+    bool simulateCoordinateFileFits(const QString &filePath);
 
 private slots:
     void on_PbFPTargetPostionSet_clicked();

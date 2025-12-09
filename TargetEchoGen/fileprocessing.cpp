@@ -124,6 +124,78 @@ void FileProcessing::on_PbFPFileBrowse_clicked()
         ui->LePFCSVFilePath->setText(filename);
     }
 }
+bool  FileProcessing::simulateCoordinateFileFits(const QString &filePath)
+{
+    const int WORD_SIZE = 4;
+    const int PACKET_DATA_SIZE = ETH_DATA_SIZE;   // required size
+
+    QFile file(filePath);
+    if (!file.exists()) {
+        LOG_ERROR("simulate: file does not exist: %s", filePath.toStdString().c_str());
+        return false;
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        LOG_ERROR("simulate: cannot open file %s (error: %s)",
+                  filePath.toStdString().c_str(),
+                  file.errorString().toStdString().c_str());
+        return false;
+    }
+
+    QTextStream in(&file);
+
+    qint64 lineNo = 0;
+    qint64 totalWords = 0;
+
+    while (!in.atEnd()) {
+        QString line = in.readLine().trimmed();
+        lineNo++;
+
+        if (line.isEmpty() || line.startsWith('#'))
+            continue;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        QStringList tok = line.split(QRegularExpression("[,\\s]+"), Qt::SkipEmptyParts);
+#else
+        QStringList tok = line.split(QRegExp("[,\\s]+"), QString::SkipEmptyParts);
+#endif
+
+        if (tok.size() < 4) {
+            LOG_ERROR("simulate: line %lld malformed (expected 4 columns): '%s'",
+                      (long long)lineNo, line.toStdString().c_str());
+            return false;
+        }
+
+        bool ok0, ok1, ok2, ok3;
+        tok[0].toUInt(&ok0, 10);
+        tok[1].toUInt(&ok1, 16);
+        tok[2].toUInt(&ok2, 16);
+        tok[3].toUInt(&ok3, 16);
+
+        if (!(ok0 && ok1 && ok2 && ok3)) {
+            LOG_ERROR("simulate: line %lld parsing failure: '%s'",
+                      (long long)lineNo, line.toStdString().c_str());
+            return false;
+        }
+
+        totalWords++;  // one 32-bit word per CSV row
+    }
+
+    const qint64 totalBytes = totalWords * WORD_SIZE;
+
+    LOG_INFO("simulate: file has %lld words (%lld bytes)",
+             (long long)totalWords, (long long)totalBytes);
+
+    // ---- FINAL VALIDATION ----
+    if (totalBytes % PACKET_DATA_SIZE != 0) {
+        LOG_ERROR("simulate: totalBytes (%lld) is NOT a multiple of %d bytes.",(long long)totalBytes, PACKET_DATA_SIZE);
+        LOG_ERROR("simulate: This file CANNOT be split into perfect 1456-byte packets.");
+        return false;
+    }
+
+    LOG_INFO("simulate: VALID — file fits perfectly into packets of 1456 bytes.");
+    return true;
+}
 
 
 void FileProcessing::on_PbFPCSVFileSend_clicked()
@@ -135,6 +207,8 @@ void FileProcessing::on_PbFPCSVFileSend_clicked()
     }
 
     if(!ui->LePFCSVFilePath->text().isEmpty()){
+        if(!simulateCoordinateFileFits(ui->LePFCSVFilePath->text()))
+            Log::showStatusMessage(this,"File processing","File not multiple of 1024");
         relay->sendCoordinateFileUdp(ui->LePFCSVFilePath->text());
         Utils::RegWrite(deviceType,0x2078,0x01);
         Utils::RegWrite(deviceType,0x2074,0x01);
