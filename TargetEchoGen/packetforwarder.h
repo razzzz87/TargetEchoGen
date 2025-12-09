@@ -13,6 +13,9 @@
 #include "connectionctx.h"
 #include <QtGlobal>
 
+static const int ETH_DATA_SIZE = 1456;    // bytes of payload per UDP packet
+static const int PROTO_OVERHEAD = 12;     // mPktBulkWrite header size
+
 // 1) Struct to carry all measurement info
 struct RelayMeasurement
 {
