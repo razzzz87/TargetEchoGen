@@ -122,6 +122,8 @@ void FileProcessing::on_PbFPFileBrowse_clicked()
 
     if(!filename.isEmpty()){
         ui->LePFCSVFilePath->setText(filename);
+        if(!simulateCoordinateFileFits(ui->LePFCSVFilePath->text()))
+            Log::showStatusMessage(this,"File processing","File data not multiple of 1024.");
     }
 }
 bool  FileProcessing::simulateCoordinateFileFits(const QString &filePath)
@@ -183,17 +185,16 @@ bool  FileProcessing::simulateCoordinateFileFits(const QString &filePath)
 
     const qint64 totalBytes = totalWords * WORD_SIZE;
 
-    LOG_INFO("simulate: file has %lld words (%lld bytes)",
-             (long long)totalWords, (long long)totalBytes);
+    LOG_INFO("simulate: file has %lld words (%lld bytes)",(long long)totalWords, (long long)totalBytes);
 
     // ---- FINAL VALIDATION ----
     if (totalBytes % PACKET_DATA_SIZE != 0) {
         LOG_ERROR("simulate: totalBytes (%lld) is NOT a multiple of %d bytes.",(long long)totalBytes, PACKET_DATA_SIZE);
-        LOG_ERROR("simulate: This file CANNOT be split into perfect 1456-byte packets.");
+        LOG_ERROR("simulate: This file CANNOT be split into perfect 1024-byte packets.");
         return false;
     }
 
-    LOG_INFO("simulate: VALID — file fits perfectly into packets of 1456 bytes.");
+    LOG_INFO("simulate: VALID — file fits perfectly into packets of 1024 bytes.");
     return true;
 }
 
@@ -207,8 +208,6 @@ void FileProcessing::on_PbFPCSVFileSend_clicked()
     }
 
     if(!ui->LePFCSVFilePath->text().isEmpty()){
-        if(!simulateCoordinateFileFits(ui->LePFCSVFilePath->text()))
-            Log::showStatusMessage(this,"File processing","File not multiple of 1024");
         relay->sendCoordinateFileUdp(ui->LePFCSVFilePath->text());
         Utils::RegWrite(deviceType,0x2078,0x01);
         Utils::RegWrite(deviceType,0x2074,0x01);

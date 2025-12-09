@@ -542,168 +542,7 @@ void PacketForwarder::cleanup()
     if (m_csv.is_open())
         m_csv.close();
 }
-#if 0
-bool PacketForwarder::sendCoordinateChunk(QByteArray &chunk, uint32_t &startAddress, const sockaddr_in &txAddr)
-{
-    if (chunk.isEmpty())
-        return true;   // nothing to do
 
-    Proto protocol;
-    char *packetData = nullptr;
-
-    int packetLen = protocol.mPktBulkWrite(startAddress, chunk.data(), static_cast<unsigned>(chunk.size()),  &packetData);
-    if (!packetData || packetLen <= 0) {
-        LOG_ERROR("sendCoordinateChunk: mPktBulkWrite failed at addr 0x%08X", startAddress);
-        if (packetData)
-            delete[] packetData;
-        chunk.clear();
-        return false;
-    }
-
-    int sent = ::sendto(m_udpTxSock, packetData, packetLen, 0, reinterpret_cast<const sockaddr*>(&txAddr), sizeof(txAddr));
-    bool ok = (sent == packetLen);
-    if (!ok) {
-#ifdef _WIN32
-        int wsaErr = WSAGetLastError();
-        LOG_ERROR("sendCoordinateChunk: sendto() failed/partial (sent=%d, expected=%d, WSAError=%d)", sent, packetLen, wsaErr);
-#else
-        int err = errno;
-        LOG_ERROR("sendCoordinateChunk: sendto() failed/partial (sent=%d, expected=%d, errno=%d %s)",
-                  sent, packetLen, err, strerror(err));
-#endif
-    } else {
-        LOG_INFO("sendCoordinateChunk: sent Proto bulk-write packet: addr=0x%08X, bytes=%d", startAddress, packetLen);
-        // advance address by data bytes if HW expects linear addressing
-        startAddress += static_cast<uint32_t>(chunk.size());
-    }
-    delete[] packetData;
-    chunk.clear();
-    return ok;
-}
-
-// ---------------------------------------------------------------------
-// UDP file send (coordinate/file) using m_udpTxSock
-// ---------------------------------------------------------------------
-void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
-{
-    if (m_udpTxSock < 0) {
-        LOG_ERROR("sendCoordinateFileUdp: m_udpTxSock not initialized (call initialize() first)");
-        return;
-    }
-
-    if (m_txIp.isEmpty() || m_txPort == 0) {
-        LOG_ERROR("sendCoordinateFileUdp: invalid UDP TX destination IP/port");
-        return;
-    }
-
-    QFile file(filePath);
-    if (!file.exists()) {
-        LOG_ERROR("sendCoordinateFileUdp: file does not exist: %s", filePath.toStdString().c_str());
-        return;
-    }
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        LOG_ERROR("sendCoordinateFileUdp: failed to open file: %s (error: %s)", filePath.toStdString().c_str(), file.errorString().toStdString().c_str());
-        return;
-    }
-
-    sockaddr_in txAddr{};
-    txAddr.sin_family = AF_INET;
-    txAddr.sin_port   = htons(m_txPort);
-
-    std::string txIpStr = m_txIp.toStdString();
-#ifdef _WIN32
-    if (InetPtonA(AF_INET, txIpStr.c_str(), &txAddr.sin_addr) != 1) {
-        LOG_ERROR("sendCoordinateFileUdp: InetPtonA failed for TX IP %s", txIpStr.c_str());
-        return;
-    }
-#else
-    if (::inet_pton(AF_INET, txIpStr.c_str(), &txAddr.sin_addr) != 1) {
-        LOG_ERROR("sendCoordinateFileUdp: inet_pton failed for TX IP %s",
-                  txIpStr.c_str());
-        return;
-    }
-#endif
-
-    LOG_INFO("sendCoordinateFileUdp: sending CSV %s to %s:%u over UDP (Proto bulk-write)", filePath.toStdString().c_str(), txIpStr.c_str(), static_cast<unsigned>(m_txPort));
-
-    QTextStream in(&file);
-
-    const int   MAX_DATA_BYTES = 1024 * 10;      // payload bytes per Proto packet
-    QByteArray  dataChunk;
-    dataChunk.reserve(MAX_DATA_BYTES);
-
-    qint64   lineNo     = 0;
-    qint64   totalWords = 0;
-    uint32_t startAddress = 0x00000000;     // TODO: set real base addr if needed
-
-    while (!in.atEnd())
-    {
-        QString line = in.readLine();
-        ++lineNo;
-        line = line.trimmed();
-        if (line.isEmpty())
-            continue;
-        if (line.startsWith('#'))
-            continue;
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-        QStringList tokens = line.split(QRegularExpression("[,\\s]+"), Qt::SkipEmptyParts);
-#else
-        QStringList tokens = line.split(QRegExp("[,\\s]+"), QString::SkipEmptyParts);
-#endif
-
-        if (tokens.size() < 4) {
-            LOG_ERROR("sendCoordinateFileUdp: line %lld: expected 4 columns, got %d: '%s'", static_cast<long long>(lineNo), tokens.size(),line.toStdString().c_str());
-            continue;
-        }
-
-        bool ok0=false, ok1=false, ok2=false, ok3=false;
-        quint32 onOff = tokens[0].toUInt(&ok0, 10);   // 0/1 decimal
-        quint32 b1    = tokens[1].toUInt(&ok1, 16);   // hex
-        quint32 b2    = tokens[2].toUInt(&ok2, 16);   // hex
-        quint32 b3    = tokens[3].toUInt(&ok3, 16);   // hex
-
-        if (!(ok0 && ok1 && ok2 && ok3)) {
-            LOG_ERROR("sendCoordinateFileUdp: line %lld parse error: '%s'", static_cast<long long>(lineNo), line.toStdString().c_str());
-            continue;
-        }
-
-        onOff &= 0xFF;
-        b1    &= 0xFF;
-        b2    &= 0xFF;
-        b3    &= 0xFF;
-
-        // 32-bit word: [31:24]=onOff, [23:16]=b1, [15:8]=b2, [7:0]=b3
-        uint32_t word =
-            (onOff << 24) |
-            (b1    << 16) |
-            (b2    << 8)  |
-            (b3);
-
-        uint32_t netWord = htonl(word);     // big-endian
-
-        dataChunk.append(reinterpret_cast<const char*>(&netWord), sizeof(netWord));
-        ++totalWords;
-
-        if (dataChunk.size() >= MAX_DATA_BYTES) {
-            if (!sendCoordinateChunk(dataChunk, startAddress, txAddr)) {
-                LOG_ERROR("sendCoordinateFileUdp: sendCoordinateChunk failed, aborting");
-                break;
-            }
-        }
-    }
-
-    // send remaining
-    if (!dataChunk.isEmpty()) {
-        if (!sendCoordinateChunk(dataChunk, startAddress, txAddr)) {
-            LOG_ERROR("sendCoordinateFileUdp: sendCoordinateChunk (final) failed");
-        }
-    }
-
-    LOG_INFO("sendCoordinateFileUdp: finished. lines=%lld, words=%lld", static_cast<long long>(lineNo),  static_cast<long long>(totalWords));
-}
-#endif
 bool PacketForwarder::sendCoordinateChunk(QByteArray &chunk,
                                           uint32_t &startAddress,
                                           const sockaddr_in &txAddr)
@@ -739,7 +578,6 @@ bool PacketForwarder::sendCoordinateChunk(QByteArray &chunk,
                         sizeof(txAddr));
 
     bool ok = (sent == packetLen);
-
     if (!ok) {
         LOG_ERROR("sendCoordinateChunk UDP send failed (sent=%d expected=%d)", sent, packetLen);
     } else {
@@ -819,120 +657,25 @@ void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
         // 🚀 SEND ONLY WHEN EXACT 1024 BYTES ARE COLLECTED
         if (chunk.size() == PACKET_SIZE)
         {
-            int sent = ::sendto(
-                m_udpTxSock,
-                chunk.constData(),
-                PACKET_SIZE,
-                0,
-                reinterpret_cast<const sockaddr*>(&txAddr),
-                sizeof(txAddr));
-
+            int sent = ::sendto(m_udpTxSock, chunk.constData(), PACKET_SIZE, 0, reinterpret_cast<const sockaddr*>(&txAddr), sizeof(txAddr));
             if (sent == PACKET_SIZE) {
                 LOG_INFO("Sent packet: addr=0x%08X size=%d", startAddress, PACKET_SIZE);
                 startAddress += PACKET_SIZE;
             } else {
                 LOG_ERROR("Send failed: sent=%d expected=%d", sent, PACKET_SIZE);
             }
-
             chunk.clear();
         }
     }
-
     // ❌ DO NOT SEND REMAINING/PARTIAL CHUNK
     if (!chunk.isEmpty()) {
         LOG_WARNING("Final %d bytes ignored (not a full 1024-byte packet)",
                     chunk.size());
     }
 
-    LOG_INFO("sendCoordinateFileUdp: Done. Total words processed=%lld",
-             (long long)totalWords);
+    LOG_INFO("sendCoordinateFileUdp: Done. Total words processed=%lld",(long long)totalWords);
 }
 
-
-#if 0
-
-void PacketForwarder::sendCoordinateFileUdp(const QString &filePath)
-{
-    if (m_udpTxSock < 0) {
-        LOG_ERROR("UDP TX socket not initialized");
-        return;
-    }
-
-    QFile file(filePath);
-    if (!file.exists() || !file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        LOG_ERROR("Failed opening file %s", filePath.toStdString().c_str());
-        return;
-    }
-
-    sockaddr_in txAddr{};
-    txAddr.sin_family = AF_INET;
-    txAddr.sin_port   = htons(m_txPort);
-    inet_pton(AF_INET, m_txIp.toStdString().c_str(), &txAddr.sin_addr);
-
-    QByteArray chunk;
-    chunk.reserve(ETH_DATA_SIZE);
-
-    QTextStream in(&file);
-    uint32_t startAddress = 0;
-
-    qint64 lineNo = 0;
-    qint64 totalWords = 0;
-
-    while (!in.atEnd()) {
-
-        QString line = in.readLine().trimmed();
-        lineNo++;
-
-        if (line.isEmpty() || line.startsWith('#'))
-            continue;
-
-        QStringList tok = line.split(QRegularExpression("[,\\s]+"), Qt::SkipEmptyParts);
-        if (tok.size() < 4) {
-            LOG_ERROR("Line %lld parse error: '%s'",
-                      (long long)lineNo, line.toStdString().c_str());
-            continue;
-        }
-
-        bool ok0, ok1, ok2, ok3;
-        uint32_t onOff = tok[0].toUInt(&ok0, 10);
-        uint32_t b1    = tok[1].toUInt(&ok1, 16);
-        uint32_t b2    = tok[2].toUInt(&ok2, 16);
-        uint32_t b3    = tok[3].toUInt(&ok3, 16);
-
-        if (!(ok0 && ok1 && ok2 && ok3)) {
-            LOG_ERROR("Line %lld parse failed: '%s'", (long long)lineNo, line.toStdString().c_str());
-            continue;
-        }
-
-        uint32_t word = (onOff << 24) | (b1 << 16) | (b2 << 8) | b3;
-        uint32_t beWord = htonl(word);
-
-        chunk.append(reinterpret_cast<const char*>(&beWord), sizeof(beWord));
-        totalWords++;
-
-        // 🚀 when chunk reaches EXACT packet size → send
-        if (chunk.size() == ETH_DATA_SIZE) {
-            if (!sendCoordinateChunk(chunk, startAddress, txAddr)) {
-                LOG_ERROR("Chunk send failed at line %lld", (long long)lineNo);
-                return;
-            }
-        }
-    }
-
-    // 🚀 If leftover bytes exist → pad to 1456 and send
-    if (!chunk.isEmpty()) {
-        int pad = ETH_DATA_SIZE - chunk.size();
-        chunk.append(QByteArray(pad, '\0'));
-
-        LOG_INFO("Padding final chunk by %d bytes", pad);
-
-        sendCoordinateChunk(chunk, startAddress, txAddr);
-    }
-
-    LOG_INFO("sendCoordinateFileUdp: Completed: %lld words sent",
-             (long long)totalWords);
-}
-#endif
 // ---------------------------------------------------------------------
 // send_delay_once() – synthetic motion -> delay_us -> UDP send via m_udpTxSock
 // ---------------------------------------------------------------------
