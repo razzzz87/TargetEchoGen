@@ -142,8 +142,8 @@ void PacketForwarder::setTargetCoordinates(double x, double y, double z)
 // ---------------------------------------------------------------------
 bool PacketForwarder::openCsv(const std::string &path)
 {
+    LOG_INFO("PacketForwarder::openCsv() <ENTER>");
     bool first = false;
-
     {
         std::ifstream test(path, std::ios::in | std::ios::binary);
         first = !test.good();
@@ -156,11 +156,10 @@ bool PacketForwarder::openCsv(const std::string &path)
     }
 
     if (first) {
-        m_csv << "timestamp_utc,msg_number,id_hex,"
-              << "x,y,z,Xtp,Ytp,Ztp,distance_m,delay_s\n";
+        m_csv << "timestamp_utc,msg_number,id_hex," << "x,y,z,Xtp,Ytp,Ztp,distance_m,delay_us\n";
         m_csv.flush();
     }
-
+    LOG_INFO("PacketForwarder::openCsv() <EXIT>");
     return true;
 }
 
@@ -240,12 +239,15 @@ void PacketForwarder::writeCsvRow(const std::string &ts,
                                   double dist,
                                   double delay_s)
 {
-    if (!m_csv.is_open())
+    if (!m_csv.is_open()){
+        LOG_ERROR("CSV File not open");
         return;
+    }
 
     rotateCsvIfNeeded();
 
     if (!m_csv.is_open())
+        LOG_ERROR("CSV Roll over open failed");
         return;
 
     char id_hex[16];
@@ -283,6 +285,7 @@ void PacketForwarder::run()
     }
 
     if (!m_csvPath.isEmpty()) {
+        LOG_INFO("Opening CSV log file");
         openCsv(m_csvPath.toStdString());
     }
 
