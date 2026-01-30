@@ -223,19 +223,66 @@ void WrIterpolation(iface deviceType,int interpoval)
     switch(interpoval)
     {
     case 2:
-        Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x01);
+        // Utils::DacWriteReg(deviceType, 0x2034, 0x5);
+        Utils::SpiDacWrite(deviceType, 0x02, 0xF080,0x2); //# SPI 4 Wire Mode - Configuration
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0C0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0D0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0F0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x14, 0x6666, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x15, 0x2666, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8182, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x03, 0xF000, 0x02);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x0100, 0x00);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x0100, 0x01);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x019C, 0x02);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x8000);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x0000);
         break;
     case 4:
-        Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x02);
+        // Utils::DacWriteReg(deviceType, 0x2034, 0x5);
+        Utils::SpiDacWrite(deviceType, 0x02, 0xF080,0x2); //# SPI 4 Wire Mode - Configuration
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0F0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0F0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0F0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x14, 0x6666, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x15, 0x2666, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8182, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x03, 0xF000, 0x02);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x10000);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x0200, 0x00);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x0200, 0x01);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x029C, 0x02);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x18000);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x10000);
         break;
     case 8:
-        Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x03);
+        // Utils::DacWriteReg(deviceType, 0x2034, 0x5);
+        Utils::SpiDacWrite(deviceType, 0x02, 0xF080,0x2); //# SPI 4 Wire Mode - Configuration
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0F0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0F0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x02, 0xF0F0, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x14, 0x6666, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x15, 0x2666, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8182, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x1F, 0x8180, 0x02);
+        // Utils::SpiDacWrite(deviceType, 0x03, 0xF000, 0x02);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x20000);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x0400, 0x00);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x0400, 0x01);
+        Utils::SpiDacWrite(deviceType, 0x00, 0x049C, 0x02);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x28000);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x20000);
         break;
     default:
-        Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x38,0x00);
+        Utils::RegWrite(deviceType,AVR_CLK_RST_CTRL_BASE_ADDR,0x00);
     }
-    Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x34,0x01);
-    Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x34,0x00);
+    // Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x34,0x01);
+    // Utils::RegWrite(deviceType,AVR_TEG_REG_BASE+0x34,0x00);
 
 }
 void WrNCOFrq(iface deviceType,QString sNCOFrq)

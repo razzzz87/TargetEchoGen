@@ -574,7 +574,7 @@ void MainWindow::on_PbDAC1Apply_clicked()
         LOG_ERROR("[WriteRegister] Interface not selected");
         return;
     }
-
+    Utils::RegWrite(deviceType,0x2200,0x2);// DAC selection
     Utils::RegWrite(deviceType,0x5000,0x4);// ddr3 reset
     Utils::RegWrite(deviceType,0x5000,0x0);
 
@@ -589,10 +589,8 @@ void MainWindow::on_PbDAC1Apply_clicked()
     Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x6C,iSignalDelay);
     Utils::RegWrite(deviceType,AVR_DAC3_BASE_ADDR+0x40,iDoplerShiftHz);
 
-    Utils::RegWrite(deviceType,0x534,0x1);  // trigger start
-    Utils::RegWrite(deviceType,0x534,0x0);
     Utils::RegWrite(deviceType,0x2018,0x1);// trigger enable
-    Utils::RegWrite(deviceType,0x2200,0x2);// DAC selection
+
 
 }
 
@@ -796,4 +794,6 @@ void MainWindow::on_CbDAC1NOCFrequency_currentIndexChanged(int index)
         }
     }
 }
+
+
 
